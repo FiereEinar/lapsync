@@ -1,12 +1,20 @@
 import { useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, Trophy, Activity, CreditCard } from "lucide-react";
+import {
+  MapPin,
+  Users,
+  Trophy,
+  Activity,
+  CreditCard,
+  Radio,
+} from "lucide-react";
 import Leaderboard from "@/components/tabs/event-detail/Leaderboard";
 import RunnerStatus from "@/components/tabs/event-detail/RunnerStatus";
 import MapTrack from "@/components/tabs/event-detail/MapTrack";
 import Participants from "@/components/tabs/event-detail/Participants";
 import PendingPayments from "@/components/tabs/event-detail/PendingPayments";
+import RaceCheckIn from "@/components/tabs/event-detail/RaceCheckIn";
 import EventFullDetails from "@/components/EventFullDetails";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/api/axios";
@@ -45,6 +53,10 @@ export default function EventDetail() {
     (r) => r.status === "pending",
   ).length;
 
+  const notCheckedInCount = registrations.filter(
+    (r) => r.status === "confirmed" && !r.rfidTag,
+  ).length;
+
   return (
     <div className='space-y-6 animate-appear'>
       {eventDetail && <EventFullDetails event={eventDetail} />}
@@ -56,7 +68,7 @@ export default function EventDetail() {
       )}
 
       <Tabs defaultValue='participants' className='w-full'>
-        <TabsList className='grid w-full grid-cols-5'>
+        <TabsList className='grid w-full grid-cols-6'>
           <TabsTrigger value='participants'>
             <Users className='w-4 h-4 mr-2' />
             Participants
@@ -81,6 +93,18 @@ export default function EventDetail() {
             <Trophy className='w-4 h-4 mr-2' />
             Leaderboard
           </TabsTrigger>
+          <TabsTrigger value='checkin'>
+            <Radio className='w-4 h-4 mr-2' />
+            Check-in
+            {notCheckedInCount > 0 && (
+              <Badge
+                variant='destructive'
+                className='ml-2 flex items-center justify-center size-5 shrink-0 rounded-full p-0 text-xs'
+              >
+                {notCheckedInCount}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value='status'>
             <Activity className='w-4 h-4 mr-2' />
             Runner Status
@@ -102,6 +126,10 @@ export default function EventDetail() {
 
         <TabsContent value='leaderboard' className='space-y-4'>
           <Leaderboard />
+        </TabsContent>
+
+        <TabsContent value='checkin' className='space-y-4'>
+          {eventDetail && <RaceCheckIn event={eventDetail} />}
         </TabsContent>
 
         <TabsContent value='status' className='space-y-4'>

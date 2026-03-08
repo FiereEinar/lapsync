@@ -4,7 +4,6 @@ import {
   Calendar,
   Settings,
   FileText,
-  Power,
   Computer,
   Radio,
 } from "lucide-react";

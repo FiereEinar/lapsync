@@ -1,6 +1,7 @@
-import { BAD_REQUEST, CREATED } from "../constant/http";
+import { BAD_REQUEST, CREATED, NOT_FOUND } from "../constant/http";
 import appAssert from "../errors/app-assert";
 import RfidTagModel from "../models/rfid-tag.model";
+import RegistrationModel from "../models/registration.model";
 import CustomResponse from "../utils/response";
 import { asyncHandler } from "../utils/utils";
 
@@ -69,12 +70,83 @@ export const removeRfidTag = asyncHandler(async (req, res) => {
 export const unassignRfidTag = asyncHandler(async (req, res) => {
   const { tagID } = req.params;
 
-  const tag = await RfidTagModel.findByIdAndUpdate(
-    tagID,
-    { registration: null, event: null, status: "available" },
-    { new: true },
-  );
+  // Get the tag to find its registration
+  const tag = await RfidTagModel.findById(tagID);
   appAssert(tag, BAD_REQUEST, "RFID tag not found");
 
+  // Clear rfidTag from the registration if it was assigned
+  if (tag.registration) {
+    await RegistrationModel.updateOne(
+      { _id: tag.registration },
+      { $unset: { rfidTag: 1 } },
+    );
+  }
+
+  // Reset the tag
+  tag.registration = null;
+  tag.event = null;
+  tag.status = "available";
+  await tag.save();
+
   res.json(new CustomResponse(true, null, "RFID tag unassigned successfully"));
+});
+
+/**
+ * @route PATCH /api/v1/rfid-tag/assign
+ * Assign an RFID tag to a confirmed registration (race-day check-in)
+ */
+export const assignRfidTag = asyncHandler(async (req, res) => {
+  const { epc, registrationId } = req.body;
+  appAssert(epc, BAD_REQUEST, "EPC is required");
+  appAssert(registrationId, BAD_REQUEST, "Registration ID is required");
+
+  // Look up the tag
+  const tag = await RfidTagModel.findOne({ epc });
+  appAssert(
+    tag,
+    NOT_FOUND,
+    "RFID tag not found. Make sure it is registered in the system.",
+  );
+  appAssert(
+    tag.status === "available",
+    BAD_REQUEST,
+    "This RFID tag is already assigned to another participant",
+  );
+
+  // Look up the registration
+  const registration = await RegistrationModel.findById(registrationId);
+  appAssert(registration, NOT_FOUND, "Registration not found");
+  appAssert(
+    registration.status === "confirmed",
+    BAD_REQUEST,
+    "Only confirmed registrations can be checked in",
+  );
+  appAssert(
+    !registration.rfidTag,
+    BAD_REQUEST,
+    "This participant already has an RFID tag assigned",
+  );
+
+  // Assign the tag to the registration
+  tag.status = "assigned";
+  tag.registration = registration._id;
+  tag.event = registration.event;
+  await tag.save();
+
+  // Link tag on the registration
+  registration.rfidTag = tag._id;
+  await registration.save();
+
+  // Return populated registration
+  const populated = await RegistrationModel.findById(registrationId)
+    .populate("user")
+    .populate("event")
+    .populate("rfidTag")
+    .populate("payment")
+    .populate("device")
+    .lean();
+
+  res.json(
+    new CustomResponse(true, populated, "RFID tag assigned successfully"),
+  );
 });
