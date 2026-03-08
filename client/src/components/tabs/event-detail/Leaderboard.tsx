@@ -23,6 +23,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/constants";
 import axiosInstance from "@/api/axios";
 import { io } from "socket.io-client";
+import { format } from "date-fns";
 
 type LeaderboardProps = {
   event: Event;
@@ -155,64 +156,80 @@ export default function Leaderboard({ event }: LeaderboardProps) {
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Time</TableHead>
-              <TableHead>Checkpoints</TableHead>
+              <TableHead>Start</TableHead>
+              <TableHead>Finish</TableHead>
+              {/* <TableHead>Checkpoints</TableHead> */}
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.map((result, index) => {
-              const reg = result.registration;
-              const cfg =
-                statusConfig[result.status] ?? statusConfig.not_started;
+            {results &&
+              results.map((result, index) => {
+                const reg = result.registration;
+                const cfg =
+                  statusConfig[result.status] ?? statusConfig.not_started;
 
-              return (
-                <TableRow key={result._id}>
-                  <TableCell>
-                    <div className='flex items-center gap-2'>
-                      {result.rank === 1 && (
-                        <Trophy className='w-4 h-4 text-yellow-500' />
-                      )}
-                      {result.rank === 2 && (
-                        <Trophy className='w-4 h-4 text-gray-400' />
-                      )}
-                      {result.rank === 3 && (
-                        <Trophy className='w-4 h-4 text-amber-600' />
-                      )}
-                      <span className='font-bold'>
-                        {result.rank ?? index + 1}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className='font-medium'>
-                    {reg?.bibNumber ?? "--"}
-                  </TableCell>
-                  <TableCell>{reg?.user?.name ?? "--"}</TableCell>
-                  <TableCell>
-                    <Badge variant='secondary'>
-                      {reg?.raceCategory?.name ?? "--"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className='font-mono'>
-                    {formatElapsed(result.elapsedMs)}
-                  </TableCell>
-                  <TableCell>
-                    {result.checkpoints.length > 0 ? (
-                      <Badge variant='outline'>
-                        {result.checkpoints[result.checkpoints.length - 1].name}
+                return (
+                  <TableRow key={result._id}>
+                    <TableCell>
+                      <div className='flex items-center gap-2'>
+                        {result.rank === 1 && (
+                          <Trophy className='w-4 h-4 text-yellow-500' />
+                        )}
+                        {result.rank === 2 && (
+                          <Trophy className='w-4 h-4 text-gray-400' />
+                        )}
+                        {result.rank === 3 && (
+                          <Trophy className='w-4 h-4 text-amber-600' />
+                        )}
+                        <span className='font-bold'>
+                          {result.rank ?? index + 1}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className='font-medium'>
+                      {reg?.bibNumber ?? "--"}
+                    </TableCell>
+                    <TableCell>{reg?.user?.name ?? "--"}</TableCell>
+                    <TableCell>
+                      <Badge variant='secondary'>
+                        {reg?.raceCategory?.name ?? "--"}
                       </Badge>
-                    ) : (
-                      <span className='text-muted-foreground'>--</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant='outline' className={cfg.className}>
-                      {cfg.icon}
-                      {cfg.label}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                    </TableCell>
+                    <TableCell className='font-mono'>
+                      {formatElapsed(result.elapsedMs)}
+                    </TableCell>
+                    <TableCell className='font-mono'>
+                      {result.startTime
+                        ? format(new Date(result.startTime), "HH:mm:ss")
+                        : "--"}
+                    </TableCell>
+                    <TableCell className='font-mono'>
+                      {result.finishTime
+                        ? format(new Date(result.finishTime), "HH:mm:ss")
+                        : "--"}
+                    </TableCell>
+                    {/* <TableCell>
+                      {result.checkpoints.length > 0 ? (
+                        <Badge variant='outline'>
+                          {
+                            result.checkpoints[result.checkpoints.length - 1]
+                              .name
+                          }
+                        </Badge>
+                      ) : (
+                        <span className='text-muted-foreground'>--</span>
+                      )}
+                    </TableCell> */}
+                    <TableCell>
+                      <Badge variant='outline' className={cfg.className}>
+                        {cfg.icon}
+                        {cfg.label}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             {results.length === 0 && (
               <TableRow>
                 <TableCell

@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, CheckCircle, Loader2 } from "lucide-react";
+import { Search, CheckCircle, Loader2, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,10 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
       <CardHeader>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
           <div>
-            <CardTitle>Pending Payments</CardTitle>
+            <CardTitle className='flex items-center gap-2'>
+              <CreditCard className='w-5 h-5 ' />
+              Pending Payments
+            </CardTitle>
             <p className='text-sm text-muted-foreground mt-1'>
               Registrations awaiting payment confirmation. Mark as paid for cash
               or manual payments.

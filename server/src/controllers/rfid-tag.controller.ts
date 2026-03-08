@@ -134,7 +134,7 @@ export const assignRfidTag = asyncHandler(async (req, res) => {
   await tag.save();
 
   // Link tag on the registration
-  registration.rfidTag = tag._id;
+  registration.rfidTag = tag._id as any;
   await registration.save();
 
   // Return populated registration

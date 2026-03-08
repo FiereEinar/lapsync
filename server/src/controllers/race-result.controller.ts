@@ -1,6 +1,8 @@
 import { BAD_REQUEST } from "../constant/http";
 import appAssert from "../errors/app-assert";
-import RaceResultModel from "../models/race-result.model";
+import EventModel from "../models/event.model";
+import RaceResultModel, { RaceResult } from "../models/race-result.model";
+import { Registration } from "../models/registration.model";
 import CustomResponse from "../utils/response";
 import { asyncHandler } from "../utils/utils";
 
@@ -30,6 +32,20 @@ export const getRaceResults = asyncHandler(async (req, res) => {
     .sort({ elapsedMs: 1, status: 1, createdAt: 1 })
     .lean();
 
+  // Populate the registration race category
+  const event = await EventModel.findById(eventID);
+  appAssert(event, BAD_REQUEST, "Event not found");
+
+  if (results.length > 0) {
+    results.forEach((result) => {
+      const registration = result.registration as Registration;
+
+      registration.raceCategory = event.raceCategories.find(
+        (cat) => cat._id.toString() === result.raceCategory.toString(),
+      )!;
+    });
+  }
+
   // Sort: finished (by rank) first, then running, then not_started, then dnf/dns
   const statusOrder: Record<string, number> = {
     finished: 0,
@@ -39,7 +55,7 @@ export const getRaceResults = asyncHandler(async (req, res) => {
     dnf: 4,
   };
 
-  results.sort((a, b) => {
+  results.sort((a: RaceResult, b: RaceResult) => {
     const statusA = statusOrder[a.status] ?? 5;
     const statusB = statusOrder[b.status] ?? 5;
     if (statusA !== statusB) return statusA - statusB;
