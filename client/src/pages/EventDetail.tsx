@@ -78,13 +78,7 @@ export default function EventDetail() {
 				</TabsList>
 
 				<TabsContent value='participants' className='space-y-4'>
-					{eventDetail && (
-						<Participants
-							event={eventDetail}
-							participants={participants}
-							setParticipants={setParticipants}
-						/>
-					)}
+					{eventDetail && <Participants event={eventDetail} />}
 				</TabsContent>
 
 				{/* Pending Assignments Tab */}

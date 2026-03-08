@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { StatusBadge } from '@/components/StatusBadge';
-import { Search, Filter, Download, UserPlus, MoreVertical } from 'lucide-react';
+import { Search, Filter, Download, UserPlus } from 'lucide-react';
 import {
 	Table,
 	TableBody,
@@ -11,12 +11,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/api/axios';
@@ -24,15 +18,10 @@ import { Registration } from '@/types/registration';
 import { QUERY_KEYS } from '@/constants';
 import { useState, useMemo } from 'react';
 import { useUserStore } from '@/stores/user';
-import RegistrationDetailsModal from '@/components/modals/RegistrationDetailsModal';
-import AssignDeviceModal from '@/components/modals/AssignDeviceModal';
 import _ from 'lodash';
+import ParticipantActionsDropDown from '@/components/buttons/ParticipantActionsDropDown';
 
 export default function Participants() {
-	const [openModal, setOpenModal] = useState(false);
-	const [openAssignModal, setOpenAssignModal] = useState(false);
-	const [selectedRegForAssign, setSelectedRegForAssign] =
-		useState<Registration | null>(null);
 	const [searchParams] = useSearchParams();
 	const [searchTerm, setSearchTerm] = useState('');
 	const eventID = searchParams.get('eventID');
@@ -103,17 +92,6 @@ export default function Participants() {
 							</Button>
 						)}
 					</div>
-
-					{selectedRegForAssign && (
-						<AssignDeviceModal
-							registration={selectedRegForAssign}
-							open={openAssignModal}
-							setOpen={(open) => {
-								setOpenAssignModal(open);
-								if (!open) setSelectedRegForAssign(null);
-							}}
-						/>
-					)}
 
 					<div className='rounded-lg border border-border overflow-x-hidden overflow-y-auto'>
 						<Table>
@@ -187,44 +165,9 @@ export default function Participants() {
 											</TableCell>
 											{isAdmin && (
 												<TableCell className='text-right'>
-													<RegistrationDetailsModal
+													<ParticipantActionsDropDown
 														registration={registration}
-														open={openModal}
-														setOpen={setOpenModal}
 													/>
-
-													<DropdownMenu>
-														<DropdownMenuTrigger asChild>
-															<Button variant='ghost' size='sm'>
-																<MoreVertical className='w-4 h-4' />
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent align='end'>
-															<DropdownMenuItem
-																onClick={(e) => {
-																	e.preventDefault();
-																	setOpenModal(true);
-																}}
-															>
-																View Details
-															</DropdownMenuItem>
-															<DropdownMenuItem>
-																Edit Participant
-															</DropdownMenuItem>
-															<DropdownMenuItem
-																onClick={(e) => {
-																	e.preventDefault();
-																	setSelectedRegForAssign(registration);
-																	setOpenAssignModal(true);
-																}}
-															>
-																Assign Hardware
-															</DropdownMenuItem>
-															<DropdownMenuItem className='text-destructive'>
-																Remove
-															</DropdownMenuItem>
-														</DropdownMenuContent>
-													</DropdownMenu>
 												</TableCell>
 											)}
 										</TableRow>
