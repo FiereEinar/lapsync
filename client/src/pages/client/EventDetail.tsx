@@ -9,6 +9,7 @@ import { Event } from '@/types/event';
 import EventFullDetails from '@/components/EventFullDetails';
 import RaceCategoryTable from '@/components/RaceCategoryTable';
 import { useQuery } from '@tanstack/react-query';
+import { useUserStore } from '@/stores/user';
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -51,6 +52,7 @@ type Checkpoint = {
 
 export default function ClientEventDetail() {
 	const { id } = useParams();
+	const { user } = useUserStore();
 
 	const { data: event } = useQuery({
 		queryKey: [QUERY_KEYS.EVENT, id],
@@ -69,24 +71,27 @@ export default function ClientEventDetail() {
 		enabled: !!id,
 	});
 
+	const { data: userRegistrations = [] } = useQuery({
+		queryKey: ["registrations", id, user?._id],
+		queryFn: async () => {
+			const { data } = await axiosInstance.get(`/registration?eventID=${id}&userID=${user?._id}`);
+			return data.data;
+		},
+		enabled: !!id && !!user?._id,
+	});
+
+	const registration = userRegistrations[0];
+
 	const mapCenter: [number, number] = checkpoints.length > 0 
 		? [checkpoints[0].location.lat, checkpoints[0].location.lng] 
 		: [14.5995, 120.9842];
 
-	const mockEvent = {
-		id: id,
-		name: 'City Marathon 2024',
-		date: 'Jan 15, 2024',
-		time: '6:00 AM',
-		distance: '42.2 km',
-		location: 'Downtown - City Hall Start',
-		techRequired: 'RFID',
-		organizer: 'Running Club',
-		registrationStatus: 'approved',
-		techAssignment: 'RFID Tag #12345',
-		pickupLocation: 'City Hall - Equipment Desk',
-		pickupTime: 'Jan 14, 2024 - 2:00 PM to 8:00 PM',
-	};
+	const pickupLocation = typeof event?.location === 'object' 
+		? `${event.location.venue}, ${event.location.city}`
+		: (event?.location || 'TBA');
+	const pickupTime = event?.date ? new Date(event.date).toLocaleDateString() + ' - Morning prior to race' : 'TBA';
+
+
 
 
 
@@ -109,13 +114,23 @@ export default function ClientEventDetail() {
 					</CardHeader>
 					<CardContent className='space-y-4'>
 						<div>
-							<Badge className='bg-teal-500/20 text-teal-700 dark:text-teal-300'>
-								{mockEvent.registrationStatus}
-							</Badge>
+							{registration ? (
+								<Badge className={`uppercase ${registration.status === 'confirmed' ? 'bg-teal-500/20 text-teal-700 dark:text-teal-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'}`}>
+									{registration.status}
+								</Badge>
+							) : (
+								<Badge className='bg-muted text-muted-foreground'>Not Registered</Badge>
+							)}
 						</div>
 						<div className='space-y-2'>
 							<p className='text-sm font-medium'>Tech Assignment</p>
-							<Badge variant='outline'>{mockEvent.techAssignment}</Badge>
+							{registration?.rfidTag ? (
+								<Badge variant='outline'>RFID Tag #{(registration.rfidTag as any).tagNumber || 'Assigned'}</Badge>
+							) : registration?.device ? (
+								<Badge variant='outline'>Device Assigned</Badge>
+							) : (
+								<Badge variant='outline' className='text-muted-foreground'>No Tech Assigned Yet</Badge>
+							)}
 						</div>
 					</CardContent>
 				</Card>
@@ -131,13 +146,13 @@ export default function ClientEventDetail() {
 						<div>
 							<p className='text-sm font-medium mb-1'>Location</p>
 							<p className='text-sm text-muted-foreground'>
-								{mockEvent.pickupLocation}
+								{pickupLocation}
 							</p>
 						</div>
 						<div>
 							<p className='text-sm font-medium mb-1'>Pickup Time</p>
 							<p className='text-sm text-muted-foreground'>
-								{mockEvent.pickupTime}
+								{pickupTime}
 							</p>
 						</div>
 					</CardContent>
