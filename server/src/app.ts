@@ -29,6 +29,7 @@ import telemetryRoutes from "./routes/telemetry.route";
 import rfidTagRoutes from "./routes/rfid-tag.route";
 import rfidScanRoutes from "./routes/rfid-scan.route";
 import raceResultRoutes from "./routes/race-result.route";
+import raceCheckpointRoutes from "./routes/race-checkpoint.route";
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
@@ -42,6 +43,7 @@ app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/telemetry", telemetryRoutes);
 app.use("/api/v1/rfid-tag", rfidTagRoutes);
 app.use("/api/v1/race-result", raceResultRoutes);
+app.use("/api/v1/race-checkpoint", raceCheckpointRoutes);
 
 // Error handlers
 app.use(notFoundHandler);
