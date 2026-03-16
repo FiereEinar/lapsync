@@ -9,6 +9,45 @@ import { Event } from '@/types/event';
 import EventFullDetails from '@/components/EventFullDetails';
 import RaceCategoryTable from '@/components/RaceCategoryTable';
 import { useQuery } from '@tanstack/react-query';
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+// Fix leaflet default icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+const getPinIcon = (type: string) => {
+  const color = type === 'start' ? '#10b981' : type === 'finish' ? '#ef4444' : '#3b82f6';
+  const html = `
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translate(-50%, -100%); width: 24px; height: 36px; position: absolute; left: 12px; top: 36px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3" fill="white" stroke="none" />
+      </svg>
+    </div>
+  `;
+  return L.divIcon({
+    className: "bg-transparent border-none overflow-visible",
+    html,
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
+  });
+};
+
+type Checkpoint = {
+  _id: string;
+  name: string;
+  type: "start" | "finish" | "checkpoint";
+  location: { lat: number; lng: number };
+  order: number;
+};
 
 export default function ClientEventDetail() {
 	const { id } = useParams();
@@ -20,6 +59,19 @@ export default function ClientEventDetail() {
 			return data.data;
 		},
 	});
+
+	const { data: checkpoints = [] } = useQuery({
+		queryKey: ["checkpoints", id],
+		queryFn: async (): Promise<Checkpoint[]> => {
+			const { data } = await axiosInstance.get(`/race-checkpoint/event/${id}`);
+			return data.data;
+		},
+		enabled: !!id,
+	});
+
+	const mapCenter: [number, number] = checkpoints.length > 0 
+		? [checkpoints[0].location.lat, checkpoints[0].location.lng] 
+		: [14.5995, 120.9842];
 
 	const mockEvent = {
 		id: id,
@@ -36,43 +88,7 @@ export default function ClientEventDetail() {
 		pickupTime: 'Jan 14, 2024 - 2:00 PM to 8:00 PM',
 	};
 
-	const checkpoints = [
-		{
-			id: 1,
-			name: 'Start Line',
-			location: 'City Hall',
-			gps: '40.7128° N, 74.0060° W',
-			distance: '0 km',
-		},
-		{
-			id: 2,
-			name: 'Checkpoint 1',
-			location: 'Central Park',
-			gps: '40.7829° N, 73.9654° W',
-			distance: '10 km',
-		},
-		{
-			id: 3,
-			name: 'Checkpoint 2',
-			location: 'Riverside Drive',
-			gps: '40.8075° N, 73.9626° W',
-			distance: '21 km',
-		},
-		{
-			id: 4,
-			name: 'Checkpoint 3',
-			location: 'Bridge Plaza',
-			gps: '40.7061° N, 74.0087° W',
-			distance: '32 km',
-		},
-		{
-			id: 5,
-			name: 'Finish Line',
-			location: 'City Hall',
-			gps: '40.7128° N, 74.0060° W',
-			distance: '42.2 km',
-		},
-	];
+
 
 	return (
 		<div className='space-y-6 animate-appear'>
@@ -136,35 +152,60 @@ export default function ClientEventDetail() {
 					</CardTitle>
 				</CardHeader>
 				<CardContent className='space-y-4'>
-					<div className='w-full h-[300px] bg-muted rounded-lg flex items-center justify-center'>
-						<div className='text-center text-muted-foreground'>
-							<MapPin className='w-12 h-12 mx-auto mb-2' />
-							<p>Route map preview</p>
-							<p className='text-sm'>View full route on race day</p>
-						</div>
+					<div className='w-full h-[300px] bg-muted rounded-lg flex items-center justify-center overflow-hidden border z-0 relative'>
+						{checkpoints.length === 0 ? (
+							<div className='text-center text-muted-foreground'>
+								<MapPin className='w-12 h-12 mx-auto mb-2' />
+								<p>Route map preview</p>
+								<p className='text-sm'>Map will be available soon</p>
+							</div>
+						) : (
+							<MapContainer
+								center={mapCenter}
+								zoom={14}
+								className="w-full h-full z-0"
+							>
+								<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+								{checkpoints.map((cp) => (
+									<Marker
+										key={cp._id}
+										position={[cp.location.lat, cp.location.lng]}
+										icon={getPinIcon(cp.type)}
+									>
+										<Popup>
+											<div className="font-bold text-sm">{cp.name}</div>
+											<div className="text-xs capitalize text-muted-foreground">{cp.type}</div>
+										</Popup>
+									</Marker>
+								))}
+							</MapContainer>
+						)}
 					</div>
 
 					<div className='space-y-2'>
 						{checkpoints.map((checkpoint, index) => (
 							<div
-								key={checkpoint.id}
+								key={checkpoint._id}
 								className='flex items-center justify-between p-3 border border-border rounded-lg'
 							>
 								<div className='flex items-center gap-3'>
-									<div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary'>
+									<div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+										${checkpoint.type === 'start' ? 'bg-emerald-500/10 text-emerald-600' : 
+										checkpoint.type === 'finish' ? 'bg-red-500/10 text-red-600' : 
+										'bg-blue-500/10 text-blue-600'}`}
+									>
 										{index + 1}
 									</div>
 									<div>
 										<p className='font-medium'>{checkpoint.name}</p>
-										<p className='text-sm text-muted-foreground'>
-											{checkpoint.location}
+										<p className='text-xs capitalize text-muted-foreground'>
+											{checkpoint.type}
 										</p>
 									</div>
 								</div>
 								<div className='text-right'>
-									<p className='text-sm font-medium'>{checkpoint.distance}</p>
 									<p className='text-xs text-muted-foreground'>
-										{checkpoint.gps}
+										{checkpoint.location.lat.toFixed(4)}°, {checkpoint.location.lng.toFixed(4)}°
 									</p>
 								</div>
 							</div>

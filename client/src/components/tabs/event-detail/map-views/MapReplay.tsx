@@ -63,12 +63,17 @@ const createCustomMarker = (color: string, name: string) => {
   const shortName = name.split(" ")[0];
 
   const html = `
-    <div style="position: relative; width: 14px; height: 14px; pointer-events: none;">
-      <!-- The dot -->
-      <div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); position: absolute; z-index: 10;"></div>
+    <div style="position: relative; width: 24px; height: 36px; pointer-events: none;">
+      <!-- The Pin -->
+      <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; width: 24px; height: 36px; position: absolute; z-index: 10;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+          <circle cx="12" cy="10" r="3" fill="white" stroke="none" />
+        </svg>
+      </div>
       
       <!-- The Callout -->
-      <div style="position: absolute; left: 7px; bottom: 7px; width: 80px; height: 40px; pointer-events: none; z-index: 11;">
+      <div style="position: absolute; left: 12px; bottom: 24px; width: 80px; height: 40px; pointer-events: none; z-index: 11;">
         <!-- The SVG Line -->
         <svg width="80" height="30" style="position: absolute; bottom: 0; left: 0; overflow: visible;">
           <path d="M 0 30 L 15 20 L 80 20" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -84,8 +89,8 @@ const createCustomMarker = (color: string, name: string) => {
   return L.divIcon({
     className: "bg-transparent border-none overflow-visible",
     html,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
+    iconSize: [24, 36],
+    iconAnchor: [12, 36],
   });
 };
 
