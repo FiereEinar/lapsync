@@ -5,9 +5,10 @@ import { useMap } from "react-leaflet";
 
 interface RoutingMachineProps {
   waypoints: [number, number][];
+  onRouteFound?: (distance: number) => void;
 }
 
-export default function RoutingMachine({ waypoints }: RoutingMachineProps) {
+export default function RoutingMachine({ waypoints, onRouteFound }: RoutingMachineProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -31,6 +32,12 @@ export default function RoutingMachine({ waypoints }: RoutingMachineProps) {
       // @ts-ignore - The types for leaflet-routing-machine are incomplete
       createMarker: () => null, // We handle our own markers
     }).addTo(map);
+
+    routingControl.on('routesfound', function(e: any) {
+      if (e.routes && e.routes.length > 0 && onRouteFound) {
+        onRouteFound(e.routes[0].summary.totalDistance);
+      }
+    });
 
     // Hide the routing control container from DOM as well to be completely invisible
     if (routingControl.getContainer()) {

@@ -11,7 +11,7 @@ import RaceCategoryTable from "@/components/RaceCategoryTable";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/stores/user";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -56,6 +56,7 @@ type Checkpoint = {
 export default function ClientEventDetail() {
   const { id } = useParams();
   const { user } = useUserStore();
+  const [totalRouteDistance, setTotalRouteDistance] = useState<number>(0);
 
   const { data: event } = useQuery({
     queryKey: [QUERY_KEYS.EVENT, id],
@@ -182,9 +183,16 @@ export default function ClientEventDetail() {
 
       <Card>
         <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <MapPin className='w-5 h-5 text-primary' />
-            Route & Checkpoints
+          <CardTitle className='flex items-center justify-between'>
+            <div className="flex items-center gap-2">
+              <MapPin className='w-5 h-5 text-primary' />
+              Route & Checkpoints
+            </div>
+            {totalRouteDistance > 0 && checkpoints.filter(cp => cp.type !== 'waypoint').length >= 2 && (
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-sm py-1">
+                {(totalRouteDistance / 1000).toFixed(2)} km Course
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
@@ -224,6 +232,7 @@ export default function ClientEventDetail() {
                       (cp) =>
                         [cp.location.lat, cp.location.lng] as [number, number],
                     )}
+                    onRouteFound={setTotalRouteDistance}
                   />
                 )}
               </MapContainer>

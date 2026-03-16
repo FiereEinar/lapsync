@@ -90,6 +90,7 @@ export default function MapCheckpoints() {
   );
 
   const [activeTab, setActiveTab] = useState<"view" | "add">("view");
+  const [totalRouteDistance, setTotalRouteDistance] = useState<number>(0);
 
   const { data: checkpoints = [], isLoading } = useQuery({
     queryKey: ["checkpoints", eventID],
@@ -266,6 +267,14 @@ export default function MapCheckpoints() {
         </div>
       </CardHeader>
       <CardContent className='flex flex-col gap-4'>
+        {activeTab === "view" && totalRouteDistance > 0 && checkpoints.filter(cp => cp.type !== 'waypoint').length >= 2 && (
+          <div className="flex justify-start items-center">
+            <span className="font-semibold text-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-md border border-teal-500/20">
+              Total Route Distance: {(totalRouteDistance / 1000).toFixed(2)} km
+            </span>
+          </div>
+        )}
+
         {activeTab === "add" && (
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card'>
             <div className='space-y-2'>
@@ -356,6 +365,7 @@ export default function MapCheckpoints() {
               waypoints={sortedCheckpoints.map(
                 (cp) => [cp.location.lat, cp.location.lng] as [number, number],
               )}
+              onRouteFound={setTotalRouteDistance}
             />
           )}
 
@@ -380,6 +390,50 @@ export default function MapCheckpoints() {
             </Marker>
           )}
         </MapContainer>
+
+        {/* Read-Only View Checkpoints List */}
+        {activeTab === "view" && checkpoints.length > 0 && (
+          <div className='flex flex-col gap-3 p-4 border rounded-lg bg-card mt-4'>
+            <h3 className='font-semibold'>Established Checkpoints</h3>
+            <div className='space-y-2 mt-2'>
+              {sortedCheckpoints
+                .filter((cp) => cp.type !== "waypoint")
+                .map((checkpoint, index) => (
+                <div
+                  key={checkpoint._id}
+                  className='flex items-center justify-between p-3 border border-border rounded-lg bg-background'
+                >
+                  <div className='flex items-center gap-3'>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                      ${
+                        checkpoint.type === "start"
+                          ? "bg-emerald-500/10 text-emerald-600"
+                          : checkpoint.type === "finish"
+                            ? "bg-red-500/10 text-red-600"
+                            : "bg-blue-500/10 text-blue-600"
+                      }`}
+                    >
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className='font-medium'>{checkpoint.name}</p>
+                      <p className='text-xs capitalize text-muted-foreground'>
+                        {checkpoint.type}
+                      </p>
+                    </div>
+                  </div>
+                  <div className='text-right'>
+                    <p className='text-xs text-muted-foreground'>
+                      {checkpoint.location.lat.toFixed(4)}°,{" "}
+                      {checkpoint.location.lng.toFixed(4)}°
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Editable Checkpoints List */}
         {activeTab === "add" && checkpoints.length > 0 && (
