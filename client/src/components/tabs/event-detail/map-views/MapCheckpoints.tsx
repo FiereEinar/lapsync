@@ -43,6 +43,8 @@ const getPinIcon = (type: string) => {
         ? "#ef4444"
         : type === "new"
           ? "#8b5cf6"
+          : type === "waypoint"
+          ? "#94a3b8" // slate color for waypoints
           : "#3b82f6";
   const html = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translate(-50%, -100%); width: 24px; height: 36px; position: absolute; left: 12px; top: 36px;">
@@ -63,7 +65,7 @@ const getPinIcon = (type: string) => {
 type Checkpoint = {
   _id: string;
   name: string;
-  type: "start" | "finish" | "checkpoint";
+  type: "start" | "finish" | "checkpoint" | "waypoint";
   location: {
     lat: number;
     lng: number;
@@ -83,7 +85,7 @@ export default function MapCheckpoints() {
     [number, number] | null
   >(null);
   const [newName, setNewName] = useState("");
-  const [newType, setNewType] = useState<"start" | "finish" | "checkpoint">(
+  const [newType, setNewType] = useState<"start" | "finish" | "checkpoint" | "waypoint">(
     "checkpoint",
   );
 
@@ -230,6 +232,17 @@ export default function MapCheckpoints() {
     return null;
   }
 
+  const sortedCheckpoints = useMemo(() => {
+    return [...checkpoints].sort((a, b) => {
+      const getScore = (type: string) => {
+        if (type === "start") return 0;
+        if (type === "finish") return 2;
+        return 1;
+      };
+      return getScore(a.type) - getScore(b.type);
+    });
+  }, [checkpoints]);
+
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
@@ -276,6 +289,7 @@ export default function MapCheckpoints() {
                   <SelectItem value='start'>Start</SelectItem>
                   <SelectItem value='finish'>Finish</SelectItem>
                   <SelectItem value='checkpoint'>Checkpoint</SelectItem>
+                  <SelectItem value='waypoint'>Waypoint (Route Guide)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -337,9 +351,9 @@ export default function MapCheckpoints() {
             ))}
 
           {/* Render Route Path */}
-          {!isLoading && checkpoints.length >= 2 && (
+          {!isLoading && sortedCheckpoints.length >= 2 && (
             <RoutingMachine
-              waypoints={checkpoints.map(
+              waypoints={sortedCheckpoints.map(
                 (cp) => [cp.location.lat, cp.location.lng] as [number, number],
               )}
             />
@@ -366,6 +380,45 @@ export default function MapCheckpoints() {
             </Marker>
           )}
         </MapContainer>
+
+        {/* Editable Checkpoints List */}
+        {activeTab === "add" && checkpoints.length > 0 && (
+          <div className='flex flex-col gap-3 p-4 border rounded-lg bg-card mt-4'>
+            <h3 className='font-semibold'>Edit Checkpoint Names</h3>
+            <p className='text-sm text-muted-foreground mb-2'>
+              Checkpoints are ordered: Start &rarr; Checkpoints/Waypoints &rarr; Finish. Edit a name and click outside the box to auto-save.
+            </p>
+            <div className='space-y-3'>
+              {sortedCheckpoints.map((cp) => (
+                <div key={cp._id} className='flex items-center gap-4'>
+                  <div className='w-24 text-sm font-medium capitalize text-muted-foreground flex-shrink-0'>
+                    {cp.type}
+                  </div>
+                  <Input
+                    defaultValue={cp.name}
+                    onBlur={(e) => {
+                      if (e.target.value.trim() && e.target.value !== cp.name) {
+                        updateCheckpointMutation.mutate({
+                          id: cp._id,
+                          data: { name: e.target.value },
+                        });
+                      }
+                    }}
+                  />
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='text-red-500 hover:text-red-700 hover:bg-red-100 flex-shrink-0'
+                    onClick={() => deleteCheckpointMutation.mutate(cp._id)}
+                    disabled={deleteCheckpointMutation.isPending}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

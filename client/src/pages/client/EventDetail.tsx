@@ -11,6 +11,7 @@ import RaceCategoryTable from "@/components/RaceCategoryTable";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/stores/user";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useMemo } from "react";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -27,7 +28,7 @@ L.Icon.Default.mergeOptions({
 
 const getPinIcon = (type: string) => {
   const color =
-    type === "start" ? "#10b981" : type === "finish" ? "#ef4444" : "#3b82f6";
+    type === "start" ? "#10b981" : type === "finish" ? "#ef4444" : type === "waypoint" ? "#94a3b8" : "#3b82f6";
   const html = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translate(-50%, -100%); width: 24px; height: 36px; position: absolute; left: 12px; top: 36px;">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -47,7 +48,7 @@ const getPinIcon = (type: string) => {
 type Checkpoint = {
   _id: string;
   name: string;
-  type: "start" | "finish" | "checkpoint";
+  type: "start" | "finish" | "checkpoint" | "waypoint";
   location: { lat: number; lng: number };
   order: number;
 };
@@ -86,9 +87,20 @@ export default function ClientEventDetail() {
 
   const registration = userRegistrations[0];
 
+  const sortedCheckpoints = useMemo(() => {
+    return [...checkpoints].sort((a, b) => {
+      const getScore = (type: string) => {
+        if (type === "start") return 0;
+        if (type === "finish") return 2;
+        return 1;
+      };
+      return getScore(a.type) - getScore(b.type);
+    });
+  }, [checkpoints]);
+
   const mapCenter: [number, number] =
-    checkpoints.length > 0
-      ? [checkpoints[0].location.lat, checkpoints[0].location.lng]
+    sortedCheckpoints.length > 0
+      ? [sortedCheckpoints[0].location.lat, sortedCheckpoints[0].location.lng]
       : [14.5995, 120.9842];
 
   const pickupLocation =
@@ -190,7 +202,9 @@ export default function ClientEventDetail() {
                 className='w-full h-full z-0'
               >
                 <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-                {checkpoints.map((cp) => (
+                {sortedCheckpoints
+                  .filter((cp) => cp.type !== "waypoint")
+                  .map((cp) => (
                   <Marker
                     key={cp._id}
                     position={[cp.location.lat, cp.location.lng]}
@@ -204,9 +218,9 @@ export default function ClientEventDetail() {
                     </Popup>
                   </Marker>
                 ))}
-                {checkpoints.length >= 2 && (
+                {sortedCheckpoints.length >= 2 && (
                   <RoutingMachine
-                    waypoints={checkpoints.map(
+                    waypoints={sortedCheckpoints.map(
                       (cp) =>
                         [cp.location.lat, cp.location.lng] as [number, number],
                     )}
@@ -217,7 +231,9 @@ export default function ClientEventDetail() {
           </div>
 
           <div className='space-y-2'>
-            {checkpoints.map((checkpoint, index) => (
+            {sortedCheckpoints
+              .filter((cp) => cp.type !== "waypoint")
+              .map((checkpoint, index) => (
               <div
                 key={checkpoint._id}
                 className='flex items-center justify-between p-3 border border-border rounded-lg'
