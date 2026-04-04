@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import { getSocket } from '@/services/socket';
@@ -6,6 +6,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import _ from 'lodash';
 
@@ -21,8 +22,8 @@ const createCustomMarker = (color: string, name: string) => {
   const shortName = name.split(" ")[0];
 
   const html = `
-    <div style="position: relative; width: 0; height: 0; pointer-events: none;">
-      <div style="position: absolute; left: 0px; bottom: 0px; width: 100px; height: 30px; z-index: 11; overflow: visible;">
+    <div style="position: relative; width: 0; height: 0;">
+      <div style="position: absolute; left: 0px; bottom: 0px; width: 100px; height: 30px; z-index: 11; overflow: visible; pointer-events: auto; cursor: pointer;">
         <svg width="100" height="30" style="position: absolute; bottom: 0; left: 0; overflow: visible;">
           <path d="M 0 30 L 15 15 L 100 15" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
@@ -143,7 +144,27 @@ export default function MapLive() {
 
                 return (
                   <div key={r.registrationId}>
-                    <Marker position={r.position!} icon={createCustomMarker(isFocused ? "#e11d48" : "#3b82f6", r.user?.name || "Unknown")} />
+                    <Marker position={r.position!} icon={createCustomMarker(isFocused ? "#e11d48" : "#3b82f6", r.user?.name || "Unknown")}>
+                      <Popup>
+                        <div className="flex flex-col gap-2 min-w-[120px] p-1">
+                          <div className="font-semibold text-base">{_.startCase(r.user?.name || "Unknown")}</div>
+                          <div className="text-sm text-muted-foreground flex justify-between">
+                            <span>HR: {r.heartRate || '--'}</span>
+                            <span>EMG: {r.emg || '--'}</span>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant={isFocused ? "outline" : "default"}
+                            onClick={() => setFocusedRunnerId(
+                              isFocused ? null : r.registrationId
+                            )}
+                            className="w-full h-8 text-xs mt-1"
+                          >
+                            {isFocused ? "Unfocus" : "View"}
+                          </Button>
+                        </div>
+                      </Popup>
+                    </Marker>
                     <Polyline positions={r.path} color={isFocused ? "#e11d48" : "#3b82f6"} weight={isFocused ? 4 : 2} />
                   </div>
                 )
