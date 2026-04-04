@@ -24,10 +24,13 @@ import { Device } from '@/types/device';
 import _ from 'lodash';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/main';
+import { useState } from 'react';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import EditDeviceDialog from '@/components/forms/EditDeviceDialog';
 
 export default function Devices() {
 	const { toast } = useToast();
+	const [editingDevice, setEditingDevice] = useState<Device | null>(null);
 
 	const { data: devices } = useQuery({
 		queryKey: [QUERY_KEYS.DEVICES],
@@ -177,7 +180,7 @@ export default function Devices() {
 													<DropdownMenuContent align='end'>
 														<DropdownMenuItem>View Details</DropdownMenuItem>
 
-														<DropdownMenuItem>Edit Device</DropdownMenuItem>
+														<DropdownMenuItem onClick={() => setEditingDevice(device)}>Edit Device</DropdownMenuItem>
 
 														{device.registration !== null && (
 															<DropdownMenuItem>
@@ -205,6 +208,14 @@ export default function Devices() {
 					</div>
 				</CardContent>
 			</Card>
+
+			{editingDevice && (
+				<EditDeviceDialog
+					device={editingDevice}
+					open={!!editingDevice}
+					onOpenChange={(open) => !open && setEditingDevice(null)}
+				/>
+			)}
 		</div>
 	);
 }
