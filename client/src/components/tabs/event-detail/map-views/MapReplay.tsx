@@ -63,23 +63,12 @@ const createCustomMarker = (color: string, name: string) => {
   const shortName = name.split(" ")[0];
 
   const html = `
-    <div style="position: relative; width: 24px; height: 36px; pointer-events: none;">
-      <!-- The Pin -->
-      <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; width: 24px; height: 36px; position: absolute; z-index: 10;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-          <circle cx="12" cy="10" r="3" fill="white" stroke="none" />
+    <div style="position: relative; width: 0; height: 0; pointer-events: none;">
+      <div style="position: absolute; left: 0px; bottom: 0px; width: 100px; height: 30px; z-index: 11; overflow: visible;">
+        <svg width="100" height="30" style="position: absolute; bottom: 0; left: 0; overflow: visible;">
+          <path d="M 0 30 L 15 15 L 100 15" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-      </div>
-      
-      <!-- The Callout -->
-      <div style="position: absolute; left: 12px; bottom: 24px; width: 80px; height: 40px; pointer-events: none; z-index: 11;">
-        <!-- The SVG Line -->
-        <svg width="80" height="30" style="position: absolute; bottom: 0; left: 0; overflow: visible;">
-          <path d="M 0 30 L 15 20 L 80 20" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        <!-- The Name -->
-        <div style="position: absolute; bottom: 10px; left: 20px; color: black; font-size: 14px; font-family: sans-serif; white-space: nowrap; line-height: 1; text-shadow: 1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white, 0px 1px 0px white, 0px -1px 0px white, 1px 0px 0px white, -1px 0px 0px white;">
+        <div style="position: absolute; bottom: 17px; left: 17px; color: black; font-size: 14px; font-weight: 600; font-family: sans-serif; white-space: nowrap; line-height: 1; text-shadow: 1.5px 1.5px 0px white, -1.5px -1.5px 0px white, 1.5px -1.5px 0px white, -1.5px 1.5px 0px white, 0px 1.5px 0px white, 0px -1.5px 0px white, 1.5px 0px 0px white, -1.5px 0px 0px white;">
           ${shortName}
         </div>
       </div>
@@ -89,8 +78,8 @@ const createCustomMarker = (color: string, name: string) => {
   return L.divIcon({
     className: "bg-transparent border-none overflow-visible",
     html,
-    iconSize: [24, 36],
-    iconAnchor: [12, 36],
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
   });
 };
 

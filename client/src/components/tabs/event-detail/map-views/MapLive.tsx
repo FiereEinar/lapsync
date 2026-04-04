@@ -17,20 +17,27 @@ L.Icon.Default.mergeOptions({
 	shadowUrl: markerShadow,
 });
 
-const getPinIcon = (color: string) => {
+const createCustomMarker = (color: string, name: string) => {
+  const shortName = name.split(" ")[0];
+
   const html = `
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translate(-50%, -100%); width: 24px; height: 36px; position: absolute; left: 12px; top: 36px;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-        <circle cx="12" cy="10" r="3" fill="white" stroke="none" />
-      </svg>
+    <div style="position: relative; width: 0; height: 0; pointer-events: none;">
+      <div style="position: absolute; left: 0px; bottom: 0px; width: 100px; height: 30px; z-index: 11; overflow: visible;">
+        <svg width="100" height="30" style="position: absolute; bottom: 0; left: 0; overflow: visible;">
+          <path d="M 0 30 L 15 15 L 100 15" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <div style="position: absolute; bottom: 17px; left: 17px; color: black; font-size: 14px; font-weight: 600; font-family: sans-serif; white-space: nowrap; line-height: 1; text-shadow: 1.5px 1.5px 0px white, -1.5px -1.5px 0px white, 1.5px -1.5px 0px white, -1.5px 1.5px 0px white, 0px 1.5px 0px white, 0px -1.5px 0px white, 1.5px 0px 0px white, -1.5px 0px 0px white;">
+          ${shortName}
+        </div>
+      </div>
     </div>
   `;
+
   return L.divIcon({
     className: "bg-transparent border-none overflow-visible",
     html,
-    iconSize: [24, 36],
-    iconAnchor: [12, 36],
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
   });
 };
 
@@ -136,7 +143,7 @@ export default function MapLive() {
 
                 return (
                   <div key={r.registrationId}>
-                    <Marker position={r.position!} icon={getPinIcon(isFocused ? "#e11d48" : "#3b82f6")} />
+                    <Marker position={r.position!} icon={createCustomMarker(isFocused ? "#e11d48" : "#3b82f6", r.user?.name || "Unknown")} />
                     <Polyline positions={r.path} color={isFocused ? "#e11d48" : "#3b82f6"} weight={isFocused ? 4 : 2} />
                   </div>
                 )
