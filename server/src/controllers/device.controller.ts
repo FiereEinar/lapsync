@@ -2,6 +2,8 @@ import { BAD_REQUEST, OK, UNAUTHORIZED } from "../constant/http";
 import appAssert from "../errors/app-assert";
 import DeviceModel, { PopulatedDevice } from "../models/device.model";
 import TelemetryModel from "../models/telemetry.model";
+import AlertModel from "../models/alert.model";
+import SettingsModel from "../models/settings.model";
 import { io } from "../server";
 import { GPSPoint, haversineDistance, isValidGPS, parseStrictGPSString } from "../utils/gps";
 import CustomResponse from "../utils/response";
@@ -13,7 +15,7 @@ const lastKnownGPS = new Map<string, GPSPoint>();
  * @route POST /api/v1/device/telemetry
  */
 export const deviceTelemetryController = asyncHandler(async (req, res) => {
-  const { deviceToken, gps, heartRate, emg, deviceId } = req.body;
+  const { deviceToken, gps: coordinates, heartRate, emg, deviceId } = req.body;
 
   // Validate the device ID
   const device = await DeviceModel.findOne({ deviceToken: deviceId }).populate({
@@ -31,6 +33,8 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
 
   const registration = device.registration as any;
   const registrationId = registration._id.toString();
+
+  const gps = coordinates;
 
   // GPS Parsing & Validation only if gps exists
   if (gps) {
@@ -68,6 +72,12 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
     lastKnownGPS.set(deviceId, parsed);
   }
 
+  // Fetch dynamic thresholds from system settings, or fallback to sensible defaults
+  let settings = await SettingsModel.findOne();
+  if (!settings) {
+    settings = await SettingsModel.create({});
+  }
+
   // Targeted Emit to runner's specific room
   if (gps) {
     io.of("/race").to(registrationId).emit("gpsUpdate", gps);
@@ -79,6 +89,46 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
 
   if (emg) {
     io.of("/race").to(registrationId).emit("emgUpdate", { emg });
+  }
+
+  // Automated Alert Engine (Physiological Status)
+  if (heartRate && (heartRate > settings.heartRateMax || heartRate < settings.heartRateMin)) {
+    const alertMessage = "Critical Heart Rate Reading: " + heartRate + " bpm";
+    const alertDoc = await AlertModel.create({
+      event: registration.event,
+      registration: registration._id,
+      type: "HEART_RATE_CRITICAL",
+      value: heartRate,
+      message: alertMessage,
+      location: gps || lastKnownGPS.get(deviceId) || {},
+    });
+
+    io.of("/race").emit("emergencyAlert", {
+      ...alertDoc.toJSON(),
+      alertId: alertDoc._id,
+      user: registration.user,
+      emergencyContact: registration.emergencyContact,
+    });
+  }
+
+  // Muscle Cramp Detect Engine (EMG Peak Threshold)
+  if (emg && emg > settings.emgCrampThreshold) {
+    const alertMessage = `Sudden Muscle Tension Exceeded Baseline (${emg} > ${settings.emgCrampThreshold}). Possible severe cramping incident.`;
+    const alertDoc = await AlertModel.create({
+      event: registration.event,
+      registration: registration._id,
+      type: "EMG_CRAMP_CRITICAL",
+      value: emg,
+      message: alertMessage,
+      location: gps || lastKnownGPS.get(deviceId) || {},
+    });
+
+    io.of("/race").emit("emergencyAlert", {
+      ...alertDoc.toJSON(),
+      alertId: alertDoc._id,
+      user: registration.user,
+      emergencyContact: registration.emergencyContact,
+    });
   }
 
   // Admin global broadcast

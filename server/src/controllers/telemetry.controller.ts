@@ -55,3 +55,64 @@ export const getEventTelemetry = asyncHandler(
     );
   },
 );
+
+export const exportEventTelemetryCsv = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { eventID } = req.params;
+    appAssert(eventID, BAD_REQUEST, "Event ID is required");
+
+    const registrations = await RegistrationModel.find({
+      event: eventID,
+    }).select("_id");
+
+    if (registrations.length === 0) {
+      res.status(400).json(new CustomResponse(false, null, "No registrations found."));
+      return;
+    }
+
+    const registrationIds = registrations.map((reg) => reg._id);
+
+    const telemetryData = await TelemetryModel.find({
+      registration: { $in: registrationIds },
+    })
+      .populate({
+        path: "registration",
+        populate: [
+          { path: "user", select: "name email" },
+          { path: "raceCategory", select: "name" }
+        ],
+      })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const headers = [
+      "Timestamp",
+      "Runner Name",
+      "Email",
+      "Race Category",
+      "Latitude",
+      "Longitude",
+      "Heart Rate (bpm)",
+      "EMG",
+    ];
+
+    const rows = telemetryData.map((t: any) => {
+      return [
+        new Date(t.createdAt).toISOString(),
+        `"${t.registration?.user?.name || 'Unknown'}"`,
+        `"${t.registration?.user?.email || 'Unknown'}"`,
+        `"${t.registration?.raceCategory?.name || 'Unknown'}"`,
+        t.gps?.lat || '',
+        t.gps?.lon || '',
+        t.heartRate || '',
+        `"${t.emg || ''}"`
+      ].join(",");
+    });
+
+    const csvContent = [headers.join(","), ...rows].join("\n");
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename=lapSync-telemetry-${eventID}.csv`);
+    res.status(200).send(csvContent);
+  }
+);

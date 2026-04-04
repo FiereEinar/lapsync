@@ -8,6 +8,8 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import EventAlerts from "../EventAlerts";
 import _ from 'lodash';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -56,6 +58,13 @@ interface RunnerData {
 export default function MapLive() {
   const [runners, setRunners] = useState<Record<string, RunnerData>>({});
   const [focusedRunnerId, setFocusedRunnerId] = useState<string | null>(null);
+  const [now, setNow] = useState(new Date());
+
+  // Re-render interval to calculate connection lost statuses continuously
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const socket = getSocket('race');
@@ -100,8 +109,8 @@ export default function MapLive() {
   }, []);
 
   const activeRunners = Object.values(runners).filter((r) => {
-    // Only show runners that have updated in the last 15 minutes
-    return new Date().getTime() - r.lastUpdate.getTime() < 15 * 60 * 1000;
+    // Keep runners that updated today (e.g. 12 hours) so they don't vanish immediately, allowing SOS/Offline tracking
+    return now.getTime() - r.lastUpdate.getTime() < 12 * 60 * 60 * 1000;
   });
 
   const getMapCenter = (): [number, number] => {
@@ -140,14 +149,20 @@ export default function MapLive() {
               
               {activeRunners.filter(r => r.position).map((r) => {
                 const isFocused = focusedRunnerId === r.registrationId;
+                const isOffline = now.getTime() - r.lastUpdate.getTime() > 2 * 60 * 1000; // > 2 mins offline
                 if (focusedRunnerId !== null && !isFocused) return null;
+
+                const pinColor = isOffline ? "#9ca3af" : (isFocused ? "#e11d48" : "#3b82f6");
 
                 return (
                   <div key={r.registrationId}>
-                    <Marker position={r.position!} icon={createCustomMarker(isFocused ? "#e11d48" : "#3b82f6", r.user?.name || "Unknown")}>
+                    <Marker position={r.position!} icon={createCustomMarker(pinColor, r.user?.name || "Unknown")}>
                       <Popup>
                         <div className="flex flex-col gap-2 min-w-[120px] p-1">
-                          <div className="font-semibold text-base">{_.startCase(r.user?.name || "Unknown")}</div>
+                          <div className="font-semibold text-base flex justify-between items-center">
+                            {_.startCase(r.user?.name || "Unknown")}
+                            {isOffline && <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse ml-2" title="Lost Signal"></span>}
+                          </div>
                           <div className="text-sm text-muted-foreground flex justify-between">
                             <span>HR: {r.heartRate || '--'}</span>
                             <span>EMG: {r.emg || '--'}</span>
@@ -165,7 +180,7 @@ export default function MapLive() {
                         </div>
                       </Popup>
                     </Marker>
-                    <Polyline positions={r.path} color={isFocused ? "#e11d48" : "#3b82f6"} weight={isFocused ? 4 : 2} />
+                    <Polyline positions={r.path} color={pinColor} weight={isFocused ? 4 : 2} />
                   </div>
                 )
               })}
@@ -174,71 +189,88 @@ export default function MapLive() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Runners</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activeRunners.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">No active runners detected yet.</p>
-          ) : (
-            <div className="rounded-lg border overflow-hidden">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow>
-                    <TableHead>Runner</TableHead>
-                    <TableHead>Heart Rate</TableHead>
-                    <TableHead>EMG</TableHead>
-                    <TableHead>Emergency Contact</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {activeRunners.map((runner) => (
-                    <TableRow 
-                      key={runner.registrationId}
-                      className={focusedRunnerId === runner.registrationId ? 'bg-primary/5' : ''}
-                    >
-                      <TableCell className="font-medium">
-                        {_.startCase(runner.user?.name || "Unknown")}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className={`font-mono ${runner.heartRate && runner.heartRate > 170 ? 'text-destructive font-bold' : ''}`}>
-                            {runner.heartRate || '--'}
-                          </span>
-                          <span className="text-xs text-muted-foreground">bpm</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {runner.emg || '--'}
-                      </TableCell>
-                      <TableCell>
-                        {runner.emergencyContact ? (
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">{runner.emergencyContact.name}</span>
-                            <span className="text-xs text-muted-foreground">{runner.emergencyContact.phone}</span>
-                          </div>
-                        ) : '--'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <button 
-                          className="text-primary hover:underline text-sm font-medium"
-                          onClick={() => setFocusedRunnerId(
-                            focusedRunnerId === runner.registrationId ? null : runner.registrationId
-                          )}
-                        >
-                          {focusedRunnerId === runner.registrationId ? "Unfocus" : "View"}
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="runners" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="runners">Active Runners</TabsTrigger>
+          <TabsTrigger value="alerts">Emergency Alerts</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="runners" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Runners</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activeRunners.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">No active runners detected yet.</p>
+              ) : (
+                <div className="rounded-lg border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead>Runner</TableHead>
+                        <TableHead>Heart Rate</TableHead>
+                        <TableHead>EMG</TableHead>
+                        <TableHead>Emergency Contact</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {activeRunners.map((runner) => {
+                        const isOffline = now.getTime() - runner.lastUpdate.getTime() > 2 * 60 * 1000;
+                        return (
+                          <TableRow 
+                            key={runner.registrationId}
+                            className={focusedRunnerId === runner.registrationId ? 'bg-primary/5' : ''}
+                          >
+                            <TableCell className="font-medium">
+                              {_.startCase(runner.user?.name || "Unknown")}
+                              {isOffline && <span className="ml-2 text-[10px] bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded-full font-bold">Offline</span>}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span className={`font-mono ${runner.heartRate && runner.heartRate > 170 ? 'text-destructive font-bold' : ''}`}>
+                                  {runner.heartRate || '--'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">bpm</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {runner.emg || '--'}
+                            </TableCell>
+                            <TableCell>
+                              {runner.emergencyContact ? (
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">{runner.emergencyContact.name}</span>
+                                  <span className="text-xs text-muted-foreground">{runner.emergencyContact.phone}</span>
+                                </div>
+                              ) : '--'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <button 
+                                className="text-primary hover:underline text-sm font-medium"
+                                onClick={() => setFocusedRunnerId(
+                                  focusedRunnerId === runner.registrationId ? null : runner.registrationId
+                                )}
+                              >
+                                {focusedRunnerId === runner.registrationId ? "Unfocus" : "View"}
+                              </button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="alerts" className="mt-4">
+          <EventAlerts />
+        </TabsContent>
+      </Tabs>
     </div>
 	);
 };
