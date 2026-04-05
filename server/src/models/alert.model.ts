@@ -1,8 +1,8 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IAlert extends Document {
-  event: mongoose.Schema.Types.ObjectId;
-  registration: mongoose.Schema.Types.ObjectId;
+  event: mongoose.Schema.Types.ObjectId | string;
+  registration: mongoose.Schema.Types.ObjectId | string;
   type: string;
   value: number;
   message: string;
@@ -17,8 +17,12 @@ export interface IAlert extends Document {
 
 const AlertSchema = new Schema<IAlert>(
   {
-    event: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
-    registration: { type: Schema.Types.ObjectId, ref: 'Registration', required: true },
+    event: { type: Schema.Types.ObjectId, ref: "Event", required: true },
+    registration: {
+      type: Schema.Types.ObjectId,
+      ref: "Registration",
+      required: true,
+    },
     type: { type: String, required: true },
     value: { type: Number, required: true },
     message: { type: String, required: true },
@@ -28,7 +32,7 @@ const AlertSchema = new Schema<IAlert>(
     },
     resolved: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export default mongoose.model<IAlert>('Alert', AlertSchema);
+export default mongoose.model<IAlert>("Alert", AlertSchema);
