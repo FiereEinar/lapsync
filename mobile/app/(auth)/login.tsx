@@ -1,18 +1,11 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
+import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "../../src/store/useAuthStore";
 import api from "../../src/api/axios";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "../../src/components/ui/Card";
+import { Button } from "../../src/components/ui/Button";
+import { Input } from "../../src/components/ui/Input";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -42,84 +35,44 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className='flex-1 bg-zinc-950'
-    >
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <View className='mb-12 mt-12'>
-          <Text className='text-4xl font-extrabold text-white mb-2 tracking-tight'>
-            Welcome Back
-          </Text>
-          <Text className='text-zinc-400 text-base'>
-            Sign in to continue to Lapsync.
-          </Text>
-        </View>
-
-        <View className='mb-8 flex flex-col gap-4'>
-          <View className='flex-row items-center bg-zinc-900 rounded-2xl px-4 py-3 border border-zinc-800'>
-            <MaterialIcons
-              name='email'
-              size={20}
-              color='#9ca3af'
-              style={{ marginRight: 12 }}
-            />
-            <TextInput
-              className='flex-1 text-white text-base py-2'
-              placeholder='Email address'
-              placeholderTextColor='#6b7280'
-              keyboardType='email-address'
-              autoCapitalize='none'
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-
-          <View className='flex-row items-center bg-zinc-900 rounded-2xl px-4 py-3 border border-zinc-800'>
-            <MaterialIcons
-              name='lock'
-              size={20}
-              color='#9ca3af'
-              style={{ marginRight: 12 }}
-            />
-            <TextInput
-              className='flex-1 text-white text-base py-2'
-              placeholder='Password'
-              placeholderTextColor='#6b7280'
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-          </View>
-        </View>
-
-        <TouchableOpacity
-          className={`bg-blue-600 rounded-2xl py-4 items-center flex-row justify-center ${isLoading ? "opacity-70" : ""}`}
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <Text className='text-white text-lg font-bold tracking-wide mr-2'>
-            {isLoading ? "Signing In..." : "Sign In"}
-          </Text>
-          {!isLoading && (
-            <MaterialIcons name='arrow-forward' size={20} color='white' />
-          )}
-        </TouchableOpacity>
-
-        <View className='flex-row justify-center mt-12'>
-          <Text className='text-zinc-400 mr-2'>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-            <Text className='text-blue-500 font-semibold text-base'>
-              Sign Up
-            </Text>
-          </TouchableOpacity>
-        </View>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className='flex-1 bg-background'>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 16 }}>
+        <Card className="w-full max-w-sm mx-auto">
+          <CardHeader className="items-center pb-8 mt-2">
+            <CardTitle className="text-2xl font-bold">Login</CardTitle>
+            <CardDescription className="text-center">Enter your email below to login to your account.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
+            <View>
+              <Text className="text-sm font-medium leading-none text-foreground mb-3">Email</Text>
+              <Input
+                placeholder='m@example.com'
+                keyboardType='email-address'
+                autoCapitalize='none'
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+            <View>
+              <Text className="text-sm font-medium leading-none text-foreground mb-3">Password</Text>
+              <Input
+                placeholder='Password'
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+            <Button className="mt-4 w-full" onPress={handleLogin} disabled={isLoading}>
+              {isLoading ? "Signing In..." : "Sign In"}
+            </Button>
+          </CardContent>
+          <CardFooter className="justify-center mt-2 pb-8">
+             <Text className='text-muted-foreground text-sm mr-2'>Don't have an account?</Text>
+             <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
+               <Text className='text-primary font-semibold text-sm'>Sign up</Text>
+             </TouchableOpacity>
+          </CardFooter>
+        </Card>
       </ScrollView>
     </KeyboardAvoidingView>
   );

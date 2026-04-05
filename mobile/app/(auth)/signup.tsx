@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, Alert, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import api from '../../src/api/axios';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "../../src/components/ui/Card";
+import { Button } from "../../src/components/ui/Button";
+import { Input } from "../../src/components/ui/Input";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -33,89 +35,62 @@ export default function SignupScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-zinc-950"
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}>
-        <TouchableOpacity className="mb-6 mt-8" onPress={() => router.back()}>
-          <View className="bg-zinc-900 w-10 h-10 rounded-full items-center justify-center border border-zinc-800">
-            <MaterialIcons name="arrow-back" size={20} color="#9ca3af" />
-          </View>
-        </TouchableOpacity>
-
-        <View className="mb-8">
-          <Text className="text-4xl font-extrabold text-white mb-2 tracking-tight">Create Account</Text>
-          <Text className="text-zinc-400 text-base">Sign up to get started with Lapsync.</Text>
-        </View>
-
-        <View className="mb-8 flex flex-col gap-4">
-          <View className="flex-row items-center bg-zinc-900 rounded-2xl px-4 py-3 border border-zinc-800">
-            <MaterialIcons name="person" size={20} color="#9ca3af" style={{ marginRight: 12 }} />
-            <TextInput
-              className="flex-1 text-white text-base py-2"
-              placeholder="Full Name"
-              placeholderTextColor="#6b7280"
-              autoCapitalize="words"
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-
-          <View className="flex-row items-center bg-zinc-900 rounded-2xl px-4 py-3 border border-zinc-800">
-            <MaterialIcons name="email" size={20} color="#9ca3af" style={{ marginRight: 12 }} />
-            <TextInput
-              className="flex-1 text-white text-base py-2"
-              placeholder="Email address"
-              placeholderTextColor="#6b7280"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-          
-          <View className="flex-row items-center bg-zinc-900 rounded-2xl px-4 py-3 border border-zinc-800">
-            <MaterialIcons name="lock" size={20} color="#9ca3af" style={{ marginRight: 12 }} />
-            <TextInput
-              className="flex-1 text-white text-base py-2"
-              placeholder="Password"
-              placeholderTextColor="#6b7280"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-          </View>
-
-          <View className="flex-row items-center bg-zinc-900 rounded-2xl px-4 py-3 border border-zinc-800">
-            <MaterialIcons name="lock-outline" size={20} color="#9ca3af" style={{ marginRight: 12 }} />
-            <TextInput
-              className="flex-1 text-white text-base py-2"
-              placeholder="Confirm Password"
-              placeholderTextColor="#6b7280"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-          </View>
-        </View>
-
-        <TouchableOpacity 
-          className={`bg-blue-600 rounded-2xl py-4 mt-2 items-center justify-center ${isLoading ? 'opacity-70' : ''}`}
-          onPress={handleSignup}
-          disabled={isLoading}
-        >
-          <Text className="text-white text-lg font-bold tracking-wide">
-            {isLoading ? 'Creating Account...' : 'Sign Up'}
-          </Text>
-        </TouchableOpacity>
-
-        <View className="flex-row justify-center mt-12">
-          <Text className="text-zinc-400 mr-2">Already have an account?</Text>
-          <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
-            <Text className="text-blue-500 font-semibold text-base">Sign In</Text>
-          </TouchableOpacity>
-        </View>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-background">
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 16 }}>
+        <Card className="w-full max-w-sm mx-auto">
+          <CardHeader className="items-center pb-8 mt-2">
+            <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
+            <CardDescription className="text-center">Enter your information to create an account</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <View>
+              <Text className="text-sm font-medium leading-none text-foreground mb-3">Full Name</Text>
+              <Input
+                placeholder="John Doe"
+                autoCapitalize="words"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
+            <View>
+              <Text className="text-sm font-medium leading-none text-foreground mb-3">Email</Text>
+              <Input
+                placeholder='m@example.com'
+                keyboardType='email-address'
+                autoCapitalize='none'
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+            <View>
+              <Text className="text-sm font-medium leading-none text-foreground mb-3">Password</Text>
+              <Input
+                placeholder='Password'
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+            <View>
+              <Text className="text-sm font-medium leading-none text-foreground mb-3">Confirm Password</Text>
+              <Input
+                placeholder='Confirm Password'
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+            </View>
+            <Button className="mt-4 w-full" onPress={handleSignup} disabled={isLoading}>
+              {isLoading ? "Creating Account..." : "Create an account"}
+            </Button>
+          </CardContent>
+          <CardFooter className="justify-center mt-2 pb-8">
+             <Text className='text-muted-foreground text-sm mr-2'>Already have an account?</Text>
+             <TouchableOpacity onPress={() => router.replace("/(auth)/login")}>
+               <Text className='text-primary font-semibold text-sm'>Sign in</Text>
+             </TouchableOpacity>
+          </CardFooter>
+        </Card>
       </ScrollView>
     </KeyboardAvoidingView>
   );

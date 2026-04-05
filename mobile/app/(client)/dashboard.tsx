@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { Card, CardHeader, CardTitle, CardContent } from '../../src/components/ui/Card';
 import { Badge } from '../../src/components/ui/Badge';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Calendar, Cpu, Activity } from 'lucide-react-native';
 import api from '../../src/api/axios';
 import { useAuthStore } from '../../src/store/useAuthStore';
 
@@ -27,8 +27,8 @@ export default function ClientHome() {
 
   if (loading) {
     return (
-      <View className="flex-1 bg-zinc-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#10b981" />
+      <View className="flex-1 bg-background items-center justify-center">
+        <ActivityIndicator size="large" color="hsl(var(--primary))" />
       </View>
     );
   }
@@ -36,44 +36,44 @@ export default function ClientHome() {
   const upcomingRegistrations = registrations.filter((r: any) => r.status === 'registered' || r.status === 'pending');
 
   return (
-    <ScrollView className="flex-1 bg-zinc-950" contentContainerStyle={{ padding: 20 }}>
-      <View className="mb-8 mt-4">
-        <Text className="text-3xl font-extrabold text-white mb-2">Welcome Back!</Text>
-        <Text className="text-zinc-400 text-base">{user?.name}, track your events and performance.</Text>
+    <ScrollView className="flex-1 bg-background" contentContainerStyle={{ padding: 20 }}>
+      <View className="mb-8 mt-2">
+        <Text className="text-3xl font-extrabold text-foreground mb-2">Welcome Back!</Text>
+        <Text className="text-muted-foreground text-base">{user?.name}, track your events and performance.</Text>
       </View>
 
       <View className="flex-row gap-4 mb-4">
         <Card className="flex-1">
-          <CardHeader className="pb-2 border-b-0">
-            <Text className="font-semibold text-zinc-300 text-sm">Events</Text>
-            <MaterialIcons name="event" size={20} color="#10b981" />
+          <CardHeader className="pb-2 flex-row justify-between items-center">
+            <Text className="font-semibold text-muted-foreground text-sm tracking-wide uppercase">Events</Text>
+            <Calendar size={18} color="hsl(var(--primary))" />
           </CardHeader>
-          <CardContent className="pt-0 relative">
-            <Text className="text-4xl font-bold text-white mb-1">{registrations.length}</Text>
-            <Text className="text-xs text-zinc-500">{upcomingRegistrations.length} upcoming</Text>
+          <CardContent className="pt-0">
+            <Text className="text-4xl font-bold text-foreground mt-2 mb-1">{registrations.length}</Text>
+            <Text className="text-xs text-muted-foreground">{upcomingRegistrations.length} upcoming</Text>
           </CardContent>
         </Card>
 
         <Card className="flex-1">
-          <CardHeader className="pb-2 border-b-0">
-            <Text className="font-semibold text-zinc-300 text-sm">Hardware</Text>
-            <MaterialIcons name="sensors" size={20} color="#10b981" />
+          <CardHeader className="pb-2 flex-row justify-between items-center">
+            <Text className="font-semibold text-muted-foreground text-sm tracking-wide uppercase">Hardware</Text>
+            <Cpu size={18} color="hsl(var(--primary))" />
           </CardHeader>
           <CardContent className="pt-0">
-            <Text className="text-2xl font-bold text-white mb-1 mt-2">Ready</Text>
-            <Text className="text-xs text-zinc-500 mt-2">Pickup at counter</Text>
+            <Text className="text-2xl font-bold text-foreground mb-1 mt-4">Ready</Text>
+            <Text className="text-xs text-muted-foreground">Pickup at counter</Text>
           </CardContent>
         </Card>
       </View>
 
-      <Card className="mb-8 border border-zinc-800">
+      <Card className="mb-8">
         <CardHeader>
           <CardTitle>My Registered Events</CardTitle>
         </CardHeader>
         <CardContent>
           <View className="flex flex-col gap-4">
             {registrations.length === 0 ? (
-                <Text className="text-zinc-500 text-center">You have no registered events yet.</Text>
+                <Text className="text-muted-foreground text-center mt-2">You have no registered events yet.</Text>
             ) : null}
             {registrations.map((reg: any, idx: number) => {
               const eventName = reg.event?.name || 'Unknown Event';
@@ -85,19 +85,19 @@ export default function ClientHome() {
               const date = reg.event?.startDate ? new Date(reg.event.startDate).toLocaleDateString() : 'TBA';
               
               return (
-                <View key={reg._id || idx} className="p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+                <View key={reg._id || idx} className="p-4 bg-muted/20 border border-border rounded-lg">
                   <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-white font-semibold flex-1 mr-2 text-base" numberOfLines={1}>{eventName}</Text>
+                    <Text className="text-foreground font-semibold flex-1 mr-2 text-base" numberOfLines={1}>{eventName}</Text>
                     <Badge variant="success">Registered</Badge>
                   </View>
                   <View className="flex-row items-center gap-4">
-                    <View className="flex-row items-center bg-zinc-950 px-2 py-1 rounded-md">
-                      <MaterialIcons name="directions-run" size={14} color="#a1a1aa" style={{ marginRight: 4 }} />
-                      <Text className="text-zinc-400 text-xs">{distance}</Text>
+                    <View className="flex-row items-center bg-background px-2 py-1.5 rounded-md border border-border">
+                      <Activity size={12} color="#64748b" style={{ marginRight: 6 }} />
+                      <Text className="text-muted-foreground text-xs font-medium">{distance}</Text>
                     </View>
-                    <View className="flex-row items-center bg-zinc-950 px-2 py-1 rounded-md">
-                      <MaterialIcons name="event" size={14} color="#a1a1aa" style={{ marginRight: 4 }} />
-                      <Text className="text-zinc-400 text-xs">{date}</Text>
+                    <View className="flex-row items-center bg-background px-2 py-1.5 rounded-md border border-border">
+                      <Calendar size={12} color="#64748b" style={{ marginRight: 6 }} />
+                      <Text className="text-muted-foreground text-xs font-medium">{date}</Text>
                     </View>
                   </View>
                 </View>

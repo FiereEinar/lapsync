@@ -2,31 +2,33 @@ import React from 'react';
 import { View, Text, ViewProps } from 'react-native';
 
 interface BadgeProps extends ViewProps {
-  variant?: 'default' | 'secondary' | 'outline' | 'success';
-  children: React.ReactNode;
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'success';
 }
 
 export const Badge = ({ children, variant = 'default', className = '', ...props }: BadgeProps) => {
-  let baseClass = 'px-3 py-1 rounded-full items-center justify-center';
-  let textClass = 'text-xs font-semibold';
+  let baseClass = 'px-2.5 py-0.5 rounded-full items-center justify-center border';
+  let textClass = 'text-xs font-semibold tracking-tight';
 
   if (variant === 'default') {
-    baseClass += ' bg-blue-600';
-    textClass += ' text-white';
+    baseClass += ' bg-primary border-transparent';
+    textClass += ' text-primary-foreground';
   } else if (variant === 'secondary') {
-    baseClass += ' bg-zinc-800';
-    textClass += ' text-zinc-300';
+    baseClass += ' bg-secondary border-transparent';
+    textClass += ' text-secondary-foreground';
+  } else if (variant === 'destructive') {
+    baseClass += ' bg-destructive border-transparent';
+    textClass += ' text-destructive-foreground';
   } else if (variant === 'outline') {
-    baseClass += ' border border-zinc-700 bg-transparent';
-    textClass += ' text-zinc-400';
+    baseClass += ' border-border bg-transparent';
+    textClass += ' text-foreground';
   } else if (variant === 'success') {
-    baseClass += ' bg-emerald-500/20';
-    textClass += ' text-emerald-400';
+    baseClass += ' bg-success border-transparent';
+    textClass += ' text-success-foreground';
   }
 
   return (
     <View className={`${baseClass} ${className}`} {...props}>
-      <Text className={textClass}>{children}</Text>
+      {typeof children === 'string' ? <Text className={textClass}>{children}</Text> : children}
     </View>
   );
 };
