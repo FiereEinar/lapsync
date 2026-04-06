@@ -3,6 +3,7 @@ import { Modal, View, Text, ScrollView, Platform, KeyboardAvoidingView, Alert, T
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { X, Plus, Trash2 } from 'lucide-react-native';
+import { DateTimePickerInput } from '../ui/DateTimePickerInput';
 import api from '../../api/axios';
 
 export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boolean, onClose: () => void, onSuccess: () => void }) {
@@ -104,18 +105,18 @@ export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boo
            </View>
 
            <View className="mb-4">
-              <Text className="text-sm font-medium text-foreground mb-2">Date (YYYY-MM-DD)</Text>
-              <Input value={form.date} onChangeText={(val) => setForm({...form, date: val})} placeholder="2024-12-01" />
+              <Text className="text-sm font-medium text-foreground mb-2">Date</Text>
+              <DateTimePickerInput mode="date" value={form.date} onChange={(val) => setForm({...form, date: val})} placeholder="Select Event Date" />
            </View>
 
            <View className="flex-row gap-4 mb-4">
              <View className="flex-1">
                 <Text className="text-sm font-medium text-foreground mb-2">Start Time</Text>
-                <Input value={form.startTime} onChangeText={(val) => setForm({...form, startTime: val})} placeholder="05:00" />
+                <DateTimePickerInput mode="time" value={form.startTime} onChange={(val) => setForm({...form, startTime: val})} placeholder="05:00" />
              </View>
              <View className="flex-1">
                 <Text className="text-sm font-medium text-foreground mb-2">End Time</Text>
-                <Input value={form.endTime} onChangeText={(val) => setForm({...form, endTime: val})} placeholder="10:00" />
+                <DateTimePickerInput mode="time" value={form.endTime} onChange={(val) => setForm({...form, endTime: val})} placeholder="10:00" />
              </View>
            </View>
 
@@ -137,14 +138,15 @@ export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boo
            </View>
 
            <Text className="text-xs tracking-wider uppercase font-bold text-muted-foreground mt-4 mb-4">Registration Window</Text>
-           <View className="flex-row gap-4 mb-4">
-             <View className="flex-1">
+           
+           <View className="flex-col gap-4 mb-4">
+             <View className="w-full">
                 <Text className="text-sm font-medium text-foreground mb-2">Opens At</Text>
-                <Input value={form.opensAt} onChangeText={(val) => setForm({...form, opensAt: val})} placeholder="YYYY-MM-DD" />
+                <DateTimePickerInput mode="date" value={form.opensAt} onChange={(val) => setForm({...form, opensAt: val})} placeholder="Select Date" />
              </View>
-             <View className="flex-1">
+             <View className="w-full">
                 <Text className="text-sm font-medium text-foreground mb-2">Closes At</Text>
-                <Input value={form.closesAt} onChangeText={(val) => setForm({...form, closesAt: val})} placeholder="YYYY-MM-DD" />
+                <DateTimePickerInput mode="date" value={form.closesAt} onChange={(val) => setForm({...form, closesAt: val})} placeholder="Select Date" />
              </View>
            </View>
 
