@@ -41,13 +41,13 @@ export default function ClientEvents() {
 
         <View className="relative mb-8 shadow-sm">
           <View className="absolute left-3 top-3.5 z-10">
-             <Search size={18} color="hsl(var(--muted-foreground))" />
+             <Search size={18} color="hsl(0, 0%, 70%)" />
           </View>
           <Input placeholder="Search events..." className="pl-10 h-12" />
         </View>
 
         {loading ? (
-            <ActivityIndicator size="large" color="hsl(var(--success))" className="mt-8" />
+            <ActivityIndicator size="large" color="hsl(142, 76%, 36%)" className="mt-8" />
         ) : (
             <View className="flex flex-col">
               {events.length === 0 ? (

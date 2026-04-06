@@ -71,7 +71,7 @@ export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boo
         <View className="flex-row items-center justify-between p-4 px-6 pt-12 border-b border-border bg-card">
            <Text className="text-xl font-bold text-foreground">Create New Event</Text>
            <TouchableOpacity onPress={onClose} className="bg-muted p-2 rounded-full">
-             <X size={20} color="hsl(var(--foreground))" />
+             <X size={20} color="hsl(0, 0%, 95%)" />
            </TouchableOpacity>
         </View>
         <ScrollView contentContainerStyle={{ padding: 24 }}>

@@ -28,7 +28,7 @@ export default function ClientLayout() {
             onPress={logout} 
             className="p-4 mx-4 rounded-md flex-row items-center mt-auto mb-8 bg-destructive/20 border border-destructive/30"
           >
-            <LogOut size={20} color="hsl(var(--destructive))" />
+            <LogOut size={20} color="hsl(0, 62%, 50%)" />
             <Text className="ml-4 text-destructive font-semibold text-base">Log Out</Text>
           </TouchableOpacity>
         </DrawerContentScrollView>

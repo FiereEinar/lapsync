@@ -7,7 +7,7 @@ export const Input = React.forwardRef<any, TextInputProps>(
       <TextInput
         ref={ref}
         className={`flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus:border-ring ${className}`}
-        placeholderTextColor="hsl(var(--muted-foreground))"
+        placeholderTextColor="hsl(0, 0%, 70%)"
         {...props}
       />
     );

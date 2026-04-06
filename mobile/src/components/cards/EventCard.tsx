@@ -52,15 +52,15 @@ export default function EventCard({ event, onRefresh }: { event: any, onRefresh:
 
           <View className="flex-row items-center gap-4 flex-wrap mt-2">
             <View className="flex-row items-center mb-1">
-              <Calendar size={14} color="hsl(var(--muted-foreground))" style={{ marginRight: 4 }} />
+              <Calendar size={14} color="hsl(0, 0%, 70%)" style={{ marginRight: 4 }} />
               <Text className="text-muted-foreground text-xs">{date}</Text>
             </View>
             <View className="flex-row items-center mb-1">
-              <MapPin size={14} color="hsl(var(--muted-foreground))" style={{ marginRight: 4 }} />
+              <MapPin size={14} color="hsl(0, 0%, 70%)" style={{ marginRight: 4 }} />
               <Text className="text-muted-foreground text-xs">{location}</Text>
             </View>
             <View className="flex-row items-center mb-1">
-              <Users size={14} color="hsl(var(--muted-foreground))" style={{ marginRight: 4 }} />
+              <Users size={14} color="hsl(0, 0%, 70%)" style={{ marginRight: 4 }} />
               <Text className="text-muted-foreground text-xs">{totalRegistered}/{totalSlots}</Text>
             </View>
             <View className="flex-row items-center mb-1">
@@ -70,7 +70,7 @@ export default function EventCard({ event, onRefresh }: { event: any, onRefresh:
         </View>
 
         <TouchableOpacity onPress={() => setDropdownVisible(true)} className="p-2 -mr-2 -mt-2">
-          <MoreVertical size={20} color="hsl(var(--foreground))" />
+          <MoreVertical size={20} color="hsl(0, 0%, 95%)" />
         </TouchableOpacity>
       </View>
 

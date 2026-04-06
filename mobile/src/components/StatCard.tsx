@@ -20,7 +20,7 @@ export const StatCard = ({ title, value, subtitle, icon: Icon }: StatCardProps) 
         </View>
         {Icon && (
           <View className="bg-primary/10 p-4 rounded-2xl ml-4">
-            <Icon size={28} color="hsl(var(--primary))" />
+            <Icon size={28} color="hsl(173, 50%, 50%)" />
           </View>
         )}
       </CardContent>

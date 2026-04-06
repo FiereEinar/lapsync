@@ -26,7 +26,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <ActivityIndicator size="large" color="hsl(var(--primary))" />
+        <ActivityIndicator size="large" color="hsl(173, 50%, 50%)" />
       </View>
     );
   }
@@ -124,11 +124,11 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <TouchableOpacity className="bg-primary rounded-md py-3 flex-row justify-center items-center shadow-sm">
-            <Plus size={18} color="hsl(var(--primary-foreground))" />
+            <Plus size={18} color="hsl(0, 0%, 100%)" />
             <Text className="text-primary-foreground font-semibold ml-2 text-base">Create New Event</Text>
           </TouchableOpacity>
           <TouchableOpacity className="border border-input bg-background rounded-md py-3 flex-row justify-center items-center shadow-sm">
-            <Users size={18} color="hsl(var(--foreground))" />
+            <Users size={18} color="hsl(0, 0%, 95%)" />
             <Text className="text-foreground font-semibold ml-2 text-base">Manage Participants</Text>
           </TouchableOpacity>
         </CardContent>

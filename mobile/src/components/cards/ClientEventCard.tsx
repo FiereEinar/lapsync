@@ -31,11 +31,11 @@ export default function ClientEventCard({ event, userRegistrations, onRegister }
       <CardContent>
         <View className="flex-row items-center gap-4 flex-wrap mb-4">
            <View className="flex-row items-center bg-muted/20 px-2.5 py-1.5 rounded-md border border-border/50">
-             <Calendar size={14} color="hsl(var(--primary))" style={{ marginRight: 6 }} />
+             <Calendar size={14} color="hsl(173, 50%, 50%)" style={{ marginRight: 6 }} />
              <Text className="text-foreground text-xs">{date}</Text>
            </View>
            <View className="flex-row items-center bg-muted/20 px-2.5 py-1.5 rounded-md border border-border/50">
-             <MapPin size={14} color="hsl(var(--primary))" style={{ marginRight: 6 }} />
+             <MapPin size={14} color="hsl(173, 50%, 50%)" style={{ marginRight: 6 }} />
              <Text className="text-foreground text-xs">{location}</Text>
            </View>
            <View className="flex-row items-center bg-muted/20 px-2.5 py-1.5 rounded-md border border-border/50">
@@ -45,7 +45,7 @@ export default function ClientEventCard({ event, userRegistrations, onRegister }
 
         <View className="flex-row items-center justify-between pt-5 border-t border-border">
           <View className="flex-row items-center flex-1">
-            <Users size={14} color="hsl(var(--muted-foreground))" style={{ marginRight: 6 }} />
+            <Users size={14} color="hsl(0, 0%, 70%)" style={{ marginRight: 6 }} />
             <Text className="text-muted-foreground text-xs font-medium">{Math.max(0, totalSlots - totalRegistered)} spots remaining</Text>
           </View>
           <View className="flex-row gap-2">

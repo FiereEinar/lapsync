@@ -28,7 +28,7 @@ export default function ClientHome() {
   if (loading) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <ActivityIndicator size="large" color="hsl(var(--primary))" />
+        <ActivityIndicator size="large" color="hsl(173, 50%, 50%)" />
       </View>
     );
   }
@@ -46,7 +46,7 @@ export default function ClientHome() {
         <Card className="flex-1">
           <CardHeader className="pb-2 flex-row justify-between items-center">
             <Text className="font-semibold text-muted-foreground text-sm tracking-wide uppercase">Events</Text>
-            <Calendar size={18} color="hsl(var(--primary))" />
+            <Calendar size={18} color="hsl(173, 50%, 50%)" />
           </CardHeader>
           <CardContent className="pt-0">
             <Text className="text-4xl font-bold text-foreground mt-2 mb-1">{registrations.length}</Text>
@@ -57,7 +57,7 @@ export default function ClientHome() {
         <Card className="flex-1">
           <CardHeader className="pb-2 flex-row justify-between items-center">
             <Text className="font-semibold text-muted-foreground text-sm tracking-wide uppercase">Hardware</Text>
-            <Cpu size={18} color="hsl(var(--primary))" />
+            <Cpu size={18} color="hsl(173, 50%, 50%)" />
           </CardHeader>
           <CardContent className="pt-0">
             <Text className="text-2xl font-bold text-foreground mb-1 mt-4">Ready</Text>

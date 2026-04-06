@@ -4,7 +4,7 @@ import { View, Text, ViewProps, TextProps } from 'react-native';
 export const Card = ({ children, className = '', ...props }: ViewProps) => (
   <View 
     style={{
-        shadowColor: 'hsl(var(--foreground))',
+        shadowColor: 'hsl(0, 0%, 95%)',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 4,

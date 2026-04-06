@@ -36,24 +36,24 @@ export default function AdminEvents() {
             <Text className="text-muted-foreground text-sm">Manage all your race events</Text>
           </View>
           <Button onPress={() => setModalVisible(true)} size="icon" className="w-12 h-12 rounded-xl">
-            <Plus size={20} color="hsl(var(--primary-foreground))" />
+            <Plus size={20} color="hsl(0, 0%, 100%)" />
           </Button>
         </View>
 
         <View className="flex-row items-center gap-3 mb-6">
           <View className="relative flex-1">
             <View className="absolute left-3 top-3.5 z-10">
-               <Search size={18} color="hsl(var(--muted-foreground))" />
+               <Search size={18} color="hsl(0, 0%, 70%)" />
             </View>
             <Input placeholder="Search events..." className="pl-10 h-12" />
           </View>
           <Button variant="outline" className="px-4 h-12">
-             <Filter size={18} color="hsl(var(--foreground))" />
+             <Filter size={18} color="hsl(0, 0%, 95%)" />
           </Button>
         </View>
 
         {loading ? (
-           <ActivityIndicator size="large" color="hsl(var(--primary))" className="mt-8" />
+           <ActivityIndicator size="large" color="hsl(173, 50%, 50%)" className="mt-8" />
         ) : (
            <View className="flex flex-col">
              {events.length === 0 ? (
