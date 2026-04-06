@@ -1,11 +1,18 @@
 import { Drawer } from 'expo-router/drawer';
 import { useAuthStore } from '../../src/store/useAuthStore';
 import { LayoutDashboard, Calendar, Users, Cpu, Wifi, FileText, Settings, LogOut } from 'lucide-react-native';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 
 export default function AdminLayout() {
   const { logout } = useAuthStore();
+
+  const confirmLogout = () => {
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Log Out", style: "destructive", onPress: logout }
+    ]);
+  };
 
   return (
     <Drawer
@@ -25,7 +32,7 @@ export default function AdminLayout() {
           <DrawerItemList {...props} />
           <View className="flex-1" />
           <TouchableOpacity 
-            onPress={logout} 
+            onPress={confirmLogout} 
             className="p-4 mx-4 rounded-md flex-row items-center mt-auto mb-8 bg-destructive/20 border border-destructive/30"
           >
             <LogOut size={20} color="hsl(0, 62%, 50%)" />

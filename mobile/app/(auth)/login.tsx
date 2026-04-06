@@ -49,6 +49,8 @@ export default function LoginScreen() {
                 placeholder='m@example.com'
                 keyboardType='email-address'
                 autoCapitalize='none'
+                autoComplete='email'
+                textContentType='emailAddress'
                 value={email}
                 onChangeText={setEmail}
               />
@@ -58,6 +60,8 @@ export default function LoginScreen() {
               <Input
                 placeholder='Password'
                 secureTextEntry
+                textContentType='password'
+                autoComplete='password'
                 value={password}
                 onChangeText={setPassword}
               />

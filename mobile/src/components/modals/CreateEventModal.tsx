@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, Text, ScrollView, Platform, KeyboardAvoidingView, Alert, TouchableOpacity } from 'react-native';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { X, Calendar as CalendarIcon, MapPin } from 'lucide-react-native';
+import { X, Plus, Trash2 } from 'lucide-react-native';
 import api from '../../api/axios';
 
 export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boolean, onClose: () => void, onSuccess: () => void }) {
@@ -16,11 +16,29 @@ export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boo
     venue: '',
     city: '',
     province: '',
+    opensAt: '',
+    closesAt: ''
   });
 
-  const [category, setCategory] = useState({
-    name: 'Standard', distanceKm: '5', cutoffTime: '60', price: '500', slots: '100'
-  });
+  const [categories, setCategories] = useState([
+    { name: 'Standard', distanceKm: '5', cutoffTime: '60', price: '500', slots: '100', id: Date.now().toString() }
+  ]);
+
+  const handleAddCategory = () => {
+     setCategories([...categories, { name: 'New Distance', distanceKm: '10', cutoffTime: '120', price: '750', slots: '100', id: Date.now().toString() }]);
+  };
+
+  const handleRemoveCategory = (id: string) => {
+     if (categories.length === 1) {
+         Alert.alert("Warning", "You must have at least one race category.");
+         return;
+     }
+     setCategories(categories.filter(c => c.id !== id));
+  };
+
+  const updateCategory = (id: string, field: string, value: string) => {
+     setCategories(categories.map(c => c.id === id ? { ...c, [field]: value } : c));
+  };
 
   const handleSubmit = async () => {
     if (!form.name || !form.date || !form.city) {
@@ -41,18 +59,16 @@ export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boo
            province: form.province || form.city
         },
         registration: {
-           opensAt: new Date().toISOString(),
-           closesAt: new Date(Date.now() + 86400000 * 30).toISOString(),
+           opensAt: form.opensAt ? new Date(form.opensAt).toISOString() : new Date().toISOString(),
+           closesAt: form.closesAt ? new Date(form.closesAt).toISOString() : new Date(Date.now() + 86400000 * 30).toISOString(),
         },
-        raceCategories: [
-          {
-             name: category.name,
-             distanceKm: Number(category.distanceKm),
-             cutoffTime: Number(category.cutoffTime),
-             price: Number(category.price),
-             slots: Number(category.slots)
-          }
-        ]
+        raceCategories: categories.map(c => ({
+             name: c.name,
+             distanceKm: Number(c.distanceKm) || 0,
+             cutoffTime: Number(c.cutoffTime) || 0,
+             price: Number(c.price) || 0,
+             slots: Number(c.slots) || 0
+        }))
       };
       
       await api.post('/event', payload);
@@ -87,52 +103,100 @@ export function CreateEventModal({ visible, onClose, onSuccess }: { visible: boo
                <Input value={form.description} onChangeText={(val) => setForm({...form, description: val})} placeholder="Annual city marathon" />
            </View>
 
+           <View className="mb-4">
+              <Text className="text-sm font-medium text-foreground mb-2">Date (YYYY-MM-DD)</Text>
+              <Input value={form.date} onChangeText={(val) => setForm({...form, date: val})} placeholder="2024-12-01" />
+           </View>
+
            <View className="flex-row gap-4 mb-4">
-             <View className="flex-1 relative">
-                <Text className="text-sm font-medium text-foreground mb-2">Date (YYYY-MM-DD)</Text>
-                <Input value={form.date} onChangeText={(val) => setForm({...form, date: val})} placeholder="2024-12-01" />
+             <View className="flex-1">
+                <Text className="text-sm font-medium text-foreground mb-2">Start Time</Text>
+                <Input value={form.startTime} onChangeText={(val) => setForm({...form, startTime: val})} placeholder="05:00" />
+             </View>
+             <View className="flex-1">
+                <Text className="text-sm font-medium text-foreground mb-2">End Time</Text>
+                <Input value={form.endTime} onChangeText={(val) => setForm({...form, endTime: val})} placeholder="10:00" />
              </View>
            </View>
 
-           <Text className="text-xs tracking-wider uppercase font-bold text-muted-foreground mt-6 mb-4">Location</Text>
+           <Text className="text-xs tracking-wider uppercase font-bold text-muted-foreground mt-4 mb-4">Location</Text>
+           
            <View className="flex-row gap-4 mb-4">
                <View className="flex-1">
                    <Text className="text-sm font-medium text-foreground mb-2">City</Text>
                    <Input value={form.city} onChangeText={(val) => setForm({...form, city: val})} placeholder="New York" />
                </View>
                <View className="flex-1">
-                   <Text className="text-sm font-medium text-foreground mb-2">Venue</Text>
-                   <Input value={form.venue} onChangeText={(val) => setForm({...form, venue: val})} placeholder="Central Park" />
+                   <Text className="text-sm font-medium text-foreground mb-2">Province</Text>
+                   <Input value={form.province} onChangeText={(val) => setForm({...form, province: val})} placeholder="NY" />
                </View>
            </View>
-
-           <View className="border-t border-border mt-8 pt-6">
-              <Text className="text-xs tracking-wider uppercase font-bold text-muted-foreground mb-4">Race Category (Default Mapping)</Text>
-              
-              <View className="flex-row gap-4 mb-4">
-                <View className="flex-1">
-                   <Text className="text-sm font-medium text-foreground mb-2">Distance (km)</Text>
-                   <Input keyboardType="numeric" value={category.distanceKm} onChangeText={(val) => setCategory({...category, distanceKm: val})} />
-                </View>
-                <View className="flex-1">
-                   <Text className="text-sm font-medium text-foreground mb-2">Slots</Text>
-                   <Input keyboardType="numeric" value={category.slots} onChangeText={(val) => setCategory({...category, slots: val})} />
-                </View>
-              </View>
-
-              <View className="flex-row gap-4">
-                <View className="flex-1">
-                   <Text className="text-sm font-medium text-foreground mb-2">Price ($)</Text>
-                   <Input keyboardType="numeric" value={category.price} onChangeText={(val) => setCategory({...category, price: val})} />
-                </View>
-                <View className="flex-1">
-                   <Text className="text-sm font-medium text-foreground mb-2">Cutoff (mins)</Text>
-                   <Input keyboardType="numeric" value={category.cutoffTime} onChangeText={(val) => setCategory({...category, cutoffTime: val})} />
-                </View>
-              </View>
+           <View className="mb-4">
+               <Text className="text-sm font-medium text-foreground mb-2">Venue / Address</Text>
+               <Input value={form.venue} onChangeText={(val) => setForm({...form, venue: val})} placeholder="Central Park" />
            </View>
 
-           <Button className="mt-10 mb-10 w-full h-14" disabled={loading} onPress={handleSubmit}>
+           <Text className="text-xs tracking-wider uppercase font-bold text-muted-foreground mt-4 mb-4">Registration Window</Text>
+           <View className="flex-row gap-4 mb-4">
+             <View className="flex-1">
+                <Text className="text-sm font-medium text-foreground mb-2">Opens At</Text>
+                <Input value={form.opensAt} onChangeText={(val) => setForm({...form, opensAt: val})} placeholder="YYYY-MM-DD" />
+             </View>
+             <View className="flex-1">
+                <Text className="text-sm font-medium text-foreground mb-2">Closes At</Text>
+                <Input value={form.closesAt} onChangeText={(val) => setForm({...form, closesAt: val})} placeholder="YYYY-MM-DD" />
+             </View>
+           </View>
+
+           <View className="flex-row items-center justify-between border-t border-border mt-6 pt-6 mb-4">
+              <Text className="text-xs tracking-wider uppercase font-bold text-muted-foreground mt-1">Race Categories</Text>
+              <TouchableOpacity onPress={handleAddCategory} className="flex-row items-center bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
+                 <Plus size={14} color="hsl(173, 50%, 50%)" style={{marginRight: 4}} />
+                 <Text className="text-primary font-bold text-xs uppercase tracking-wide">Add Distance</Text>
+              </TouchableOpacity>
+           </View>
+
+           {categories.map((cat, index) => (
+              <View key={cat.id} className="bg-card border border-border p-4 rounded-xl mb-4 relative">
+                 <View className="flex-row justify-between items-center mb-4">
+                    <Text className="text-foreground font-bold">Category {index + 1}</Text>
+                    {categories.length > 1 && (
+                        <TouchableOpacity onPress={() => handleRemoveCategory(cat.id)} className="p-2">
+                           <Trash2 size={16} color="hsl(0, 62%, 50%)" />
+                        </TouchableOpacity>
+                    )}
+                 </View>
+
+                 <View className="mb-4">
+                     <Text className="text-sm font-medium text-foreground mb-2">Category Name</Text>
+                     <Input value={cat.name} onChangeText={(val) => updateCategory(cat.id, 'name', val)} placeholder="Standard" />
+                 </View>
+
+                 <View className="flex-row gap-4 mb-4">
+                    <View className="flex-1">
+                       <Text className="text-sm font-medium text-foreground mb-2">Distance (km)</Text>
+                       <Input keyboardType="numeric" value={cat.distanceKm} onChangeText={(val) => updateCategory(cat.id, 'distanceKm', val)} />
+                    </View>
+                    <View className="flex-1">
+                       <Text className="text-sm font-medium text-foreground mb-2">Slots</Text>
+                       <Input keyboardType="numeric" value={cat.slots} onChangeText={(val) => updateCategory(cat.id, 'slots', val)} />
+                    </View>
+                 </View>
+
+                 <View className="flex-row gap-4">
+                    <View className="flex-1">
+                       <Text className="text-sm font-medium text-foreground mb-2">Price ($)</Text>
+                       <Input keyboardType="numeric" value={cat.price} onChangeText={(val) => updateCategory(cat.id, 'price', val)} />
+                    </View>
+                    <View className="flex-1">
+                       <Text className="text-sm font-medium text-foreground mb-2">Cutoff (mins)</Text>
+                       <Input keyboardType="numeric" value={cat.cutoffTime} onChangeText={(val) => updateCategory(cat.id, 'cutoffTime', val)} />
+                    </View>
+                 </View>
+              </View>
+           ))}
+
+           <Button className="mt-6 mb-10 w-full h-14" disabled={loading} onPress={handleSubmit}>
               <Text className="text-primary-foreground font-bold text-lg">{loading ? "Creating..." : "Publish Event"}</Text>
            </Button>
         </ScrollView>

@@ -48,6 +48,8 @@ export default function SignupScreen() {
               <Input
                 placeholder="John Doe"
                 autoCapitalize="words"
+                textContentType="name"
+                autoComplete="name"
                 value={name}
                 onChangeText={setName}
               />
@@ -58,6 +60,8 @@ export default function SignupScreen() {
                 placeholder='m@example.com'
                 keyboardType='email-address'
                 autoCapitalize='none'
+                textContentType="emailAddress"
+                autoComplete="email"
                 value={email}
                 onChangeText={setEmail}
               />
@@ -67,6 +71,8 @@ export default function SignupScreen() {
               <Input
                 placeholder='Password'
                 secureTextEntry
+                textContentType="newPassword"
+                autoComplete="password-new"
                 value={password}
                 onChangeText={setPassword}
               />
@@ -76,6 +82,8 @@ export default function SignupScreen() {
               <Input
                 placeholder='Confirm Password'
                 secureTextEntry
+                textContentType="newPassword"
+                autoComplete="password-new"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
