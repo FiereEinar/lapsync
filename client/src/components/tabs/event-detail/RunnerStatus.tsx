@@ -36,46 +36,53 @@ export default function RunnerStatus() {
 	];
 
 	return (
-		<Card>
+		<Card className='rounded-xl border border-border shadow-sm'>
 			<CardHeader>
-				<CardTitle>RFID & Biosignal Status</CardTitle>
+				<CardTitle className='flex items-center gap-2 text-xl'>
+					<div className='w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center'>
+						<Activity className='w-5 h-5 text-red-500' />
+					</div>
+					RFID & Biosignal Status
+				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Bib #</TableHead>
-							<TableHead>Name</TableHead>
-							<TableHead>RFID Status</TableHead>
-							<TableHead>Heart Rate (BPM)</TableHead>
-							<TableHead>Last Seen</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{runnerStatus.map((runner) => (
-							<TableRow key={runner.bibNumber}>
-								<TableCell className='font-medium'>
-									{runner.bibNumber}
-								</TableCell>
-								<TableCell>{runner.name}</TableCell>
-								<TableCell>
-									<Badge className='bg-teal-500/20 text-teal-700 dark:text-teal-300'>
-										{runner.rfidStatus}
-									</Badge>
-								</TableCell>
-								<TableCell>
-									<div className='flex items-center gap-2'>
-										<Activity className='w-4 h-4 text-red-500' />
-										<span className='font-mono'>{runner.heartRate}</span>
-									</div>
-								</TableCell>
-								<TableCell className='text-muted-foreground'>
-									{runner.lastSeen}
-								</TableCell>
+				<div className='rounded-xl border border-border overflow-hidden'>
+					<Table>
+						<TableHeader>
+							<TableRow className="bg-muted/30">
+								<TableHead className="font-semibold">Bib #</TableHead>
+								<TableHead className="font-semibold">Name</TableHead>
+								<TableHead className="font-semibold">RFID Status</TableHead>
+								<TableHead className="font-semibold">Heart Rate (BPM)</TableHead>
+								<TableHead className="font-semibold">Last Seen</TableHead>
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+						</TableHeader>
+						<TableBody>
+							{runnerStatus.map((runner) => (
+								<TableRow key={runner.bibNumber} className="hover:bg-muted/30 transition-colors">
+									<TableCell className='font-medium'>
+										{runner.bibNumber}
+									</TableCell>
+									<TableCell>{runner.name}</TableCell>
+									<TableCell>
+										<Badge className='bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-0 uppercase tracking-wider text-[10px]'>
+											{runner.rfidStatus}
+										</Badge>
+									</TableCell>
+									<TableCell>
+										<div className='flex items-center gap-2'>
+											<Activity className='w-4 h-4 text-red-500' />
+											<span className='font-mono'>{runner.heartRate}</span>
+										</div>
+									</TableCell>
+									<TableCell className='text-muted-foreground'>
+										{runner.lastSeen}
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
 			</CardContent>
 		</Card>
 	);

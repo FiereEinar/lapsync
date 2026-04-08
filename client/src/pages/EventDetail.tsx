@@ -68,50 +68,51 @@ export default function EventDetail() {
       )}
 
       <Tabs defaultValue='participants' className='w-full'>
-        <TabsList className='grid w-full grid-cols-6'>
-          <TabsTrigger value='participants'>
+        <TabsList className='grid w-full grid-cols-3 md:grid-cols-6 rounded-xl h-auto p-1 mb-6'>
+          <TabsTrigger value='participants' className='rounded-lg py-2'>
             <Users className='w-4 h-4 mr-2' />
             Participants
           </TabsTrigger>
-          <TabsTrigger value='pending'>
+          <TabsTrigger value='pending' className='rounded-lg py-2'>
             <CreditCard className='w-4 h-4 mr-2' />
-            Pending Payments
+            Pending
             {pendingCount > 0 && (
               <Badge
                 variant='destructive'
-                className='ml-2 flex items-center justify-center size-5 shrink-0 rounded-full p-0 text-xs'
+                className='ml-2 flex items-center justify-center size-5 shrink-0 rounded-full p-0 text-[10px] font-bold'
               >
                 {pendingCount}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value='map'>
+          <TabsTrigger value='map' className='rounded-lg py-2'>
             <MapPin className='w-4 h-4 mr-2' />
             Map Track
           </TabsTrigger>
-          <TabsTrigger value='leaderboard'>
+          <TabsTrigger value='leaderboard' className='rounded-lg py-2'>
             <Trophy className='w-4 h-4 mr-2' />
             Leaderboard
           </TabsTrigger>
-          <TabsTrigger value='checkin'>
+          <TabsTrigger value='checkin' className='rounded-lg py-2'>
             <Radio className='w-4 h-4 mr-2' />
             Check-in
             {notCheckedInCount > 0 && (
               <Badge
                 variant='destructive'
-                className='ml-2 flex items-center justify-center size-5 shrink-0 rounded-full p-0 text-xs'
+                className='ml-2 flex items-center justify-center size-4 shrink-0 rounded-full p-0 text-[10px] font-bold'
               >
                 {notCheckedInCount}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value='status'>
+          <TabsTrigger value='status' className='rounded-lg py-2'>
             <Activity className='w-4 h-4 mr-2' />
             Runner Status
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value='participants' className='space-y-4'>
+
           {eventDetail && <Participants event={eventDetail} />}
         </TabsContent>
 

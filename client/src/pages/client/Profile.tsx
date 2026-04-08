@@ -1,19 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { User, Mail, Phone, Calendar, Radio, Bell } from 'lucide-react';
+import { Trophy, CalendarCheck, Radio, Bell, AlertTriangle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import EditProfile from '@/components/EditProfile';
+import { useUserStore } from '@/stores/user';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '@/api/axios';
+import { QUERY_KEYS } from '@/constants';
+import { Registration } from '@/types/registration';
+import { format } from 'date-fns';
+import { StatusBadge } from '@/components/StatusBadge';
 
 export default function Profile() {
-	const profile = {
-		name: 'Alex Runner',
-		email: 'alex.runner@example.com',
-		phone: '+1 (555) 123-4567',
-		memberSince: 'Dec 2023',
-	};
+	const { user } = useUserStore((state) => state);
+
+	const { data: userRegistrations = [] } = useQuery({
+		queryKey: [QUERY_KEYS.REGISTRATIONS, user?._id],
+		queryFn: async (): Promise<Registration[]> => {
+			const { data } = await axiosInstance.get(`/registration`, {
+				params: { user: user?._id },
+			});
+			return Array.isArray(data.data) ? data.data : [];
+		},
+		enabled: !!user?._id,
+	});
 
 	const hardwareHistory = [
 		{
@@ -36,27 +47,33 @@ export default function Profile() {
 		},
 	];
 
-	const registeredEvents = [
-		{ name: 'City Marathon 2024', date: 'Jan 15, 2024', status: 'Active' },
-		{ name: 'Trail Run Challenge', date: 'Jan 22, 2024', status: 'Registered' },
-	];
-
 	return (
 		<div className='space-y-6 animate-appear'>
-			<div>
-				<h1 className='text-3xl font-bold text-foreground'>My Profile</h1>
-				<p className='text-muted-foreground mt-2'>
-					Manage your account and preferences
-				</p>
+			{/* Hero Section */}
+			<div className='relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/10 p-6 md:p-8'>
+				<div className='absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
+				<div className='relative'>
+					<p className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
+						Account
+					</p>
+					<h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>
+						My Profile
+					</h1>
+					<p className='text-muted-foreground mt-1.5 text-sm'>
+						Manage your account details and notification preferences
+					</p>
+				</div>
 			</div>
 
 			<div className='grid gap-6 md:grid-cols-2'>
 				<EditProfile />
 
-				<Card>
+				<Card className='rounded-xl border border-border shadow-sm'>
 					<CardHeader>
 						<CardTitle className='flex items-center gap-2'>
-							<Bell className='w-5 h-5 text-primary' />
+							<div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+								<Bell className='w-4 h-4 text-primary' />
+							</div>
 							Notification Preferences
 						</CardTitle>
 					</CardHeader>
@@ -64,7 +81,7 @@ export default function Profile() {
 						<div className='flex items-center justify-between'>
 							<div className='space-y-0.5'>
 								<Label>Event Reminders</Label>
-								<p className='text-sm text-muted-foreground'>
+								<p className='text-xs text-muted-foreground'>
 									Get notified before events
 								</p>
 							</div>
@@ -73,7 +90,7 @@ export default function Profile() {
 						<div className='flex items-center justify-between'>
 							<div className='space-y-0.5'>
 								<Label>Race Updates</Label>
-								<p className='text-sm text-muted-foreground'>
+								<p className='text-xs text-muted-foreground'>
 									Live updates during races
 								</p>
 							</div>
@@ -82,7 +99,7 @@ export default function Profile() {
 						<div className='flex items-center justify-between'>
 							<div className='space-y-0.5'>
 								<Label>Hardware Notifications</Label>
-								<p className='text-sm text-muted-foreground'>
+								<p className='text-xs text-muted-foreground'>
 									Device pickup reminders
 								</p>
 							</div>
@@ -91,7 +108,7 @@ export default function Profile() {
 						<div className='flex items-center justify-between'>
 							<div className='space-y-0.5'>
 								<Label>Results & Leaderboards</Label>
-								<p className='text-sm text-muted-foreground'>
+								<p className='text-xs text-muted-foreground'>
 									When results are published
 								</p>
 							</div>
@@ -100,7 +117,7 @@ export default function Profile() {
 						<div className='flex items-center justify-between'>
 							<div className='space-y-0.5'>
 								<Label>Marketing Emails</Label>
-								<p className='text-sm text-muted-foreground'>
+								<p className='text-xs text-muted-foreground'>
 									News and promotions
 								</p>
 							</div>
@@ -110,78 +127,97 @@ export default function Profile() {
 				</Card>
 			</div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Registered Events</CardTitle>
-				</CardHeader>
-				<CardContent className='space-y-3'>
-					{registeredEvents.map((event, index) => (
-						<div
-							key={index}
-							className='flex items-center justify-between p-3 border border-border rounded-lg'
-						>
-							<div>
-								<p className='font-medium'>{event.name}</p>
-								<p className='text-sm text-muted-foreground'>{event.date}</p>
+			<div className='grid gap-6 md:grid-cols-2'>
+				{/* Registrations */}
+				<Card className='rounded-xl border border-border shadow-sm flex flex-col'>
+					<CardHeader>
+						<CardTitle className='flex items-center gap-2'>
+							<div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+								<Trophy className='w-4 h-4 text-primary' />
 							</div>
-							<Badge
-								variant={event.status === 'Active' ? 'default' : 'secondary'}
-								className={
-									event.status === 'Active'
-										? 'bg-teal-500/20 text-teal-700 dark:text-teal-300'
-										: ''
-								}
-							>
-								{event.status}
-							</Badge>
-						</div>
-					))}
-				</CardContent>
-			</Card>
+							My Registrations
+						</CardTitle>
+					</CardHeader>
+					<CardContent className='space-y-3 flex-1'>
+						{userRegistrations.length === 0 ? (
+							<div className='text-center py-8'>
+								<CalendarCheck className='w-10 h-10 text-muted-foreground/50 mx-auto mb-3' />
+								<p className='text-muted-foreground text-sm'>No registrations yet</p>
+							</div>
+						) : (
+							userRegistrations.map((reg) => (
+								<div
+									key={reg._id}
+									className='flex items-center justify-between p-3 border border-border rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors'
+								>
+									<div>
+										<p className='font-medium text-sm'>{reg.event?.name || '--'}</p>
+										<p className='text-xs text-muted-foreground mt-0.5'>
+											{reg.event?.date ? format(new Date(reg.event.date), "MMM d, yyyy") : '--'}
+											{reg.raceCategory && ` • ${reg.raceCategory.name}`}
+										</p>
+									</div>
+									<StatusBadge status={reg.status} />
+								</div>
+							))
+						)}
+					</CardContent>
+				</Card>
 
-			<Card>
+				{/* Hardware History */}
+				<Card className='rounded-xl border border-border shadow-sm flex flex-col'>
+					<CardHeader>
+						<CardTitle className='flex items-center gap-2'>
+							<div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+								<Radio className='w-4 h-4 text-primary' />
+							</div>
+							Hardware History
+						</CardTitle>
+					</CardHeader>
+					<CardContent className='space-y-3 flex-1'>
+						{hardwareHistory.map((item, index) => (
+							<div
+								key={index}
+								className='flex items-center justify-between p-3 border border-border rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors'
+							>
+								<div className='space-y-0.5'>
+									<p className='font-medium text-sm'>{item.device}</p>
+									<p className='text-xs text-muted-foreground'>
+										{item.event} • {item.date}
+									</p>
+								</div>
+								<span
+									className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
+										item.status === 'In Use'
+											? 'bg-primary/10 text-primary'
+											: 'bg-muted text-muted-foreground'
+									}`}
+								>
+									{item.status}
+								</span>
+							</div>
+						))}
+					</CardContent>
+				</Card>
+			</div>
+
+			<Card className='rounded-xl border border-destructive/20 bg-destructive/5 shadow-none'>
 				<CardHeader>
-					<CardTitle className='flex items-center gap-2'>
-						<Radio className='w-5 h-5 text-primary' />
-						Hardware Assignment History
+					<CardTitle className='text-destructive flex items-center gap-2'>
+						<AlertTriangle className='w-5 h-5' />
+						Danger Zone
 					</CardTitle>
-				</CardHeader>
-				<CardContent className='space-y-3'>
-					{hardwareHistory.map((item, index) => (
-						<div
-							key={index}
-							className='flex items-center justify-between p-3 border border-border rounded-lg'
-						>
-							<div className='space-y-1'>
-								<p className='font-medium'>{item.event}</p>
-								<p className='text-sm text-muted-foreground'>{item.device}</p>
-								<p className='text-xs text-muted-foreground'>{item.date}</p>
-							</div>
-							<Badge
-								variant={item.status === 'In Use' ? 'default' : 'secondary'}
-								className={
-									item.status === 'In Use'
-										? 'bg-teal-500/20 text-teal-700 dark:text-teal-300'
-										: ''
-								}
-							>
-								{item.status}
-							</Badge>
-						</div>
-					))}
-				</CardContent>
-			</Card>
-
-			<Card className='border-destructive/50'>
-				<CardHeader>
-					<CardTitle className='text-destructive'>Danger Zone</CardTitle>
 				</CardHeader>
 				<CardContent className='space-y-4'>
 					<p className='text-sm text-muted-foreground'>
-						Once you delete your account, there is no going back. Please be
-						certain.
+						Once you delete your account, there is no going back. All of your historical data, registrations, and leaderboard records will be permanently erased.
 					</p>
-					<Button variant='destructive'>Delete Account</Button>
+					<Button
+						variant='destructive'
+						className='rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground'
+					>
+						Delete Account
+					</Button>
 				</CardContent>
 			</Card>
 		</div>

@@ -50,11 +50,13 @@ export default function Participants({ event }: ParticipantsProps) {
   );
 
   return (
-    <Card>
+    <Card className='rounded-xl border border-border shadow-sm'>
       <CardHeader>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
-          <CardTitle className='flex items-center gap-2'>
-            <Users className='w-5 h-5 ' />
+          <CardTitle className='flex items-center gap-2 text-xl'>
+            <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
+              <Users className='w-5 h-5 text-primary' />
+            </div>
             Manage Registrations
           </CardTitle>
           <div className='flex items-center gap-2'>
@@ -62,34 +64,34 @@ export default function Participants({ event }: ParticipantsProps) {
               <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
               <Input
                 placeholder='Search participants...'
-                className='pl-9 w-[250px]'
+                className='pl-9 w-[250px] rounded-xl'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            {/* <RegisterEventDialog event={event} /> */}
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Bib #</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Device Name</TableHead>
-              <TableHead>Device ID</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className='text-right'>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredParticipants &&
-              filteredParticipants.map((participant) => (
-                <TableRow key={participant._id}>
+        <div className='rounded-xl border border-border overflow-hidden'>
+          <Table>
+            <TableHeader>
+              <TableRow className='bg-muted/30'>
+                <TableHead className='font-semibold'>Bib #</TableHead>
+                <TableHead className='font-semibold'>Name</TableHead>
+                <TableHead className='font-semibold'>Email</TableHead>
+                <TableHead className='font-semibold'>Category</TableHead>
+                <TableHead className='font-semibold'>Device Name</TableHead>
+                <TableHead className='font-semibold'>Device ID</TableHead>
+                <TableHead className='font-semibold'>Phone</TableHead>
+                <TableHead className='font-semibold'>Status</TableHead>
+                <TableHead className='text-right font-semibold'>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredParticipants &&
+                filteredParticipants.map((participant) => (
+                  <TableRow key={participant._id} className='hover:bg-muted/30 transition-colors'>
                   <TableCell className='font-medium'>
                     {participant.bibNumber}
                   </TableCell>
@@ -137,7 +139,8 @@ export default function Participants({ event }: ParticipantsProps) {
               </TableRow>
             )}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

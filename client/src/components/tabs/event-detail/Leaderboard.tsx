@@ -119,21 +119,23 @@ export default function Leaderboard({ event }: LeaderboardProps) {
   const runningCount = results.filter((r) => r.status === "running").length;
 
   return (
-    <Card>
+    <Card className='rounded-xl border border-border shadow-sm'>
       <CardHeader>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
           <div>
-            <CardTitle className='flex items-center gap-2'>
-              <Trophy className='w-5 h-5 text-yellow-500' />
+            <CardTitle className='flex items-center gap-2 text-xl'>
+              <div className='w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center'>
+                <Trophy className='w-5 h-5 text-yellow-500' />
+              </div>
               Live Leaderboard
             </CardTitle>
-            <p className='text-sm text-muted-foreground mt-1'>
+            <p className='text-sm text-muted-foreground mt-2 pl-12'>
               {finishedCount} finished · {runningCount} running ·{" "}
               {results.length} total
             </p>
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className='w-[200px]'>
+            <SelectTrigger className='w-[200px] rounded-xl'>
               <SelectValue placeholder='All Categories' />
             </SelectTrigger>
             <SelectContent>
@@ -148,20 +150,21 @@ export default function Leaderboard({ event }: LeaderboardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className='w-[80px]'>Rank</TableHead>
-              <TableHead>Bib #</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Start</TableHead>
-              <TableHead>Finish</TableHead>
-              {/* <TableHead>Checkpoints</TableHead> */}
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
+        <div className='rounded-xl border border-border overflow-hidden'>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30">
+                <TableHead className='w-[80px] font-semibold'>Rank</TableHead>
+                <TableHead className="font-semibold">Bib #</TableHead>
+                <TableHead className="font-semibold">Name</TableHead>
+                <TableHead className="font-semibold">Category</TableHead>
+                <TableHead className="font-semibold">Time</TableHead>
+                <TableHead className="font-semibold">Start</TableHead>
+                <TableHead className="font-semibold">Finish</TableHead>
+                {/* <TableHead>Checkpoints</TableHead> */}
+                <TableHead className="font-semibold">Status</TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {results &&
               results.map((result, index) => {
@@ -170,7 +173,7 @@ export default function Leaderboard({ event }: LeaderboardProps) {
                   statusConfig[result.status] ?? statusConfig.not_started;
 
                 return (
-                  <TableRow key={result._id}>
+                  <TableRow key={result._id} className="hover:bg-muted/30 transition-colors">
                     <TableCell>
                       <div className='flex items-center gap-2'>
                         {result.rank === 1 && (
@@ -199,30 +202,18 @@ export default function Leaderboard({ event }: LeaderboardProps) {
                     <TableCell className='font-mono'>
                       {formatElapsed(result.elapsedMs)}
                     </TableCell>
-                    <TableCell className='font-mono'>
+                    <TableCell className='font-mono text-xs text-muted-foreground'>
                       {result.startTime
                         ? format(new Date(result.startTime), "HH:mm:ss")
                         : "--"}
                     </TableCell>
-                    <TableCell className='font-mono'>
+                    <TableCell className='font-mono text-xs text-muted-foreground'>
                       {result.finishTime
                         ? format(new Date(result.finishTime), "HH:mm:ss")
                         : "--"}
                     </TableCell>
-                    {/* <TableCell>
-                      {result.checkpoints.length > 0 ? (
-                        <Badge variant='outline'>
-                          {
-                            result.checkpoints[result.checkpoints.length - 1]
-                              .name
-                          }
-                        </Badge>
-                      ) : (
-                        <span className='text-muted-foreground'>--</span>
-                      )}
-                    </TableCell> */}
                     <TableCell>
-                      <Badge variant='outline' className={cfg.className}>
+                      <Badge variant='outline' className={`${cfg.className} border-0 uppercase tracking-wider text-[10px]`}>
                         {cfg.icon}
                         {cfg.label}
                       </Badge>
@@ -242,7 +233,8 @@ export default function Leaderboard({ event }: LeaderboardProps) {
               </TableRow>
             )}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

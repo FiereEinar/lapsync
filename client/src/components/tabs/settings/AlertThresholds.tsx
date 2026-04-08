@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, Heart, Zap, Save, RotateCcw } from "lucide-react";
+import { AlertCircle, Heart, Zap, Save, RotateCcw, Loader2 } from "lucide-react";
 
 interface SettingsData {
   heartRateMax: number;
@@ -80,14 +80,16 @@ export default function AlertThresholds() {
   };
 
   if (isLoading) {
-    return <div className="text-muted-foreground text-center py-8">Loading settings...</div>;
+    return <div className="flex items-center justify-center py-12 text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin" /></div>;
   }
 
   return (
-    <Card>
+    <Card className="rounded-xl border border-border shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 text-destructive" />
+        <CardTitle className="flex items-center gap-2 text-xl">
+          <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+          </div>
           Alert Threshold Configuration
         </CardTitle>
         <CardDescription>
@@ -112,6 +114,7 @@ export default function AlertThresholds() {
                 type="number"
                 value={formData.heartRateMax}
                 onChange={(e) => handleChange("heartRateMax", e.target.value)}
+                className="rounded-xl"
               />
               <p className="text-xs text-muted-foreground">
                 Alert triggers when HR exceeds this limit (tachycardia zone)
@@ -124,6 +127,7 @@ export default function AlertThresholds() {
                 type="number"
                 value={formData.heartRateMin}
                 onChange={(e) => handleChange("heartRateMin", e.target.value)}
+                className="rounded-xl"
               />
               <p className="text-xs text-muted-foreground">
                 Alert triggers when HR drops below this limit (bradycardia zone)
@@ -148,7 +152,7 @@ export default function AlertThresholds() {
               type="number"
               value={formData.emgCrampThreshold}
               onChange={(e) => handleChange("emgCrampThreshold", e.target.value)}
-              className="max-w-xs"
+              className="max-w-xs rounded-xl"
             />
             <p className="text-xs text-muted-foreground">
               Alert triggers when EMG reading exceeds this value, indicating
@@ -164,16 +168,16 @@ export default function AlertThresholds() {
           <Button
             onClick={() => updateMutation.mutate(formData)}
             disabled={!hasChanges || updateMutation.isPending}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20"
           >
-            <Save className="w-4 h-4" />
+            {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {updateMutation.isPending ? "Saving..." : "Save Thresholds"}
           </Button>
           <Button
             variant="outline"
             onClick={handleReset}
             disabled={!hasChanges}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-xl"
           >
             <RotateCcw className="w-4 h-4" />
             Reset

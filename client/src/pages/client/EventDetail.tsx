@@ -122,10 +122,12 @@ export default function ClientEventDetail() {
       )}
 
       <div className='grid gap-6 md:grid-cols-2'>
-        <Card className='border-border'>
+        <Card className='rounded-xl border border-border shadow-sm'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <CheckCircle className='w-5 h-5 text-teal-500' />
+              <div className='w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center'>
+                <CheckCircle className='w-4 h-4 text-teal-500' />
+              </div>
               Registration Status
             </CardTitle>
           </CardHeader>
@@ -133,12 +135,12 @@ export default function ClientEventDetail() {
             <div>
               {registration ? (
                 <Badge
-                  className={`uppercase ${registration.status === "confirmed" ? "bg-teal-500/20 text-teal-700 dark:text-teal-300" : "bg-amber-500/20 text-amber-700 dark:text-amber-300"}`}
+                  className={`uppercase tracking-wider border-0 ${registration.status === "confirmed" ? "bg-teal-500/15 text-teal-700 dark:text-teal-300" : "bg-amber-500/15 text-amber-700 dark:text-amber-300"}`}
                 >
                   {registration.status}
                 </Badge>
               ) : (
-                <Badge className='bg-muted text-muted-foreground'>
+                <Badge className='bg-muted text-muted-foreground border-0'>
                   Not Registered
                 </Badge>
               )}
@@ -146,14 +148,14 @@ export default function ClientEventDetail() {
             <div className='space-y-2'>
               <p className='text-sm font-medium'>Tech Assignment</p>
               {registration?.rfidTag ? (
-                <Badge variant='outline'>
+                <Badge variant='outline' className="rounded-md">
                   RFID Tag #
                   {(registration.rfidTag as any).tagNumber || "Assigned"}
                 </Badge>
               ) : registration?.device ? (
-                <Badge variant='outline'>Device Assigned</Badge>
+                <Badge variant='outline' className="rounded-md">Device Assigned</Badge>
               ) : (
-                <Badge variant='outline' className='text-muted-foreground'>
+                <Badge variant='outline' className='text-muted-foreground bg-muted/50 rounded-md border-dashed'>
                   No Tech Assigned Yet
                 </Badge>
               )}
@@ -161,10 +163,12 @@ export default function ClientEventDetail() {
           </CardContent>
         </Card>
 
-        <Card className='border-border'>
+        <Card className='rounded-xl border border-border shadow-sm'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Radio className='w-5 h-5 text-primary' />
+              <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+                <Radio className='w-4 h-4 text-primary' />
+              </div>
               Hardware Pickup
             </CardTitle>
           </CardHeader>
@@ -181,25 +185,27 @@ export default function ClientEventDetail() {
         </Card>
       </div>
 
-      <Card>
+      <Card className='rounded-xl border border-border shadow-sm'>
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
             <div className="flex items-center gap-2">
-              <MapPin className='w-5 h-5 text-primary' />
+			  <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+                <MapPin className='w-4 h-4 text-primary' />
+              </div>
               Route & Checkpoints
             </div>
             {totalRouteDistance > 0 && checkpoints.filter(cp => cp.type !== 'waypoint').length >= 2 && (
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-sm py-1">
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-sm py-1 rounded-lg">
                 {(totalRouteDistance / 1000).toFixed(2)} km Course
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='w-full h-[500px] bg-muted rounded-lg flex items-center justify-center overflow-hidden border z-0 relative'>
+          <div className='w-full h-[500px] bg-muted/30 rounded-xl flex items-center justify-center overflow-hidden border z-0 relative'>
             {checkpoints.length === 0 ? (
               <div className='text-center text-muted-foreground'>
-                <MapPin className='w-12 h-12 mx-auto mb-2' />
+                <MapPin className='w-12 h-12 mx-auto mb-2 opacity-30' />
                 <p>Route map preview</p>
                 <p className='text-sm'>Map will be available soon</p>
               </div>
@@ -245,30 +251,30 @@ export default function ClientEventDetail() {
               .map((checkpoint, index) => (
               <div
                 key={checkpoint._id}
-                className='flex items-center justify-between p-3 border border-border rounded-lg'
+                className='flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/30 transition-colors'
               >
                 <div className='flex items-center gap-3'>
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
 										${
                       checkpoint.type === "start"
-                        ? "bg-emerald-500/10 text-emerald-600"
+                        ? "bg-emerald-500/15 text-emerald-600"
                         : checkpoint.type === "finish"
-                          ? "bg-red-500/10 text-red-600"
-                          : "bg-blue-500/10 text-blue-600"
+                          ? "bg-red-500/15 text-red-600"
+                          : "bg-blue-500/15 text-blue-600"
                     }`}
                   >
                     {index + 1}
                   </div>
                   <div>
-                    <p className='font-medium'>{checkpoint.name}</p>
+                    <p className='font-semibold'>{checkpoint.name}</p>
                     <p className='text-xs capitalize text-muted-foreground'>
                       {checkpoint.type}
                     </p>
                   </div>
                 </div>
                 <div className='text-right'>
-                  <p className='text-xs text-muted-foreground'>
+                  <p className='text-[10px] uppercase font-mono text-muted-foreground'>
                     {checkpoint.location.lat.toFixed(4)}°,{" "}
                     {checkpoint.location.lng.toFixed(4)}°
                   </p>
@@ -279,20 +285,22 @@ export default function ClientEventDetail() {
         </CardContent>
       </Card>
 
-      <Card className='border-primary/50 bg-primary/5'>
+      <Card className='rounded-xl border border-primary/20 bg-primary/5 shadow-none'>
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
-            <Info className='w-5 h-5 text-primary' />
+            <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+              <Info className='w-4 h-4 text-primary' />
+            </div>
             Event Instructions
           </CardTitle>
         </CardHeader>
-        <CardContent className='space-y-2 text-sm'>
-          <p>• Pick up your RFID tag from the equipment desk before race day</p>
-          <p>• Attach the RFID tag securely to your running bib</p>
-          <p>• Arrive at least 30 minutes before the start time</p>
-          <p>• Warm up area available at City Hall Plaza</p>
-          <p>• Water stations available at each checkpoint</p>
-          <p>• Medical support stationed along the route</p>
+        <CardContent className='space-y-2 text-sm text-foreground/80 leading-relaxed font-medium'>
+          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Pick up your RFID tag from the equipment desk before race day</p>
+          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Attach the RFID tag securely to your running bib</p>
+          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Arrive at least 30 minutes before the start time</p>
+          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Warm up area available at City Hall Plaza</p>
+          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Water stations available at each checkpoint</p>
+          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Medical support stationed along the route</p>
         </CardContent>
       </Card>
 

@@ -98,15 +98,17 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
   };
 
   return (
-    <Card>
+    <Card className='rounded-xl border border-border shadow-sm'>
       <CardHeader>
         <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
           <div>
-            <CardTitle className='flex items-center gap-2'>
-              <CreditCard className='w-5 h-5 ' />
+            <CardTitle className='flex items-center gap-2 text-xl'>
+              <div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
+                <CreditCard className='w-5 h-5 text-primary' />
+              </div>
               Pending Payments
             </CardTitle>
-            <p className='text-sm text-muted-foreground mt-1'>
+            <p className='text-sm text-muted-foreground mt-2 pl-12'>
               Registrations awaiting payment confirmation. Mark as paid for cash
               or manual payments.
             </p>
@@ -115,7 +117,7 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
             <Input
               placeholder='Search pending...'
-              className='pl-9 w-[250px]'
+              className='pl-9 w-[250px] rounded-xl'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -123,21 +125,22 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>T-Shirt</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className='text-right'>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pendingRegistrations.map((registration) => {
+        <div className='rounded-xl border border-border overflow-hidden'>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30">
+                <TableHead className="font-semibold">Name</TableHead>
+                <TableHead className="font-semibold">Email</TableHead>
+                <TableHead className="font-semibold">Phone</TableHead>
+                <TableHead className="font-semibold">Category</TableHead>
+                <TableHead className="font-semibold">T-Shirt</TableHead>
+                <TableHead className="font-semibold">Amount</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className='text-right font-semibold'>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pendingRegistrations.map((registration) => {
               const raceCategory = event.raceCategories.find(
                 (rc) =>
                   rc._id === registration.raceCategory._id ||
@@ -145,7 +148,7 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
               );
 
               return (
-                <TableRow key={registration._id}>
+                <TableRow key={registration._id} className="hover:bg-muted/30 transition-colors">
                   <TableCell className='font-medium'>
                     {registration.user.name}
                   </TableCell>
@@ -170,7 +173,7 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
                   <TableCell>
                     <Badge
                       variant='outline'
-                      className='bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                      className='bg-amber-500/15 text-amber-700 dark:text-amber-300 border-0 uppercase tracking-wider text-[10px]'
                     >
                       {registration.payment?.status === "pending"
                         ? "Payment Pending"
@@ -181,7 +184,7 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
                     <Button
                       size='sm'
                       onClick={() => openConfirmDialog(registration)}
-                      className='gap-2'
+                      className='gap-2 rounded-xl'
                     >
                       <CheckCircle className='w-4 h-4' />
                       Mark as Paid
@@ -202,14 +205,15 @@ export default function PendingPayments({ event }: PendingPaymentsProps) {
               </TableRow>
             )}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
 
         {/* Confirm Mark as Paid Dialog */}
         <Dialog
           open={isConfirmDialogOpen}
           onOpenChange={setIsConfirmDialogOpen}
         >
-          <DialogContent className='max-w-md'>
+          <DialogContent className='max-w-md rounded-2xl'>
             <DialogHeader>
               <DialogTitle>Confirm Payment</DialogTitle>
               <DialogDescription>

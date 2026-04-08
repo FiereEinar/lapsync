@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Calendar } from 'lucide-react';
+import { User, Calendar, Loader2 } from 'lucide-react';
 import { useUserStore } from '@/stores/user';
 import { format } from 'date-fns';
 import { useState } from 'react';
@@ -33,6 +33,7 @@ export default function EditProfile() {
 			});
 		} catch (err: any) {
 			toast({
+				variant: 'destructive',
 				title: 'Update failed',
 				description: err?.message ?? 'Could not update profile.',
 			});
@@ -42,10 +43,12 @@ export default function EditProfile() {
 	};
 
 	return (
-		<Card>
+		<Card className='rounded-xl border border-border shadow-sm'>
 			<CardHeader>
 				<CardTitle className='flex items-center gap-2'>
-					<User className='w-5 h-5 text-primary' />
+					<div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+						<User className='w-4 h-4 text-primary' />
+					</div>
 					Personal Information
 				</CardTitle>
 			</CardHeader>
@@ -56,6 +59,7 @@ export default function EditProfile() {
 						id='name'
 						value={name}
 						onChange={(e) => setName(e.target.value)}
+						className='rounded-xl'
 					/>
 				</div>
 				<div className='space-y-2'>
@@ -65,6 +69,7 @@ export default function EditProfile() {
 						type='email'
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
+						className='rounded-xl'
 					/>
 				</div>
 				<div className='space-y-2'>
@@ -74,6 +79,7 @@ export default function EditProfile() {
 						type='tel'
 						value={phone}
 						onChange={(e) => setPhone(e.target.value)}
+						className='rounded-xl'
 					/>
 				</div>
 				<div className='flex items-center gap-2 text-sm text-muted-foreground'>
@@ -83,7 +89,12 @@ export default function EditProfile() {
 						{user ? format(new Date(user.createdAt), 'MMM d, yyyy') : ''}
 					</span>
 				</div>
-				<Button className='w-full' onClick={handleSubmit} disabled={loading}>
+				<Button
+					className='w-max gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20'
+					onClick={handleSubmit}
+					disabled={loading}
+				>
+					{loading && <Loader2 className='w-4 h-4 animate-spin' />}
 					{loading ? 'Saving...' : 'Update Profile'}
 				</Button>
 			</CardContent>

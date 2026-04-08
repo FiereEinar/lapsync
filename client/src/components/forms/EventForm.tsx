@@ -15,6 +15,7 @@ import {
 } from "../ui/form";
 import { createEventSchema } from "@/schemas/event.schema";
 import { formatDatesForInput } from "@/lib/utils";
+import { MapPin, Calendar, Clock, Users, Plus, Trash2, Loader2 } from "lucide-react";
 
 export type EventFormValues = z.infer<typeof createEventSchema>;
 
@@ -42,139 +43,161 @@ export function EventForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-        {/* Event Info */}
-        <div className='grid grid-cols-2 gap-4'>
-          <FormField
-            control={form.control}
-            name='name'
-            render={({ field }) => (
-              <FormItem className='col-span-2'>
-                <FormLabel>Event Name</FormLabel>
-                <FormControl>
-                  <Input placeholder='City Marathon 2024' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Section: Event Info */}
+        <div className='space-y-4'>
+          <div className='flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+            <Calendar className='w-4 h-4' />
+            Event Information
+          </div>
+          <div className='grid grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem className='col-span-2'>
+                  <FormLabel>Event Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='City Marathon 2024' className='rounded-xl' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name='description'
-            render={({ field }) => (
-              <FormItem className='col-span-2'>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Input placeholder='Optional description' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name='description'
+              render={({ field }) => (
+                <FormItem className='col-span-2'>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Brief event description (optional)' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name='date'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date</FormLabel>
-                <FormControl>
-                  <Input type='date' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name='date'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input type='date' className='rounded-xl' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name='startTime'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Time</FormLabel>
-                <FormControl>
-                  <Input type='time' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name='startTime'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Time</FormLabel>
+                  <FormControl>
+                    <Input type='time' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
-        {/* Location */}
-        <div className='grid grid-cols-3 gap-4'>
-          <FormField
-            control={form.control}
-            name='location.venue'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Venue</FormLabel>
-                <FormControl>
-                  <Input placeholder='Downtown' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='location.city'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>City</FormLabel>
-                <FormControl>
-                  <Input placeholder='Davao' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='location.province'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Province</FormLabel>
-                <FormControl>
-                  <Input placeholder='Davao del Sur' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+        {/* Section: Location */}
+        <div className='space-y-4'>
+          <div className='flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+            <MapPin className='w-4 h-4' />
+            Location
+          </div>
+          <div className='grid grid-cols-3 gap-4'>
+            <FormField
+              control={form.control}
+              name='location.venue'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Venue</FormLabel>
+                  <FormControl>
+                    <Input placeholder='e.g. Downtown' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='location.city'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City</FormLabel>
+                  <FormControl>
+                    <Input placeholder='e.g. Davao' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='location.province'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Province</FormLabel>
+                  <FormControl>
+                    <Input placeholder='e.g. Davao del Sur' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
-        {/* Registration */}
-        <div className='grid grid-cols-2 gap-4'>
-          <FormField
-            control={form.control}
-            name='registration.opensAt'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Registration Opens</FormLabel>
-                <FormControl>
-                  <Input type='date' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='registration.closesAt'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Registration Closes</FormLabel>
-                <FormControl>
-                  <Input type='date' {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+        {/* Section: Registration */}
+        <div className='space-y-4'>
+          <div className='flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+            <Clock className='w-4 h-4' />
+            Registration Period
+          </div>
+          <div className='grid grid-cols-2 gap-4'>
+            <FormField
+              control={form.control}
+              name='registration.opensAt'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Opens At</FormLabel>
+                  <FormControl>
+                    <Input type='date' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='registration.closesAt'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Closes At</FormLabel>
+                  <FormControl>
+                    <Input type='date' className='rounded-xl' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
-        {/* Race Categories */}
+        {/* Section: Race Categories */}
         <div className='space-y-4'>
           <div className='flex justify-between items-center'>
-            <h4 className='font-semibold'>Race Categories</h4>
+            <div className='flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+              <Users className='w-4 h-4' />
+              Race Categories
+            </div>
             <Button
               type='button'
               variant='outline'
               size='sm'
+              className='gap-1.5 rounded-xl text-xs'
               onClick={() =>
                 append({
                   name: "",
@@ -185,101 +208,115 @@ export function EventForm({
                 })
               }
             >
+              <Plus className='w-3.5 h-3.5' />
               Add Category
             </Button>
           </div>
 
-          {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className='grid grid-cols-5 gap-3 border p-3 rounded-lg'
-            >
-              <FormField
-                control={form.control}
-                name={`raceCategories.${index}.name`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder='5K Run' {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+          <div className='space-y-3'>
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className='rounded-xl bg-muted/30 border border-border p-4 space-y-3'
+              >
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-muted-foreground uppercase tracking-wider'>
+                    Category {index + 1}
+                  </span>
+                  {fields.length > 1 && (
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => remove(index)}
+                      className='text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 p-0 rounded-lg'
+                    >
+                      <Trash2 className='w-3.5 h-3.5' />
+                    </Button>
+                  )}
+                </div>
+                <div className='grid grid-cols-5 gap-3'>
+                  <FormField
+                    control={form.control}
+                    name={`raceCategories.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs'>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder='5K Run' className='rounded-lg h-9 text-sm' {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name={`raceCategories.${index}.distanceKm`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>KM</FormLabel>
-                    <FormControl>
-                      <Input type='number' {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name={`raceCategories.${index}.distanceKm`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs'>Distance (km)</FormLabel>
+                        <FormControl>
+                          <Input type='number' className='rounded-lg h-9 text-sm' {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name={`raceCategories.${index}.cutoffTime`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cutoff</FormLabel>
-                    <FormControl>
-                      <Input type='number' placeholder='min' {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name={`raceCategories.${index}.cutoffTime`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs'>Cutoff (min)</FormLabel>
+                        <FormControl>
+                          <Input type='number' placeholder='min' className='rounded-lg h-9 text-sm' {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name={`raceCategories.${index}.price`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input type='number' {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name={`raceCategories.${index}.price`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs'>Price</FormLabel>
+                        <FormControl>
+                          <Input type='number' className='rounded-lg h-9 text-sm' {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name={`raceCategories.${index}.slots`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Slots</FormLabel>
-                    <FormControl>
-                      <Input type='number' {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {fields.length > 1 && (
-                <Button
-                  type='button'
-                  variant='link'
-                  size='sm'
-                  onClick={() => remove(index)}
-                  className='col-span-5 text-red-500'
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-          ))}
+                  <FormField
+                    control={form.control}
+                    name={`raceCategories.${index}.slots`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs'>Slots</FormLabel>
+                        <FormControl>
+                          <Input type='number' className='rounded-lg h-9 text-sm' {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className='gap-2 pt-2'>
           <DialogClose asChild>
-            <Button variant='outline'>Cancel</Button>
+            <Button variant='outline' className='rounded-xl'>Cancel</Button>
           </DialogClose>
 
-          <Button disabled={form.formState.isSubmitting} type='submit'>
+          <Button
+            disabled={form.formState.isSubmitting}
+            type='submit'
+            className='rounded-xl gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20'
+          >
+            {form.formState.isSubmitting && <Loader2 className='w-4 h-4 animate-spin' />}
             {submitLabel}
           </Button>
         </DialogFooter>

@@ -15,6 +15,7 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import SidebarLink from "./sidebars/SidebarLink";
 import LogoutButton from "./buttons/LogoutButton";
@@ -64,12 +65,17 @@ export function AppSidebar() {
                 {menuItems.map((item) => (
                   <SidebarLink key={item.title} item={item} />
                 ))}
-                <LogoutButton />
               </>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className='p-4 border-t border-sidebar-border mt-auto'>
+        <SidebarMenu>
+          <LogoutButton />
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

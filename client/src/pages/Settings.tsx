@@ -19,28 +19,37 @@ import { User, Settings2, AlertCircle, Cpu } from 'lucide-react';
 export default function Settings() {
 	return (
 		<div className='space-y-6 max-w-4xl animate-appear'>
-			<div>
-				<h1 className='text-3xl font-bold text-foreground mb-2'>Settings</h1>
-				<p className='text-muted-foreground'>
-					Manage your application preferences
-				</p>
+			{/* Hero Section */}
+			<div className='relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/10 p-6 md:p-8'>
+				<div className='absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
+				<div className='relative'>
+					<p className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
+						System
+					</p>
+					<h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>
+						Settings
+					</h1>
+					<p className='text-muted-foreground mt-1.5 text-sm'>
+						Manage your application preferences
+					</p>
+				</div>
 			</div>
 
 			<Tabs defaultValue='profile' className='w-full'>
-				<TabsList className='grid w-full grid-cols-4'>
-					<TabsTrigger value='profile' className='flex items-center gap-2'>
+				<TabsList className='grid w-full grid-cols-4 rounded-xl'>
+					<TabsTrigger value='profile' className='flex items-center gap-2 rounded-lg'>
 						<User className='w-4 h-4' />
 						Profile
 					</TabsTrigger>
-					<TabsTrigger value='preferences' className='flex items-center gap-2'>
+					<TabsTrigger value='preferences' className='flex items-center gap-2 rounded-lg'>
 						<Settings2 className='w-4 h-4' />
 						Preferences
 					</TabsTrigger>
-					<TabsTrigger value='hardware' className='flex items-center gap-2'>
+					<TabsTrigger value='hardware' className='flex items-center gap-2 rounded-lg'>
 						<Cpu className='w-4 h-4' />
 						Hardware
 					</TabsTrigger>
-					<TabsTrigger value='thresholds' className='flex items-center gap-2'>
+					<TabsTrigger value='thresholds' className='flex items-center gap-2 rounded-lg'>
 						<AlertCircle className='w-4 h-4' />
 						Alert Thresholds
 					</TabsTrigger>
@@ -51,7 +60,7 @@ export default function Settings() {
 				</TabsContent>
 
 				<TabsContent value='preferences' className='mt-6'>
-					<Card>
+					<Card className='rounded-xl border border-border shadow-sm'>
 						<CardHeader>
 							<CardTitle>Event Preferences</CardTitle>
 							<CardDescription>Configure default event settings</CardDescription>
@@ -91,7 +100,7 @@ export default function Settings() {
 				</TabsContent>
 
 				<TabsContent value='hardware' className='mt-6'>
-					<Card>
+					<Card className='rounded-xl border border-border shadow-sm'>
 						<CardHeader>
 							<CardTitle>Hardware Configuration</CardTitle>
 							<CardDescription>
@@ -101,15 +110,17 @@ export default function Settings() {
 						<CardContent className='space-y-4'>
 							<div className='space-y-2'>
 								<Label htmlFor='rfid-prefix'>RFID Tag Prefix</Label>
-								<Input id='rfid-prefix' defaultValue='LS-' />
+								<Input id='rfid-prefix' defaultValue='LS-' className='rounded-xl' />
 							</div>
 							<div className='space-y-2'>
 								<Label htmlFor='checkpoint-interval'>
 									Checkpoint Check Interval (seconds)
 								</Label>
-								<Input id='checkpoint-interval' type='number' defaultValue='5' />
+								<Input id='checkpoint-interval' type='number' defaultValue='5' className='rounded-xl' />
 							</div>
-							<Button>Update Configuration</Button>
+							<Button className='rounded-xl gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20'>
+								Update Configuration
+							</Button>
 						</CardContent>
 					</Card>
 				</TabsContent>

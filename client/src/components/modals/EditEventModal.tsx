@@ -12,6 +12,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Event } from '@/types/event';
+import { Calendar } from 'lucide-react';
 
 type EditEventDialogProps = {
 	event: Event;
@@ -40,6 +41,7 @@ export function EditEventDialog({
 			await queryClient.invalidateQueries({
 				queryKey: [QUERY_KEYS.EVENT],
 			});
+			onOpenChange(false);
 		} catch (error) {
 			console.error('Error updating event:', error);
 			toast({
@@ -57,12 +59,19 @@ export function EditEventDialog({
 				<Dialog open={open} onOpenChange={onOpenChange}>
 					<DialogTrigger asChild>{trigger ? trigger : null}</DialogTrigger>
 
-					<DialogContent className='max-w-3xl max-h-[90vh] overflow-y-auto'>
-						<DialogHeader>
-							<DialogTitle>Edit Event</DialogTitle>
-							<DialogDescription>
-								Edit the event details below.
-							</DialogDescription>
+					<DialogContent className='max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl'>
+						<DialogHeader className='space-y-3 pb-2'>
+							<div className='flex items-center gap-3'>
+								<div className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
+									<Calendar className='w-5 h-5 text-primary' />
+								</div>
+								<div>
+									<DialogTitle className='text-xl'>Edit Event</DialogTitle>
+									<DialogDescription>
+										Update the event details below.
+									</DialogDescription>
+								</div>
+							</div>
 						</DialogHeader>
 
 						<EventForm
@@ -76,3 +85,4 @@ export function EditEventDialog({
 		</>
 	);
 }
+

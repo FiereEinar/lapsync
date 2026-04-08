@@ -31,16 +31,16 @@ export default function MapTrack() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-card p-4 rounded-xl border border-border shadow-sm gap-4">
         <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)}>
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="replay">Replay</TabsTrigger>
-            <TabsTrigger value="live">Live</TabsTrigger>
-            <TabsTrigger value="checkpoints">Checkpoints</TabsTrigger>
+          <TabsList className="grid w-full sm:w-auto min-w-[300px] grid-cols-3 rounded-xl p-1 h-auto">
+            <TabsTrigger value="replay" className="rounded-lg py-1.5">Replay</TabsTrigger>
+            <TabsTrigger value="live" className="rounded-lg py-1.5">Live</TabsTrigger>
+            <TabsTrigger value="checkpoints" className="rounded-lg py-1.5">Checkpoints</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <Button onClick={handleExport} variant="outline" className="flex items-center gap-2">
+        <Button onClick={handleExport} variant="outline" className="flex items-center gap-2 rounded-xl">
           <Download className="w-4 h-4" />
           Export Telemetry (CSV)
         </Button>
