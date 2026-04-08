@@ -6,24 +6,24 @@ interface BadgeProps extends ViewProps {
 }
 
 export const Badge = ({ children, variant = 'default', className = '', ...props }: BadgeProps) => {
-  let baseClass = 'px-2.5 py-0.5 rounded-full items-center justify-center border';
-  let textClass = 'text-xs font-semibold tracking-tight';
+  let baseClass = 'px-2.5 py-1 rounded-lg items-center justify-center';
+  let textClass = 'text-[10px] font-bold tracking-wider uppercase';
 
   if (variant === 'default') {
-    baseClass += ' bg-primary border-transparent';
-    textClass += ' text-primary-foreground';
+    baseClass += ' bg-primary/15';
+    textClass += ' text-primary';
   } else if (variant === 'secondary') {
-    baseClass += ' bg-secondary border-transparent';
+    baseClass += ' bg-secondary';
     textClass += ' text-secondary-foreground';
   } else if (variant === 'destructive') {
-    baseClass += ' bg-destructive border-transparent';
-    textClass += ' text-destructive-foreground';
+    baseClass += ' bg-destructive/15';
+    textClass += ' text-destructive';
   } else if (variant === 'outline') {
-    baseClass += ' border-border bg-transparent';
+    baseClass += ' border border-border bg-transparent';
     textClass += ' text-foreground';
   } else if (variant === 'success') {
-    baseClass += ' bg-success border-transparent';
-    textClass += ' text-success-foreground';
+    baseClass += ' bg-success/15';
+    textClass += ' text-success';
   }
 
   return (

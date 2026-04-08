@@ -1,187 +1,333 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Radio, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Calendar,
+  MapPin,
+  Radio,
+  Zap,
+  ChevronRight,
+  Trophy,
+  Cpu,
+  Activity,
+  CalendarCheck,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "@/api/axios";
+import { Event } from "@/types/event";
+import { Registration } from "@/types/registration";
+import { QUERY_KEYS } from "@/constants";
+import { useUserStore } from "@/stores/user";
+import { format } from "date-fns";
+import { StatusBadge } from "@/components/StatusBadge";
 
 export default function ClientHome() {
-	const upcomingEvents = [
-		{
-			id: 1,
-			name: 'City Marathon 2024',
-			date: 'Jan 15, 2024',
-			distance: '42.2 km',
-			status: 'registered',
-		},
-		{
-			id: 2,
-			name: 'Trail Run Challenge',
-			date: 'Jan 22, 2024',
-			distance: '21 km',
-			status: 'pending',
-		},
-	];
+  const { user } = useUserStore((state) => state);
 
-	const activeEvent = {
-		id: 1,
-		name: 'City Marathon 2024',
-		date: 'Jan 15, 2024',
-		techStatus: 'RFID tag assigned',
-	};
+  const { data: events = [] } = useQuery({
+    queryKey: [QUERY_KEYS.EVENT],
+    queryFn: async (): Promise<Event[]> => {
+      const { data } = await axiosInstance.get("/event");
+      return data.data;
+    },
+  });
 
-	const hardwareStatus = {
-		rfidTag: 'Assigned - #12345',
-		node: 'Available for pickup',
-	};
+  const { data: userRegistrations = [] } = useQuery({
+    queryKey: [QUERY_KEYS.REGISTRATIONS, user?._id],
+    queryFn: async (): Promise<Registration[]> => {
+      const { data } = await axiosInstance.get(`/registration`, {
+        params: { user: user?._id },
+      });
+      return Array.isArray(data.data) ? data.data : [];
+    },
+    enabled: !!user?._id,
+  });
 
-	return (
-		<div className='space-y-6 animate-appear'>
-			<div>
-				<h1 className='text-3xl font-bold text-foreground'>
-					Welcome Back, Runner!
-				</h1>
-				<p className='text-muted-foreground mt-2'>
-					Track your events and performance
-				</p>
-			</div>
+  const registeredCount = userRegistrations.length;
+  const activeRegistrations = userRegistrations.filter(
+    (r) => r.event?.status === "active"
+  );
+  const upcomingRegistrations = userRegistrations.filter(
+    (r) => r.event?.status === "upcoming"
+  );
 
-			<div className='grid gap-6 md:grid-cols-3'>
-				<Card className='border-border'>
-					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-						<CardTitle className='text-sm font-medium'>
-							Registered Events
-						</CardTitle>
-						<Calendar className='h-4 w-4 text-primary' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold'>2</div>
-						<p className='text-xs text-muted-foreground'>
-							1 upcoming, 1 pending
-						</p>
-					</CardContent>
-				</Card>
+  const upcomingEvents = events
+    .filter((e) => e.status === "upcoming")
+    .slice(0, 3);
 
-				<Card className='border-border'>
-					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-						<CardTitle className='text-sm font-medium'>
-							Hardware Status
-						</CardTitle>
-						<Radio className='h-4 w-4 text-primary' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold'>Ready</div>
-						<p className='text-xs text-muted-foreground'>RFID tag assigned</p>
-					</CardContent>
-				</Card>
+  return (
+    <div className='space-y-6 animate-appear'>
+      {/* Hero Section */}
+      <div className='relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/10 p-6 md:p-8'>
+        <div className='absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
+        <div className='relative'>
+          <p className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
+            Home
+          </p>
+          <h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>
+            Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}!
+          </h1>
+          <p className='text-muted-foreground mt-1.5 text-sm'>
+            Track your events and performance
+          </p>
+        </div>
+      </div>
 
-				<Card className='border-border'>
-					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-						<CardTitle className='text-sm font-medium'>Active Event</CardTitle>
-						<Zap className='h-4 w-4 text-primary' />
-					</CardHeader>
-					<CardContent>
-						<div className='text-2xl font-bold'>1</div>
-						<p className='text-xs text-muted-foreground'>City Marathon 2024</p>
-					</CardContent>
-				</Card>
-			</div>
+      {/* Quick Stats */}
+      <div className='grid gap-4 md:grid-cols-3'>
+        {/* Registered Events */}
+        <Card className='group relative overflow-hidden'>
+          <div className='absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent opacity-60 group-hover:opacity-100 transition-opacity' />
+          <CardContent className='p-5 relative'>
+            <div className='flex items-start justify-between'>
+              <div className='space-y-1.5'>
+                <p className='text-xs font-semibold text-muted-foreground uppercase tracking-widest'>
+                  Registered Events
+                </p>
+                <p className='text-3xl font-extrabold text-foreground tracking-tight'>
+                  {registeredCount}
+                </p>
+                <p className='text-xs text-muted-foreground font-medium'>
+                  {activeRegistrations.length} active, {upcomingRegistrations.length} upcoming
+                </p>
+              </div>
+              <div className='w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform'>
+                <CalendarCheck className='h-5 w-5 text-primary' />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-			{activeEvent && (
-				<Card className='border-primary/50 bg-primary/5'>
-					<CardHeader>
-						<CardTitle className='flex items-center gap-2'>
-							<Zap className='w-5 h-5 text-primary' />
-							Active Event
-						</CardTitle>
-					</CardHeader>
-					<CardContent className='space-y-4'>
-						<div>
-							<h3 className='text-lg font-semibold'>{activeEvent.name}</h3>
-							<div className='flex items-center gap-4 text-sm text-muted-foreground mt-2'>
-								<span className='flex items-center gap-1'>
-									<Calendar className='w-4 h-4' />
-									{activeEvent.date}
-								</span>
-							</div>
-						</div>
-						<div className='flex items-center gap-2'>
-							<Badge variant='secondary'>{activeEvent.techStatus}</Badge>
-						</div>
-						<Button asChild className='w-full'>
-							<Link to={`/client/events/${activeEvent.id}`}>
-								View Event Details
-							</Link>
-						</Button>
-					</CardContent>
-				</Card>
-			)}
+        {/* Available Events */}
+        <Card className='group relative overflow-hidden'>
+          <div className='absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent opacity-60 group-hover:opacity-100 transition-opacity' />
+          <CardContent className='p-5 relative'>
+            <div className='flex items-start justify-between'>
+              <div className='space-y-1.5'>
+                <p className='text-xs font-semibold text-muted-foreground uppercase tracking-widest'>
+                  Available Events
+                </p>
+                <p className='text-3xl font-extrabold text-foreground tracking-tight'>
+                  {events.length}
+                </p>
+                <p className='text-xs text-muted-foreground font-medium'>
+                  {upcomingEvents.length} upcoming
+                </p>
+              </div>
+              <div className='w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform'>
+                <Calendar className='h-5 w-5 text-emerald-500' />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Upcoming Events</CardTitle>
-				</CardHeader>
-				<CardContent className='space-y-4'>
-					{upcomingEvents.map((event) => (
-						<div
-							key={event.id}
-							className='flex items-center justify-between p-4 border border-border rounded-lg'
-						>
-							<div className='space-y-1'>
-								<h4 className='font-semibold'>{event.name}</h4>
-								<div className='flex items-center gap-4 text-sm text-muted-foreground'>
-									<span className='flex items-center gap-1'>
-										<Calendar className='w-4 h-4' />
-										{event.date}
-									</span>
-									<span className='flex items-center gap-1'>
-										<MapPin className='w-4 h-4' />
-										{event.distance}
-									</span>
-								</div>
-							</div>
-							<div className='flex items-center gap-2'>
-								<Badge
-									variant={
-										event.status === 'registered' ? 'default' : 'secondary'
-									}
-								>
-									{event.status}
-								</Badge>
-								<Button asChild variant='outline' size='sm'>
-									<Link to={`/client/events/${event.id}`}>Details</Link>
-								</Button>
-							</div>
-						</div>
-					))}
-				</CardContent>
-			</Card>
+        {/* Active Now */}
+        <Card className='group relative overflow-hidden'>
+          <div className='absolute inset-0 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent opacity-60 group-hover:opacity-100 transition-opacity' />
+          <CardContent className='p-5 relative'>
+            <div className='flex items-start justify-between'>
+              <div className='space-y-1.5'>
+                <p className='text-xs font-semibold text-muted-foreground uppercase tracking-widest'>
+                  Active Now
+                </p>
+                <p className='text-3xl font-extrabold text-foreground tracking-tight'>
+                  {activeRegistrations.length}
+                </p>
+                <p className='text-xs text-muted-foreground font-medium'>
+                  Events you're racing in
+                </p>
+              </div>
+              <div className='w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:scale-110 transition-transform'>
+                <Zap className='h-5 w-5 text-amber-500' />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Hardware Assignment Status</CardTitle>
-				</CardHeader>
-				<CardContent className='space-y-3'>
-					<div className='flex items-center justify-between p-3 bg-muted rounded-lg'>
-						<span className='text-sm font-medium'>RFID Tag</span>
-						<Badge className='bg-teal-500/20 text-teal-700 dark:text-teal-300'>
-							{hardwareStatus.rfidTag}
-						</Badge>
-					</div>
-					<div className='flex items-center justify-between p-3 bg-muted rounded-lg'>
-						<span className='text-sm font-medium'>Running Node</span>
-						<Badge variant='secondary'>{hardwareStatus.node}</Badge>
-					</div>
-				</CardContent>
-			</Card>
+      {/* My Registrations */}
+      {userRegistrations.length > 0 && (
+        <Card>
+          <CardHeader className='pb-4'>
+            <div className='flex items-center justify-between'>
+              <div className='flex items-center gap-2.5'>
+                <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+                  <Trophy className='w-4 h-4 text-primary' />
+                </div>
+                <CardTitle>My Registrations</CardTitle>
+              </div>
+              <Button
+                asChild
+                variant='ghost'
+                size='sm'
+                className='text-primary hover:text-primary hover:bg-primary/10 gap-1 rounded-full px-4'
+              >
+                <Link to='/client/events'>
+                  Browse All
+                  <ChevronRight className='w-3.5 h-3.5' />
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className='space-y-3'>
+            {userRegistrations.slice(0, 3).map((reg) => {
+              const event = reg.event;
+              if (!event) return null;
+              const eventDate = new Date(event.date);
+              return (
+                <div
+                  key={reg._id}
+                  className='flex items-center gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 group'
+                >
+                  {/* Date Badge */}
+                  <div className='w-14 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center flex-shrink-0'>
+                    <span className='text-lg font-extrabold text-primary leading-none'>
+                      {format(eventDate, "d")}
+                    </span>
+                    <span className='text-[10px] font-bold text-primary uppercase tracking-wider'>
+                      {format(eventDate, "MMM")}
+                    </span>
+                  </div>
+                  {/* Info */}
+                  <div className='flex-1 min-w-0'>
+                    <h4 className='font-semibold group-hover:text-primary transition-colors truncate'>
+                      {event.name}
+                    </h4>
+                    <div className='flex items-center gap-3 text-xs text-muted-foreground mt-1'>
+                      <span className='flex items-center gap-1'>
+                        <Calendar className='w-3 h-3' />
+                        {format(eventDate, "MMM dd, yyyy")}
+                      </span>
+                      {reg.raceCategory && (
+                        <span className='flex items-center gap-1'>
+                          <Activity className='w-3 h-3' />
+                          {reg.raceCategory.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Status */}
+                  <div className='flex items-center gap-2.5 flex-shrink-0'>
+                    <StatusBadge status={reg.status} />
+                    <Button
+                      asChild
+                      variant='ghost'
+                      size='sm'
+                      className='rounded-lg hover:bg-primary/10 text-primary'
+                    >
+                      <Link to={`/client/events/${event._id}`}>Details</Link>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
-			<div className='flex gap-4'>
-				<Button asChild className='flex-1'>
-					<Link to='/client/events'>Browse Events</Link>
-				</Button>
-				<Button asChild variant='outline' className='flex-1'>
-					<Link to='/client/profile'>My Profile</Link>
-				</Button>
-			</div>
-		</div>
-	);
+      {/* Upcoming Events */}
+      <Card>
+        <CardHeader className='pb-4'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2.5'>
+              <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+                <Calendar className='w-4 h-4 text-primary' />
+              </div>
+              <CardTitle>Upcoming Events</CardTitle>
+            </div>
+            <Button
+              asChild
+              variant='ghost'
+              size='sm'
+              className='text-primary hover:text-primary hover:bg-primary/10 gap-1 rounded-full px-4'
+            >
+              <Link to='/client/events'>
+                Browse All
+                <ChevronRight className='w-3.5 h-3.5' />
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className='space-y-3'>
+          {upcomingEvents.length === 0 ? (
+            <div className='text-center py-8'>
+              <Calendar className='w-10 h-10 text-muted-foreground/50 mx-auto mb-3' />
+              <p className='text-muted-foreground text-sm'>
+                No upcoming events at the moment
+              </p>
+            </div>
+          ) : (
+            upcomingEvents.map((event) => {
+              const eventDate = new Date(event.date);
+              const spotsRemaining = event.raceCategories.reduce(
+                (acc, cat) => acc + (cat.slots - cat.registeredCount),
+                0
+              );
+              return (
+                <div
+                  key={event._id}
+                  className='flex items-center gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-200 group'
+                >
+                  <div className='w-14 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center flex-shrink-0'>
+                    <span className='text-lg font-extrabold text-primary leading-none'>
+                      {format(eventDate, "d")}
+                    </span>
+                    <span className='text-[10px] font-bold text-primary uppercase tracking-wider'>
+                      {format(eventDate, "MMM")}
+                    </span>
+                  </div>
+                  <div className='flex-1 min-w-0'>
+                    <h4 className='font-semibold group-hover:text-primary transition-colors truncate'>
+                      {event.name}
+                    </h4>
+                    <div className='flex items-center gap-3 text-xs text-muted-foreground mt-1'>
+                      <span className='flex items-center gap-1'>
+                        <MapPin className='w-3 h-3' />
+                        {event.location.city}
+                      </span>
+                      <span className='text-xs text-muted-foreground'>
+                        {spotsRemaining} spots left
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    asChild
+                    variant='ghost'
+                    size='sm'
+                    className='rounded-lg hover:bg-primary/10 text-primary gap-1 flex-shrink-0'
+                  >
+                    <Link to={`/client/events/${event._id}`}>
+                      View
+                      <ChevronRight className='w-3.5 h-3.5' />
+                    </Link>
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Bottom Actions */}
+      <div className='flex gap-4'>
+        <Button
+          asChild
+          className='flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/20'
+        >
+          <Link to='/client/events'>
+            <Calendar className='w-4 h-4 mr-2' />
+            Browse Events
+          </Link>
+        </Button>
+        <Button
+          asChild
+          variant='outline'
+          className='flex-1 h-12 rounded-xl hover:bg-muted/50'
+        >
+          <Link to='/client/profile'>My Profile</Link>
+        </Button>
+      </div>
+    </div>
+  );
 }

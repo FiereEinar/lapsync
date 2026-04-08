@@ -3,6 +3,7 @@ import { useAuthStore } from '../../src/store/useAuthStore';
 import { Home, Calendar, Trophy, Activity, User, LogOut } from 'lucide-react-native';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ClientLayout() {
   const { logout } = useAuthStore();
@@ -17,37 +18,60 @@ export default function ClientLayout() {
   return (
     <Drawer
       drawerContent={(props) => (
-        <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1, backgroundColor: 'hsl(180, 30%, 15%)' }}>
-          <View className="p-4 border-b border-sidebar-border mb-2 mt-4 mx-2">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 bg-success shadow-sm rounded-lg flex items-center justify-center">
-                <Text className="text-success-foreground font-bold text-lg">L</Text>
+        <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1, backgroundColor: 'hsl(220, 20%, 8%)' }}>
+          {/* Sidebar Header */}
+          <View className="mx-4 mb-4 mt-4 overflow-hidden rounded-2xl">
+            <LinearGradient
+              colors={['hsla(152, 60%, 42%, 0.2)', 'hsla(152, 60%, 42%, 0.05)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ padding: 16 }}
+            >
+              <View className="flex-row items-center gap-3">
+                <View className="w-11 h-11 rounded-xl flex items-center justify-center overflow-hidden">
+                  <LinearGradient
+                    colors={['hsl(152, 60%, 42%)', 'hsl(152, 70%, 32%)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Text className="text-white font-extrabold text-lg">L</Text>
+                  </LinearGradient>
+                </View>
+                <View className="flex-1">
+                  <Text className="font-bold text-white text-base tracking-wide">LapSync</Text>
+                  <Text className="text-xs text-white/50 font-medium">Runner Portal</Text>
+                </View>
               </View>
-              <View>
-                <Text className="font-bold text-sidebar-foreground text-base">LapSync</Text>
-                <Text className="text-xs text-sidebar-foreground opacity-70">Runner Portal</Text>
-              </View>
-            </View>
+            </LinearGradient>
+          </View>
+
+          <View className="mx-2">
+            <Text className="px-4 mb-2 text-[10px] font-bold text-white/30 uppercase tracking-[2px]">Navigation</Text>
           </View>
           <DrawerItemList {...props} />
           <View className="flex-1" />
           <TouchableOpacity 
             onPress={confirmLogout} 
-            className="p-4 mx-4 rounded-md flex-row items-center mt-auto mb-8 bg-destructive/20 border border-destructive/30"
+            className="mx-4 mb-8 rounded-xl flex-row items-center py-3.5 px-4"
+            style={{ backgroundColor: 'hsla(0, 62%, 50%, 0.1)', borderWidth: 1, borderColor: 'hsla(0, 62%, 50%, 0.15)' }}
+            activeOpacity={0.7}
           >
-            <LogOut size={20} color="hsl(0, 62%, 50%)" />
-            <Text className="ml-4 text-destructive font-semibold text-base">Log Out</Text>
+            <LogOut size={18} color="hsl(0, 62%, 55%)" />
+            <Text style={{ color: 'hsl(0, 62%, 55%)' }} className="ml-3 font-semibold text-sm">Log Out</Text>
           </TouchableOpacity>
         </DrawerContentScrollView>
       )}
       screenOptions={{
-        headerStyle: { backgroundColor: 'hsl(180, 30%, 10%)', borderBottomWidth: 1, borderBottomColor: 'hsl(180, 20%, 25%)' },
-        headerTintColor: 'hsl(0, 0%, 95%)',
-        drawerStyle: { backgroundColor: 'hsl(180, 30%, 15%)', width: 280 },
-        drawerActiveBackgroundColor: 'hsl(180, 30%, 20%)',
-        drawerActiveTintColor: 'hsl(142, 76%, 36%)', 
-        drawerInactiveTintColor: 'hsl(0, 0%, 95%)',
-        drawerLabelStyle: { fontSize: 16, fontWeight: '600' }
+        headerStyle: { backgroundColor: 'hsl(220, 20%, 8%)' },
+        headerTintColor: 'hsl(210, 20%, 95%)',
+        headerShadowVisible: false,
+        drawerStyle: { backgroundColor: 'hsl(220, 20%, 8%)', width: 280 },
+        drawerActiveBackgroundColor: 'hsla(152, 60%, 42%, 0.1)',
+        drawerActiveTintColor: 'hsl(152, 60%, 42%)', 
+        drawerInactiveTintColor: 'hsla(210, 20%, 95%, 0.6)',
+        drawerLabelStyle: { fontSize: 14, fontWeight: '600', marginLeft: -8 },
+        drawerItemStyle: { borderRadius: 12, marginHorizontal: 8, paddingVertical: 2 },
       }}
     >
       <Drawer.Screen
@@ -55,7 +79,7 @@ export default function ClientLayout() {
         options={{
           drawerLabel: 'Home',
           title: 'Home',
-          drawerIcon: ({ color }) => <Home size={22} color={color} />,
+          drawerIcon: ({ color }) => <Home size={20} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -63,7 +87,7 @@ export default function ClientLayout() {
         options={{
           drawerLabel: 'Events',
           title: 'Events',
-          drawerIcon: ({ color }) => <Calendar size={22} color={color} />,
+          drawerIcon: ({ color }) => <Calendar size={20} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -71,7 +95,7 @@ export default function ClientLayout() {
         options={{
           drawerLabel: 'Leaderboard',
           title: 'Leaderboard',
-          drawerIcon: ({ color }) => <Trophy size={22} color={color} />,
+          drawerIcon: ({ color }) => <Trophy size={20} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -79,7 +103,7 @@ export default function ClientLayout() {
         options={{
           drawerLabel: 'Live Race',
           title: 'Live Race',
-          drawerIcon: ({ color }) => <Activity size={22} color={color} />,
+          drawerIcon: ({ color }) => <Activity size={20} color={color} />,
         }}
       />
       <Drawer.Screen
@@ -87,7 +111,7 @@ export default function ClientLayout() {
         options={{
           drawerLabel: 'Profile',
           title: 'Profile',
-          drawerIcon: ({ color }) => <User size={22} color={color} />,
+          drawerIcon: ({ color }) => <User size={20} color={color} />,
         }}
       />
     </Drawer>

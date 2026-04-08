@@ -41,12 +41,12 @@ export function AppSidebar() {
     <Sidebar className='border-r border-sidebar-border'>
       <SidebarHeader className='p-4 border-b border-sidebar-border'>
         <div className='flex items-center gap-3'>
-          <div className='w-10 h-10 bg-primary rounded-lg flex items-center justify-center'>
-            <span className='text-primary-foreground font-bold text-lg'>L</span>
+          <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20'>
+            <span className='text-primary-foreground font-extrabold text-lg'>L</span>
           </div>
           <div>
-            <h2 className='font-bold text-sidebar-foreground'>LapSync</h2>
-            <p className='text-xs text-sidebar-foreground/60'>
+            <h2 className='font-bold text-sidebar-foreground tracking-wide'>LapSync</h2>
+            <p className='text-[10px] text-sidebar-foreground/40 font-semibold uppercase tracking-[0.15em]'>
               Event Management
             </p>
           </div>
@@ -55,7 +55,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className='text-sidebar-foreground/60'>
+          <SidebarGroupLabel className='text-sidebar-foreground/40 text-[10px] font-bold uppercase tracking-[0.15em]'>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
