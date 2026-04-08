@@ -46,18 +46,14 @@ export default function Dashboard() {
     );
   }, 0);
 
-  const activeEvents = events.filter(
-    (ev) => ev.status === "active"
-  ).length;
+  const activeEvents = events.filter((ev) => ev.status === "active").length;
 
   const completedEvents = events.filter(
-    (ev) => ev.status === "finished" || ev.status === "completed"
+    (ev) => ev.status === "finished",
   ).length;
 
   const completionRate =
-    events.length > 0
-      ? Math.round((completedEvents / events.length) * 100)
-      : 0;
+    events.length > 0 ? Math.round((completedEvents / events.length) * 100) : 0;
 
   const latestEvents = events.slice(0, 3);
 
@@ -152,7 +148,7 @@ export default function Dashboard() {
                   const dateMonth = format(eventDate, "MMM");
                   const participants = event.raceCategories.reduce(
                     (acc, cur) => acc + cur.registeredCount,
-                    0
+                    0,
                   );
                   const displayLocation = `${event.location.city}, ${event.location.venue}`;
 

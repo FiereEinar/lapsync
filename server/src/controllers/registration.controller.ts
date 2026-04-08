@@ -1,4 +1,5 @@
 import { BAD_REQUEST, CREATED, NOT_FOUND } from "../constant/http";
+import UserModel from "../models/user.model";
 import appAssert from "../errors/app-assert";
 import EventModel from "../models/event.model";
 import RegistrationModel, {
@@ -104,4 +105,62 @@ export const getRegistrationsHander = asyncHandler(async (req, res) => {
       "Registrations fetched successfully",
     ),
   );
+});
+
+/**
+ * @route POST /api/v1/registration/admin-add
+ * Admin adds a participant (user must exist)
+ */
+export const adminRegisterHandler = asyncHandler(async (req, res) => {
+  const { userId, eventId, raceCategoryId, shirtSize } = req.body;
+
+  appAssert(userId, BAD_REQUEST, "User is required");
+  appAssert(eventId, BAD_REQUEST, "Event is required");
+  appAssert(raceCategoryId, BAD_REQUEST, "Race category is required");
+  appAssert(shirtSize, BAD_REQUEST, "Shirt size is required");
+
+  // Verify user exists
+  const user = await UserModel.findById(userId);
+  appAssert(user, NOT_FOUND, "User not found");
+
+  // Verify event exists
+  const event = await EventModel.findById(eventId);
+  appAssert(event, NOT_FOUND, "Event not found");
+
+  // Verify race category exists
+  const category = event.raceCategories.find(
+    (cat) => cat._id.toString() === raceCategoryId,
+  );
+  appAssert(category, NOT_FOUND, "Race category not found");
+
+  appAssert(
+    category.registeredCount < category.slots,
+    BAD_REQUEST,
+    "Category is full",
+  );
+
+  // Check if user already registered for this event
+  const existingRegistration = await RegistrationModel.findOne({
+    user: userId,
+    event: eventId,
+  });
+  appAssert(
+    !existingRegistration,
+    BAD_REQUEST,
+    "User is already registered for this event",
+  );
+
+  const registration = await RegistrationModel.create({
+    user: userId,
+    event: eventId,
+    raceCategory: raceCategoryId,
+    shirtSize,
+    emergencyContact: { name: "", phone: "", relationship: "" },
+    medicalInfo: {},
+    status: "confirmed",
+  });
+
+  res
+    .status(CREATED)
+    .json(new CustomResponse(true, registration, "Participant added successfully"));
 });

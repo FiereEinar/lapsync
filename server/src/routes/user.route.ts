@@ -1,8 +1,9 @@
 import express from 'express';
-import { updateProfileHandler } from '../controllers/user.controller';
+import { updateProfileHandler, searchUsersHandler } from '../controllers/user.controller';
 
 const router = express.Router();
 
 router.patch('/', updateProfileHandler);
+router.get('/search', searchUsersHandler);
 
 export default router;
