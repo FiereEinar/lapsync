@@ -40,8 +40,8 @@ export default function EventFullDetails({ event }: EventFullDetailsProps) {
 						)}
 					</div>
 					<div className="flex-shrink-0">
-                        {user.role === 'user' && <ClientEventActionButton event={event} />}
-                        {user.role === 'admin' && <EventActionButton event={event} />}
+                        {user?.role === 'user' && <ClientEventActionButton event={event} />}
+                        {user?.role === 'admin' && <EventActionButton event={event} />}
                     </div>
 				</div>
 

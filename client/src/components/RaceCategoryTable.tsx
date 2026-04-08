@@ -28,14 +28,16 @@ export default function RaceCategoryTable({
   const { data: registration } = useQuery({
     queryKey: [
       QUERY_KEYS.REGISTRATIONS,
-      { userID: user._id, eventID: event._id },
+      { userID: user?._id, eventID: event._id },
     ],
-    queryFn: async (): Promise<Registration> => {
+    queryFn: async (): Promise<Registration | null> => {
+      if (!user?._id) return null;
       const { data } = await axiosInstance.get(`/registration`, {
         params: { userID: user._id, eventID: event._id },
       });
       return data.data[0] || null;
     },
+    enabled: !!user?._id && !!event?._id,
   });
 
   const registrationID =

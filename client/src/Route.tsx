@@ -21,6 +21,10 @@ import Profile from "./pages/client/Profile";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Logout from "./pages/auth/Logout";
+import { PublicLayout } from "./components/PublicLayout";
+import Landing from "./pages/public/Landing";
+import PublicEventList from "./pages/public/PublicEventList";
+import PublicEventSpectate from "./pages/public/PublicEventSpectate";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Devices from "./pages/Devices";
@@ -51,6 +55,27 @@ const router = createBrowserRouter([
     element: <ResetPassword />,
   },
 
+  /* ------------------ Public Routes ------------------ */
+  {
+    path: "/",
+    element: <PublicLayout />,
+    errorElement: <NotFound />,
+    children: [
+      {
+        index: true,
+        element: <Landing />,
+      },
+      {
+        path: "public/events",
+        element: <PublicEventList />,
+      },
+      {
+        path: "public/events/:id",
+        element: <PublicEventSpectate />,
+      },
+    ]
+  },
+
   /* ------------------ Admin Routes ------------------ */
   {
     path: "/",
@@ -62,7 +87,7 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       {
-        index: true,
+        path: "dashboard",
         element: <Dashboard />,
       },
       {

@@ -20,6 +20,7 @@ app.use(cookieParser());
 app.get("/", healthcheck);
 
 import authRoutes from "./routes/auth.route";
+import publicRoutes from "./routes/public.route";
 import eventsRoutes from "./routes/event.routes";
 import userRoutes from "./routes/user.route";
 import registrationRoutes from "./routes/registration.route";
@@ -37,6 +38,11 @@ import settingsRoutes from "./routes/settings.route";
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/device", deviceRoutes);
 app.use("/api/v1/rfid/scan", rfidScanRoutes);
+
+// Public Routes (No authentication required)
+app.use("/api/v1/public", publicRoutes);
+
+// Protected Routes
 app.use(auth);
 app.use("/api/v1/event", eventsRoutes);
 app.use("/api/v1/user", userRoutes);

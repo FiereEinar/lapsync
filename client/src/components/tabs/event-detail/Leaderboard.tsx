@@ -27,6 +27,7 @@ import { format } from "date-fns";
 
 type LeaderboardProps = {
   event: Event;
+  isPublic?: boolean;
 };
 
 /** Format elapsed milliseconds into HH:MM:SS */
@@ -74,7 +75,7 @@ const statusConfig: Record<
   },
 };
 
-export default function Leaderboard({ event }: LeaderboardProps) {
+export default function Leaderboard({ event, isPublic }: LeaderboardProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const queryClient = useQueryClient();
 
@@ -84,12 +85,13 @@ export default function Leaderboard({ event }: LeaderboardProps) {
     queryParams.append("raceCategory", categoryFilter);
   }
 
+  const queryKeyName = isPublic ? [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter, "public"] : [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter];
+  const endpoint = isPublic ? `/public/race-result?${queryParams.toString()}` : `/race-result?${queryParams.toString()}`;
+
   const { data: results = [] } = useQuery({
-    queryKey: [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter],
+    queryKey: queryKeyName,
     queryFn: async (): Promise<RaceResult[]> => {
-      const { data } = await axiosInstance.get(
-        `/race-result?${queryParams.toString()}`,
-      );
+      const { data } = await axiosInstance.get(endpoint);
       return Array.isArray(data.data) ? data.data : [];
     },
     refetchInterval: 30000, // fallback polling every 30s

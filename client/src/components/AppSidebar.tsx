@@ -1,11 +1,12 @@
 import {
-  Home,
-  Users,
   Calendar,
-  Settings,
-  FileText,
   Computer,
+  FileText,
+  Home,
+  LayoutDashboard,
   Radio,
+  Settings,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,7 +29,11 @@ export type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { title: "Dashboard", url: "/", icon: Home },
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+  },
   { title: "Events", url: "/events", icon: Calendar },
   { title: "Participants", url: "/participants", icon: Users },
   { title: "Devices", url: "/devices", icon: Computer },
