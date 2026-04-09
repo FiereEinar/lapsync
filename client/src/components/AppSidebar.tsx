@@ -38,7 +38,6 @@ const menuItems: MenuItem[] = [
   { title: "Participants", url: "/participants", icon: Users },
   { title: "Devices", url: "/devices", icon: Computer },
   { title: "RFID Tags", url: "/rfid-tags", icon: Radio },
-  { title: "Reports", url: "/reports", icon: FileText },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

@@ -1,17 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/api/axios';
-import ClientEventCard from '@/components/cards/ClientEventCard';
-import { Registration } from '@/types/registration';
-import { QUERY_KEYS } from '@/constants';
-import { useUserStore } from '@/stores/user';
-import { Trophy, CheckCircle, Flag, CalendarCheck, Clock } from 'lucide-react';
-import { StatCard } from '@/components/StatCard';
-import { useMemo } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "@/api/axios";
+import ClientEventCard from "@/components/cards/ClientEventCard";
+import { Registration } from "@/types/registration";
+import { QUERY_KEYS } from "@/constants";
+import { useUserStore } from "@/stores/user";
+import { Trophy, CheckCircle, Flag, CalendarCheck, Clock } from "lucide-react";
+import { StatCard } from "@/components/StatCard";
+import { useMemo } from "react";
+import { Event } from "@/types/event";
 
 export default function CompletedEvents() {
   const { user } = useUserStore((state) => state);
 
-  const { data: userRegistrations, isLoading } = useQuery({
+  const { data: userRegistrations = [], isLoading: isLoadingRegs } = useQuery({
     queryKey: [QUERY_KEYS.REGISTRATIONS, user._id],
     queryFn: async (): Promise<Registration[]> => {
       const { data } = await axiosInstance.get(`/registration`, {
@@ -21,16 +22,22 @@ export default function CompletedEvents() {
     },
   });
 
-  const completedRegistrations = useMemo(() => {
-    if (!userRegistrations) return [];
-    return userRegistrations.filter(r => r.event.status === 'finished');
-  }, [userRegistrations]);
+  const { data: events, isLoading: isLoadingEvents } = useQuery({
+    queryKey: [QUERY_KEYS.EVENT],
+    queryFn: async (): Promise<Event[]> => {
+      const { data } = await axiosInstance.get("/event");
+      return data.data;
+    },
+  });
 
-  const completedEventsCount = completedRegistrations.length;
-  // Calculate total distance ran across completed events (if available in registration's category)
-  const totalDistanceKm = completedRegistrations.reduce((sum, r) => {
-    return sum + (r.raceCategory?.distanceKm || 0);
-  }, 0);
+  const isLoading = isLoadingRegs || isLoadingEvents;
+
+  const completedEvents = useMemo(() => {
+    if (!events) return [];
+    return events.filter((e) => e.status === "finished");
+  }, [events]);
+
+  const completedEventsCount = completedEvents.length;
 
   return (
     <div className='space-y-6 animate-appear'>
@@ -40,7 +47,7 @@ export default function CompletedEvents() {
         <div className='relative flex items-center justify-between'>
           <div>
             <p className='text-xs font-bold text-indigo-500 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5'>
-              <CheckCircle className="w-3.5 h-3.5" />
+              <CheckCircle className='w-3.5 h-3.5' />
               History
             </p>
             <h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>
@@ -50,8 +57,8 @@ export default function CompletedEvents() {
               Review your past races, reports, and leaderboards.
             </p>
           </div>
-          <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-indigo-500/10 items-center justify-center border border-indigo-500/20 shadow-sm">
-            <Trophy className="w-8 h-8 text-indigo-500" />
+          <div className='hidden sm:flex w-16 h-16 rounded-2xl bg-indigo-500/10 items-center justify-center border border-indigo-500/20 shadow-sm'>
+            <Trophy className='w-8 h-8 text-indigo-500' />
           </div>
         </div>
       </div>
@@ -66,9 +73,9 @@ export default function CompletedEvents() {
           accentColor='indigo'
         />
         <StatCard
-          title='Total Distance'
-          value={`${totalDistanceKm} km`}
-          subtitle='Distance covered'
+          title='History Vault'
+          value='Available'
+          subtitle='Check any finished records'
           icon={Clock}
           accentColor='teal'
         />
@@ -82,23 +89,26 @@ export default function CompletedEvents() {
             <p className='text-muted-foreground text-sm'>Loading history...</p>
           </div>
         )}
-        {!isLoading && completedRegistrations.length === 0 && (
+        {!isLoading && completedEvents.length === 0 && (
           <div className='text-center py-16 border border-dashed rounded-2xl bg-muted/10'>
             <Trophy className='w-10 h-10 text-muted-foreground/30 mx-auto mb-3' />
-            <p className='text-foreground font-semibold'>No completed events yet</p>
+            <p className='text-foreground font-semibold'>
+              No completed events yet
+            </p>
             <p className='text-muted-foreground text-sm'>
-              Join an upcoming event and finish a race to see your history here!
+              There are no finished events in the vault yet.
             </p>
           </div>
         )}
-        {!isLoading && completedRegistrations.map((reg) => (
-          <ClientEventCard
-            key={reg.event._id}
-            event={reg.event}
-            userRegistrations={userRegistrations || []}
-            linkPrefix="/client/completed"
-          />
-        ))}
+        {!isLoading &&
+          completedEvents.map((event) => (
+            <ClientEventCard
+              key={event._id}
+              event={event}
+              userRegistrations={userRegistrations}
+              linkPrefix='/client/completed'
+            />
+          ))}
       </div>
     </div>
   );

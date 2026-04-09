@@ -112,10 +112,6 @@ const router = createBrowserRouter([
         element: <RfidTags />,
       },
       {
-        path: "reports",
-        element: <Reports />,
-      },
-      {
         path: "settings",
         element: <Settings />,
       },
@@ -144,7 +140,7 @@ const router = createBrowserRouter([
         element: <ClientEventDetail />,
       },
       {
-        path: "race/:registrationId",
+        path: "race/:eventId",
         element: <RaceParticipation />,
       },
       {

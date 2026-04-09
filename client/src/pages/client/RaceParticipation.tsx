@@ -4,6 +4,7 @@ import { RaceStatsCards } from "@/components/RaceStatsCards.tsx";
 import { RaceProgress } from "@/components/RaceProgress.tsx";
 import { BioSignalMonitor } from "@/components/BioSignalMonitor.tsx";
 import { LiveMap } from "@/components/LiveMap.tsx";
+import MapLive from "@/components/tabs/event-detail/map-views/MapLive";
 import { CheckpointList } from "@/components/CheckpointList.tsx";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -18,6 +19,7 @@ import axiosInstance from "@/api/axios";
 import { QUERY_KEYS } from "@/constants";
 import { useUserStore } from "@/stores/user";
 import { Registration } from "@/types/registration";
+import { Event } from "@/types/event";
 import { Activity } from "lucide-react";
 
 type Checkpoint = {
@@ -39,7 +41,7 @@ function getTimeLabel() {
 }
 
 export default function RaceParticipation() {
-  const { registrationId } = useParams();
+  const { eventId } = useParams();
   const navigate = useNavigate();
   const { user } = useUserStore((state) => state);
 
@@ -55,17 +57,27 @@ export default function RaceParticipation() {
     enabled: !!user?._id,
   });
 
-  // Since it's a live race, let's allow selecting any registration (especially confirmed/active ones)
-  // For safety, we'll list all of them incase testing requires checking past events.
-  const selectOptions = userRegistrations;
+  // Fetch running events directly to populate the dropdown for spectators/runners
+  const { data: events = [] } = useQuery({
+    queryKey: [QUERY_KEYS.EVENT],
+    queryFn: async (): Promise<Event[]> => {
+      const { data } = await axiosInstance.get(`/event`);
+      return Array.isArray(data.data) ? data.data : [];
+    },
+  });
 
-  // If no registrationid is in URL, see if we should auto-select the first one or just show empty state
+  const selectOptions = events.filter((e) => e.status === "active");
+
+  // If no eventId is in URL, automatically select the first one
   useEffect(() => {
-    if (!registrationId && selectOptions.length > 0) {
-      // Opt: automatically navigate to the first available registration if none is selected
-      // navigate(`/client/race/${selectOptions[0]._id}`, { replace: true });
+    if (!eventId && selectOptions.length > 0) {
+      navigate(`/client/race/${selectOptions[0]._id}`, { replace: true });
     }
-  }, [registrationId, selectOptions, navigate]);
+  }, [eventId, selectOptions, navigate]);
+
+  // Derive registrationId if the user is registered for the currently selected event
+  const selectedReg = userRegistrations.find((r) => r.event?._id === eventId);
+  const registrationId = selectedReg?._id;
 
   const [raceData, setRaceData] = useState({
     currentPosition: "-",
@@ -130,10 +142,9 @@ export default function RaceParticipation() {
       }));
       const numericValue = parseFloat(data.emg) || 0;
       const entry = { time: getTimeLabel(), value: numericValue };
-      emgHistoryRef.current = [
-        ...emgHistoryRef.current,
-        entry,
-      ].slice(-MAX_HISTORY);
+      emgHistoryRef.current = [...emgHistoryRef.current, entry].slice(
+        -MAX_HISTORY,
+      );
       setEmgHistory([...emgHistoryRef.current]);
     });
     socket.on("checkpointUpdate", (data) =>
@@ -164,46 +175,51 @@ export default function RaceParticipation() {
               <span className='w-2 h-2 rounded-full bg-amber-500 animate-pulse'></span>
               Live Broadcast
             </p>
-            <h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>Live Race View</h1>
+            <h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>
+              Live Race View
+            </h1>
             <p className='text-muted-foreground mt-1.5 text-sm flex items-center gap-2'>
               Monitor your real-time performance, location, and vitals
             </p>
           </div>
 
           <div className='w-full md:w-auto'>
-            <Select 
-              value={registrationId || ""} 
+            <Select
+              value={eventId || ""}
               onValueChange={(id) => navigate(`/client/race/${id}`)}
             >
               <SelectTrigger className='w-full md:w-[320px] rounded-xl bg-background/50 backdrop-blur-sm'>
-                <SelectValue placeholder='Select a registered event' />
+                <SelectValue placeholder='Select an active event' />
               </SelectTrigger>
               <SelectContent>
-                {selectOptions.map((reg) => (
-                  <SelectItem key={reg._id} value={reg._id}>
-                    {reg.event?.name} {reg.raceCategory ? `(${reg.raceCategory.name})` : ''}
-                  </SelectItem>
-                ))}
+                {selectOptions.map((evt) => {
+                  const isReg = userRegistrations.some(
+                    (r) => r.event?._id === evt._id,
+                  );
+                  return (
+                    <SelectItem key={evt._id} value={evt._id}>
+                      {evt.name} {isReg ? "(Registered)" : "(Not Registered)"}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
         </div>
       </div>
 
-      {!registrationId ? (
+      {!eventId ? (
         <div className='text-center py-16 px-4 border border-dashed border-border rounded-2xl bg-muted/10'>
           <Activity className='w-12 h-12 text-muted-foreground/30 mx-auto mb-4' />
           <h2 className='text-xl font-semibold mb-2'>No Race Selected</h2>
           <p className='text-muted-foreground text-sm max-w-sm mx-auto'>
-            Please select an active event registration from the dropdown above to view your live stats and map.
+            Please select an active event from the dropdown above to view the
+            live broadcast.
           </p>
         </div>
       ) : (
-        (() => {
-          const selectedReg = selectOptions.find(r => r._id === registrationId);
-          const eventId = selectedReg?.event?._id;
-          
-          return (
+        <>
+          {registrationId ? (
             <>
               <RaceStatsCards
                 currentPosition={raceData.currentPosition}
@@ -211,13 +227,6 @@ export default function RaceParticipation() {
                 pace={raceData.pace}
                 heartRate={raceData.heartRate}
                 heartRateZone={raceData.heartRateZone}
-              />
-              <RaceProgress
-                distance={raceData.distance}
-                totalDistance={raceData.totalDistance}
-                nextCheckpoint={raceData.nextCheckpoint}
-                distanceToCheckpoint={raceData.distanceToCheckpoint}
-                estimatedTime={raceData.estimatedTime}
               />
               <BioSignalMonitor
                 heartRate={raceData.heartRate}
@@ -230,8 +239,17 @@ export default function RaceParticipation() {
               <LiveMap eventId={eventId} />
               <CheckpointList checkpoints={raceData.checkpoints} />
             </>
-          );
-        })()
+          ) : (
+            <div className='bg-card rounded-xl p-6 border border-border shadow-sm'>
+              <h3 className='text-xl font-bold mb-2'>Live Spectator View</h3>
+              <p className='text-muted-foreground text-sm mb-6'>
+                You are not registered for this event. You are currently viewing
+                the live standard broadcast.
+              </p>
+              <MapLive />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

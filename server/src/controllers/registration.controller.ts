@@ -68,12 +68,13 @@ export const registerHandler = asyncHandler(async (req, res) => {
  * query: userID: string | eventID: string
  */
 export const getRegistrationsHander = asyncHandler(async (req, res) => {
-  const { userID, eventID } = req.query;
+  const { userID, eventID, user } = req.query;
 
   let filters: any = {};
 
-  if (userID) {
-    filters.user = userID;
+  const resolvedUserId = userID || user;
+  if (resolvedUserId) {
+    filters.user = resolvedUserId;
   }
 
   if (eventID) {
