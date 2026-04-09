@@ -13,7 +13,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Activity, Heart, AlertTriangle, TrendingUp, Calendar, Trophy } from 'lucide-react';
 
-export default function PersonalReport({ event }: { event: Event }) {
+import { useState } from 'react';
+import { Switch } from '@/components/ui/switch';
+import { SerialPlotter } from '@/components/SerialPlotter';
+
+export default function PersonalReport({ event, registrationId }: { event: Event, registrationId?: string }) {
   const { user } = useUserStore();
 
   const { data: userRegistrations = [] } = useQuery({
@@ -24,10 +28,11 @@ export default function PersonalReport({ event }: { event: Event }) {
       );
       return data.data;
     },
-    enabled: !!event._id && !!user._id,
+    enabled: !!event._id && !!user._id && !registrationId,
   });
 
-  const registration = userRegistrations[0];
+  const registration = registrationId ? { _id: registrationId } : userRegistrations[0];
+  const [showPlotter, setShowPlotter] = useState(false);
 
   const { data: analytics, isLoading } = useQuery({
     queryKey: ['registrationAnalytics', registration?._id],
@@ -65,7 +70,7 @@ export default function PersonalReport({ event }: { event: Event }) {
     );
   }
 
-  const { heartRate, semg, alerts = [] } = analytics;
+  const { heartRate, semg, alerts = [], rawHeartRate = [], rawEmg = [] } = analytics;
 
   return (
     <div className='space-y-6 animate-appear'>
@@ -79,10 +84,66 @@ export default function PersonalReport({ event }: { event: Event }) {
               <CardTitle>Medical Performance Report</CardTitle>
               <CardDescription>Your personalized race analytics and metrics</CardDescription>
             </div>
+            
+            {/* Added Switch for plotter */}
+            <div className='ml-auto flex items-center gap-2 pr-2'>
+              <span className='text-sm text-muted-foreground font-medium'>
+                {showPlotter ? 'Plotter Mode' : 'Stats & Zones'}
+              </span>
+              <Switch
+                checked={showPlotter}
+                onCheckedChange={setShowPlotter}
+                className="data-[state=checked]:bg-primary"
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='grid gap-4 md:grid-cols-2'>
+          {showPlotter ? (
+            <div className='space-y-6'>
+              <div className='p-5 rounded-xl bg-muted/30 border border-border/50'>
+                <div className='flex items-center gap-2 mb-4'>
+                  <Heart className='w-4 h-4 text-red-500' />
+                  <span className='text-sm font-semibold'>
+                    Heart Rate History (BPM)
+                  </span>
+                </div>
+                <SerialPlotter
+                  data={rawHeartRate}
+                  maxDataPoints={rawHeartRate.length || 100}
+                  lines={[
+                    {
+                      dataKey: 'value',
+                      color: 'hsl(0, 84%, 60%)',
+                      label: 'Heart Rate',
+                    },
+                  ]}
+                  yAxisLabel='BPM'
+                />
+              </div>
+              <div className='p-5 rounded-xl bg-muted/30 border border-border/50'>
+                <div className='flex items-center gap-2 mb-4'>
+                  <Activity className='w-4 h-4 text-emerald-500' />
+                  <span className='text-sm font-semibold'>
+                    EMG Signal Over Time
+                  </span>
+                </div>
+                <SerialPlotter
+                  data={rawEmg}
+                  maxDataPoints={rawEmg.length || 100}
+                  lines={[
+                    {
+                      dataKey: 'value',
+                      color: 'hsl(142, 71%, 45%)',
+                      label: 'EMG',
+                    },
+                  ]}
+                  yAxisLabel='EMG'
+                />
+              </div>
+            </div>
+          ) : (
+            <div className='grid gap-4 md:grid-cols-2'>
             {/* Heart Rate Block */}
             <div className='p-5 rounded-xl bg-muted/30 space-y-4 border border-border/50'>
               <h5 className='font-semibold flex items-center gap-2 text-foreground'>
@@ -176,7 +237,8 @@ export default function PersonalReport({ event }: { event: Event }) {
                 </div>
               </div>
             </div>
-          </div>
+            </div>
+          )}
 
           {/* Alerts Timeline */}
           {alerts.length > 0 ? (

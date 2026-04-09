@@ -144,7 +144,7 @@ export default function EventDetail() {
               {eventDetail && <RaceCheckIn event={eventDetail} />}
             </TabsContent>
             <TabsContent value='status' className='space-y-4'>
-              <RunnerStatus />
+              <RunnerStatus event={eventDetail} registrations={registrations} />
             </TabsContent>
           </>
         ) : (

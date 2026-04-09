@@ -54,13 +54,25 @@ export const getRegistrationAnalytics = asyncHandler(
     let validEmgCount = 0;
 
     const zCount = { z1: 0, z2: 0, z3: 0, z4: 0, z5: 0 };
+    
+    const rawHeartRate: { time: string, value: number }[] = [];
+    const rawEmg: { time: string, value: number }[] = [];
 
     telemetryData.forEach(t => {
+      const timeLabel = new Date(t.createdAt).toLocaleTimeString("en-US", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
       if (t.heartRate) {
         if (t.heartRate < minHR) minHR = t.heartRate;
         if (t.heartRate > maxHR) maxHR = t.heartRate;
         sumHR += t.heartRate;
         validHrCount++;
+        
+        rawHeartRate.push({ time: timeLabel, value: t.heartRate });
 
         // Assuming max HR ~ 190. Z1: < 60%, Z2: 60-70%, Z3: 70-80%, Z4: 80-90%, Z5: > 90%
         // Simplified zones for demonstration
@@ -77,6 +89,7 @@ export const getRegistrationAnalytics = asyncHandler(
           sumEmg += emgVal;
           if (emgVal > maxEmg) maxEmg = emgVal;
           validEmgCount++;
+          rawEmg.push({ time: timeLabel, value: emgVal });
         }
       }
     });
@@ -114,6 +127,8 @@ export const getRegistrationAnalytics = asyncHandler(
             avgFatigue,
             trend: 'Stable'
           },
+          rawHeartRate,
+          rawEmg,
           alerts: alerts.map(a => ({
             time: new Date(a.createdAt).toLocaleTimeString(),
             type: a.type.replace(/_/g, ' '),
