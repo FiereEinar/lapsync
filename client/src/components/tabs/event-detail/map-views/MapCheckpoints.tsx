@@ -72,9 +72,10 @@ type Checkpoint = {
   };
 };
 
-export default function MapCheckpoints() {
-  const { eventID } = useParams();
+export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
+  const { eventID: urlEventId } = useParams();
   const queryClient = useQueryClient();
+  const eventIDToUse = eventId || urlEventId;
   const [mapCenter, setMapCenter] = useState<[number, number]>([
     14.5995, 120.9842,
   ]); // Manila default
@@ -93,14 +94,14 @@ export default function MapCheckpoints() {
   const [totalRouteDistance, setTotalRouteDistance] = useState<number>(0);
 
   const { data: checkpoints = [], isLoading } = useQuery({
-    queryKey: ["checkpoints", eventID],
+    queryKey: ["checkpoints", eventIDToUse],
     queryFn: async (): Promise<Checkpoint[]> => {
       const { data } = await axiosInstance.get(
-        `/race-checkpoint/event/${eventID}`,
+        `/race-checkpoint/event/${eventIDToUse}`,
       );
       return data.data;
     },
-    enabled: !!eventID,
+    enabled: !!eventIDToUse,
   });
 
   const centerCalculated = useRef(false);
@@ -118,7 +119,7 @@ export default function MapCheckpoints() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventID] });
+      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse] });
       toast.success("Checkpoint added successfully!");
       setNewCheckpointPoint(null);
       setNewName("");
@@ -136,7 +137,7 @@ export default function MapCheckpoints() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventID] });
+      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse] });
       toast.success("Checkpoint updated successfully!");
     },
     onError: (error: any) => {
@@ -151,7 +152,7 @@ export default function MapCheckpoints() {
       await axiosInstance.delete(`/race-checkpoint/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventID] });
+      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse] });
       toast.success("Checkpoint deleted successfully!");
     },
     onError: (error: any) => {
@@ -191,7 +192,7 @@ export default function MapCheckpoints() {
     }
 
     addCheckpointMutation.mutate({
-      event: eventID,
+      event: eventIDToUse,
       name: newName,
       type: newType,
       location: {

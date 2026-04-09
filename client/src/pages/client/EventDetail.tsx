@@ -28,7 +28,13 @@ L.Icon.Default.mergeOptions({
 
 const getPinIcon = (type: string) => {
   const color =
-    type === "start" ? "#10b981" : type === "finish" ? "#ef4444" : type === "waypoint" ? "#94a3b8" : "#3b82f6";
+    type === "start"
+      ? "#10b981"
+      : type === "finish"
+        ? "#ef4444"
+        : type === "waypoint"
+          ? "#94a3b8"
+          : "#3b82f6";
   const html = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translate(-50%, -100%); width: 24px; height: 36px; position: absolute; left: 12px; top: 36px;">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -115,7 +121,7 @@ export default function ClientEventDetail() {
   return (
     <div className='space-y-6 animate-appear'>
       {event && (
-        <div>
+        <div className='space-y-6'>
           <EventFullDetails event={event} />
           <RaceCategoryTable categories={event.raceCategories} event={event} />
         </div>
@@ -148,14 +154,19 @@ export default function ClientEventDetail() {
             <div className='space-y-2'>
               <p className='text-sm font-medium'>Tech Assignment</p>
               {registration?.rfidTag ? (
-                <Badge variant='outline' className="rounded-md">
+                <Badge variant='outline' className='rounded-md'>
                   RFID Tag #
                   {(registration.rfidTag as any).tagNumber || "Assigned"}
                 </Badge>
               ) : registration?.device ? (
-                <Badge variant='outline' className="rounded-md">Device Assigned</Badge>
+                <Badge variant='outline' className='rounded-md'>
+                  Device Assigned
+                </Badge>
               ) : (
-                <Badge variant='outline' className='text-muted-foreground bg-muted/50 rounded-md border-dashed'>
+                <Badge
+                  variant='outline'
+                  className='text-muted-foreground bg-muted/50 rounded-md border-dashed'
+                >
                   No Tech Assigned Yet
                 </Badge>
               )}
@@ -188,17 +199,22 @@ export default function ClientEventDetail() {
       <Card className='rounded-xl border border-border shadow-sm'>
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
-            <div className="flex items-center gap-2">
-			  <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+            <div className='flex items-center gap-2'>
+              <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
                 <MapPin className='w-4 h-4 text-primary' />
               </div>
               Route & Checkpoints
             </div>
-            {totalRouteDistance > 0 && checkpoints.filter(cp => cp.type !== 'waypoint').length >= 2 && (
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-sm py-1 rounded-lg">
-                {(totalRouteDistance / 1000).toFixed(2)} km Course
-              </Badge>
-            )}
+            {totalRouteDistance > 0 &&
+              checkpoints.filter((cp) => cp.type !== "waypoint").length >=
+                2 && (
+                <Badge
+                  variant='outline'
+                  className='bg-primary/10 text-primary border-primary/20 text-sm py-1 rounded-lg'
+                >
+                  {(totalRouteDistance / 1000).toFixed(2)} km Course
+                </Badge>
+              )}
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
@@ -219,19 +235,19 @@ export default function ClientEventDetail() {
                 {sortedCheckpoints
                   .filter((cp) => cp.type !== "waypoint")
                   .map((cp) => (
-                  <Marker
-                    key={cp._id}
-                    position={[cp.location.lat, cp.location.lng]}
-                    icon={getPinIcon(cp.type)}
-                  >
-                    <Popup>
-                      <div className='font-bold text-sm'>{cp.name}</div>
-                      <div className='text-xs capitalize text-muted-foreground'>
-                        {cp.type}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+                    <Marker
+                      key={cp._id}
+                      position={[cp.location.lat, cp.location.lng]}
+                      icon={getPinIcon(cp.type)}
+                    >
+                      <Popup>
+                        <div className='font-bold text-sm'>{cp.name}</div>
+                        <div className='text-xs capitalize text-muted-foreground'>
+                          {cp.type}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
                 {sortedCheckpoints.length >= 2 && (
                   <RoutingMachine
                     waypoints={sortedCheckpoints.map(
@@ -249,13 +265,13 @@ export default function ClientEventDetail() {
             {sortedCheckpoints
               .filter((cp) => cp.type !== "waypoint")
               .map((checkpoint, index) => (
-              <div
-                key={checkpoint._id}
-                className='flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/30 transition-colors'
-              >
-                <div className='flex items-center gap-3'>
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                <div
+                  key={checkpoint._id}
+                  className='flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/30 transition-colors'
+                >
+                  <div className='flex items-center gap-3'>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
 										${
                       checkpoint.type === "start"
                         ? "bg-emerald-500/15 text-emerald-600"
@@ -263,24 +279,24 @@ export default function ClientEventDetail() {
                           ? "bg-red-500/15 text-red-600"
                           : "bg-blue-500/15 text-blue-600"
                     }`}
-                  >
-                    {index + 1}
+                    >
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className='font-semibold'>{checkpoint.name}</p>
+                      <p className='text-xs capitalize text-muted-foreground'>
+                        {checkpoint.type}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className='font-semibold'>{checkpoint.name}</p>
-                    <p className='text-xs capitalize text-muted-foreground'>
-                      {checkpoint.type}
+                  <div className='text-right'>
+                    <p className='text-[10px] uppercase font-mono text-muted-foreground'>
+                      {checkpoint.location.lat.toFixed(4)}°,{" "}
+                      {checkpoint.location.lng.toFixed(4)}°
                     </p>
                   </div>
                 </div>
-                <div className='text-right'>
-                  <p className='text-[10px] uppercase font-mono text-muted-foreground'>
-                    {checkpoint.location.lat.toFixed(4)}°,{" "}
-                    {checkpoint.location.lng.toFixed(4)}°
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </CardContent>
       </Card>
@@ -295,12 +311,30 @@ export default function ClientEventDetail() {
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-2 text-sm text-foreground/80 leading-relaxed font-medium'>
-          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Pick up your RFID tag from the equipment desk before race day</p>
-          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Attach the RFID tag securely to your running bib</p>
-          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Arrive at least 30 minutes before the start time</p>
-          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Warm up area available at City Hall Plaza</p>
-          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Water stations available at each checkpoint</p>
-          <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" /> Medical support stationed along the route</p>
+          <p className='flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />{" "}
+            Pick up your RFID tag from the equipment desk before race day
+          </p>
+          <p className='flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />{" "}
+            Attach the RFID tag securely to your running bib
+          </p>
+          <p className='flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />{" "}
+            Arrive at least 30 minutes before the start time
+          </p>
+          <p className='flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />{" "}
+            Warm up area available at City Hall Plaza
+          </p>
+          <p className='flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />{" "}
+            Water stations available at each checkpoint
+          </p>
+          <p className='flex items-center gap-2'>
+            <span className='w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0' />{" "}
+            Medical support stationed along the route
+          </p>
         </CardContent>
       </Card>
 

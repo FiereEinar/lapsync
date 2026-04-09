@@ -22,9 +22,12 @@ import { Event } from "@/types/event";
 import { Registration } from "@/types/registration";
 import { QUERY_KEYS } from "@/constants";
 import RaceCategoryTable from "@/components/RaceCategoryTable";
+import PersonalReport from "@/components/tabs/event-detail/PersonalReport";
+import { useUserStore } from "@/stores/user";
 
 export default function EventDetail() {
   const { eventID } = useParams();
+  const { user } = useUserStore();
 
   const { data: eventDetail } = useQuery({
     queryKey: [QUERY_KEYS.EVENT, eventID],
@@ -73,18 +76,6 @@ export default function EventDetail() {
             <Users className='w-4 h-4 mr-2' />
             Participants
           </TabsTrigger>
-          <TabsTrigger value='pending' className='rounded-lg py-2'>
-            <CreditCard className='w-4 h-4 mr-2' />
-            Pending
-            {pendingCount > 0 && (
-              <Badge
-                variant='destructive'
-                className='ml-2 flex items-center justify-center size-5 shrink-0 rounded-full p-0 text-[10px] font-bold'
-              >
-                {pendingCount}
-              </Badge>
-            )}
-          </TabsTrigger>
           <TabsTrigger value='map' className='rounded-lg py-2'>
             <MapPin className='w-4 h-4 mr-2' />
             Map Track
@@ -93,32 +84,47 @@ export default function EventDetail() {
             <Trophy className='w-4 h-4 mr-2' />
             Leaderboard
           </TabsTrigger>
-          <TabsTrigger value='checkin' className='rounded-lg py-2'>
-            <Radio className='w-4 h-4 mr-2' />
-            Check-in
-            {notCheckedInCount > 0 && (
-              <Badge
-                variant='destructive'
-                className='ml-2 flex items-center justify-center size-4 shrink-0 rounded-full p-0 text-[10px] font-bold'
-              >
-                {notCheckedInCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value='status' className='rounded-lg py-2'>
-            <Activity className='w-4 h-4 mr-2' />
-            Runner Status
-          </TabsTrigger>
+          {user.role === 'admin' ? (
+            <>
+              <TabsTrigger value='pending' className='rounded-lg py-2'>
+                <CreditCard className='w-4 h-4 mr-2' />
+                Pending
+                {pendingCount > 0 && (
+                  <Badge
+                    variant='destructive'
+                    className='ml-2 flex items-center justify-center size-5 shrink-0 rounded-full p-0 text-[10px] font-bold'
+                  >
+                    {pendingCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value='checkin' className='rounded-lg py-2'>
+                <Radio className='w-4 h-4 mr-2' />
+                Check-in
+                {notCheckedInCount > 0 && (
+                  <Badge
+                    variant='destructive'
+                    className='ml-2 flex items-center justify-center size-4 shrink-0 rounded-full p-0 text-[10px] font-bold'
+                  >
+                    {notCheckedInCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value='status' className='rounded-lg py-2'>
+                <Activity className='w-4 h-4 mr-2' />
+                Runner Status
+              </TabsTrigger>
+            </>
+          ) : (
+            <TabsTrigger value='reports' className='rounded-lg py-2'>
+              <Activity className='w-4 h-4 mr-2' />
+              My Report
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value='participants' className='space-y-4'>
-
           {eventDetail && <Participants event={eventDetail} />}
-        </TabsContent>
-
-        {/* Pending Payments Tab */}
-        <TabsContent value='pending' className='space-y-4'>
-          {eventDetail && <PendingPayments event={eventDetail} />}
         </TabsContent>
 
         <TabsContent value='map' className='space-y-4'>
@@ -129,13 +135,23 @@ export default function EventDetail() {
           {eventDetail && <Leaderboard event={eventDetail} />}
         </TabsContent>
 
-        <TabsContent value='checkin' className='space-y-4'>
-          {eventDetail && <RaceCheckIn event={eventDetail} />}
-        </TabsContent>
-
-        <TabsContent value='status' className='space-y-4'>
-          <RunnerStatus />
-        </TabsContent>
+        {user.role === 'admin' ? (
+          <>
+            <TabsContent value='pending' className='space-y-4'>
+              {eventDetail && <PendingPayments event={eventDetail} />}
+            </TabsContent>
+            <TabsContent value='checkin' className='space-y-4'>
+              {eventDetail && <RaceCheckIn event={eventDetail} />}
+            </TabsContent>
+            <TabsContent value='status' className='space-y-4'>
+              <RunnerStatus />
+            </TabsContent>
+          </>
+        ) : (
+          <TabsContent value='reports' className='space-y-4'>
+            {eventDetail && <PersonalReport event={eventDetail} />}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

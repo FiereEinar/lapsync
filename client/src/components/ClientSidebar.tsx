@@ -1,4 +1,4 @@
-import { Home, Calendar, Trophy, Activity, User } from 'lucide-react';
+import { Home, Calendar, Trophy, Activity, User, CheckCircle } from 'lucide-react';
 import {
 	Sidebar,
 	SidebarContent,
@@ -16,7 +16,7 @@ import LogoutButton from './buttons/LogoutButton';
 const menuItems: MenuItem[] = [
 	{ title: 'Home', url: '/client', icon: Home },
 	{ title: 'Events', url: '/client/events', icon: Calendar },
-	{ title: 'Leaderboard', url: '/client/leaderboard', icon: Trophy },
+	{ title: 'Completed Events', url: '/client/completed', icon: CheckCircle },
 	{ title: 'Live Race', url: '/client/race', icon: Activity },
 	{ title: 'Profile', url: '/client/profile', icon: User },
 ];

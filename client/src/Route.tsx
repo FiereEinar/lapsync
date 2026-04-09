@@ -31,6 +31,7 @@ import Devices from "./pages/Devices";
 import RfidTags from "./pages/RfidTags";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import CompletedEvents from "./pages/client/CompletedEvents";
 
 const router = createBrowserRouter([
   /* ------------------ Auth Routes ------------------ */
@@ -73,7 +74,7 @@ const router = createBrowserRouter([
         path: "public/events/:id",
         element: <PublicEventSpectate />,
       },
-    ]
+    ],
   },
 
   /* ------------------ Admin Routes ------------------ */
@@ -151,8 +152,12 @@ const router = createBrowserRouter([
         element: <RaceParticipation />,
       },
       {
-        path: "leaderboard",
-        element: <Leaderboard />,
+        path: "completed",
+        element: <CompletedEvents />,
+      },
+      {
+        path: "completed/:eventID",
+        element: <EventDetail />,
       },
       {
         path: "profile",

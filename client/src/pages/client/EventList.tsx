@@ -1,23 +1,23 @@
-import { Input } from '@/components/ui/input';
-import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/api/axios';
-import ClientEventCard from '@/components/cards/ClientEventCard';
-import { Event } from '@/types/event';
-import { QUERY_KEYS } from '@/constants';
-import { useUserStore } from '@/stores/user';
-import { Registration } from '@/types/registration';
-import { Search, Calendar, CalendarCheck, Users } from 'lucide-react';
-import { StatCard } from '@/components/StatCard';
-import { useState, useMemo } from 'react';
+import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "@/api/axios";
+import ClientEventCard from "@/components/cards/ClientEventCard";
+import { Event } from "@/types/event";
+import { QUERY_KEYS } from "@/constants";
+import { useUserStore } from "@/stores/user";
+import { Registration } from "@/types/registration";
+import { Search, Calendar, CalendarCheck, Users } from "lucide-react";
+import { StatCard } from "@/components/StatCard";
+import { useState, useMemo } from "react";
 
 export default function ClientEventList() {
   const { user } = useUserStore((state) => state);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: events, isLoading: eventsLoading } = useQuery({
     queryKey: [QUERY_KEYS.EVENT],
     queryFn: async (): Promise<Event[]> => {
-      const { data } = await axiosInstance.get('/event');
+      const { data } = await axiosInstance.get("/event");
       return data.data;
     },
   });
@@ -34,19 +34,31 @@ export default function ClientEventList() {
 
   const filteredEvents = useMemo(() => {
     if (!events) return [];
-    if (!searchTerm) return events;
-    return events.filter(
+    const activeEvents = events.filter((e) => e.status !== "finished");
+    if (!searchTerm) return activeEvents;
+    return activeEvents.filter(
       (event) =>
         event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.location.city.toLowerCase().includes(searchTerm.toLowerCase())
+        event.location.city.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [events, searchTerm]);
 
-  const registeredCount = userRegistrations?.length || 0;
-  const upcomingCount = events?.filter((e) => e.status === 'upcoming').length || 0;
-  const totalSlots = events?.reduce((sum, ev) => {
-    return sum + ev.raceCategories.reduce((s, cat) => s + (cat.slots - cat.registeredCount), 0);
-  }, 0) || 0;
+  const registeredCount =
+    userRegistrations?.filter((r) => r.event.status !== "finished").length || 0;
+  const upcomingCount =
+    events?.filter((e) => e.status === "upcoming").length || 0;
+  const totalSlots =
+    events
+      ?.filter((e) => e.status !== "finished")
+      .reduce((sum, ev) => {
+        return (
+          sum +
+          ev.raceCategories.reduce(
+            (s, cat) => s + (cat.slots - cat.registeredCount),
+            0,
+          )
+        );
+      }, 0) || 0;
 
   return (
     <div className='space-y-6 animate-appear'>
@@ -54,7 +66,9 @@ export default function ClientEventList() {
       <div className='relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/10 p-6 md:p-8'>
         <div className='absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
         <div className='relative'>
-          <p className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>Events</p>
+          <p className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
+            Events
+          </p>
           <h1 className='text-2xl md:text-3xl font-extrabold text-foreground'>
             Available Events
           </h1>

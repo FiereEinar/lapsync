@@ -83,20 +83,21 @@ const createCustomMarker = (color: string, name: string) => {
   });
 };
 
-export default function MapReplay() {
-  const { eventID } = useParams();
+export default function MapReplay({ eventId }: { eventId?: string } = {}) {
+  const { eventID: urlEventId } = useParams();
+  const eventIDToUse = eventId || urlEventId;
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: telemetryPoints = [], isLoading } = useQuery({
-    queryKey: ["telemetry", eventID],
+    queryKey: ["telemetry", eventIDToUse],
     queryFn: async (): Promise<TelemetryData[]> => {
-      const { data } = await axiosInstance.get(`/telemetry/event/${eventID}`);
+      const { data } = await axiosInstance.get(`/telemetry/event/${eventIDToUse}`);
       return data.data;
     },
-    enabled: !!eventID,
+    enabled: !!eventIDToUse,
   });
 
   const { groupedData, minTime, maxTime, defaultCenter } = useMemo(() => {

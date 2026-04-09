@@ -199,32 +199,39 @@ export default function RaceParticipation() {
           </p>
         </div>
       ) : (
-        <>
-          <RaceStatsCards
-            currentPosition={raceData.currentPosition}
-            timeElapsed={raceData.timeElapsed}
-            pace={raceData.pace}
-            heartRate={raceData.heartRate}
-            heartRateZone={raceData.heartRateZone}
-          />
-          <RaceProgress
-            distance={raceData.distance}
-            totalDistance={raceData.totalDistance}
-            nextCheckpoint={raceData.nextCheckpoint}
-            distanceToCheckpoint={raceData.distanceToCheckpoint}
-            estimatedTime={raceData.estimatedTime}
-          />
-          <BioSignalMonitor
-            heartRate={raceData.heartRate}
-            heartRateZone={raceData.heartRateZone}
-            emg={raceData.emg}
-            warning={raceData.warning}
-            heartRateHistory={heartRateHistory}
-            emgHistory={emgHistory}
-          />
-          <LiveMap />
-          <CheckpointList checkpoints={raceData.checkpoints} />
-        </>
+        (() => {
+          const selectedReg = selectOptions.find(r => r._id === registrationId);
+          const eventId = selectedReg?.event?._id;
+          
+          return (
+            <>
+              <RaceStatsCards
+                currentPosition={raceData.currentPosition}
+                timeElapsed={raceData.timeElapsed}
+                pace={raceData.pace}
+                heartRate={raceData.heartRate}
+                heartRateZone={raceData.heartRateZone}
+              />
+              <RaceProgress
+                distance={raceData.distance}
+                totalDistance={raceData.totalDistance}
+                nextCheckpoint={raceData.nextCheckpoint}
+                distanceToCheckpoint={raceData.distanceToCheckpoint}
+                estimatedTime={raceData.estimatedTime}
+              />
+              <BioSignalMonitor
+                heartRate={raceData.heartRate}
+                heartRateZone={raceData.heartRateZone}
+                emg={raceData.emg}
+                warning={raceData.warning}
+                heartRateHistory={heartRateHistory}
+                emgHistory={emgHistory}
+              />
+              <LiveMap eventId={eventId} />
+              <CheckpointList checkpoints={raceData.checkpoints} />
+            </>
+          );
+        })()
       )}
     </div>
   );

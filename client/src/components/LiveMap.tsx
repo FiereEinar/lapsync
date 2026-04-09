@@ -17,7 +17,11 @@ L.Icon.Default.mergeOptions({
 	shadowUrl: markerShadow,
 });
 
-export const LiveMap = () => {
+type LiveMapProps = {
+	eventId?: string;
+};
+
+export const LiveMap = ({ eventId }: LiveMapProps = {}) => {
 	const [position, setPosition] = useState<[number, number] | null>(null);
 	const [path, setPath] = useState<[number, number][]>([]);
 
@@ -36,7 +40,7 @@ export const LiveMap = () => {
 		};
 	}, []);
 
-	if (!position) return <MapTrack />;
+	if (!position) return <MapTrack fallbackEventId={eventId} />;
 
 	return (
 		<MapContainer

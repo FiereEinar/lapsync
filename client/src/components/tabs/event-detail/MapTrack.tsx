@@ -8,9 +8,14 @@ import { Download } from "lucide-react";
 import { useParams } from "react-router-dom";
 import axiosInstance from "@/api/axios";
 
-export default function MapTrack() {
+type MapTrackProps = {
+  fallbackEventId?: string;
+};
+
+export default function MapTrack({ fallbackEventId }: MapTrackProps = {}) {
   const [activeTab, setActiveTab] = useState<"replay" | "live" | "checkpoints">("replay");
-  const { eventID } = useParams();
+  const { eventID: urlEventId } = useParams();
+  const eventID = urlEventId || fallbackEventId;
 
   const handleExport = async () => {
     try {
@@ -47,9 +52,9 @@ export default function MapTrack() {
       </div>
 
       <div className="mt-2">
-        {activeTab === "replay" && <MapReplay />}
+        {activeTab === "replay" && <MapReplay eventId={eventID} />}
         {activeTab === "live" && <MapLive />}
-        {activeTab === "checkpoints" && <MapCheckpoints />}
+        {activeTab === "checkpoints" && <MapCheckpoints eventId={eventID} />}
       </div>
     </div>
   );

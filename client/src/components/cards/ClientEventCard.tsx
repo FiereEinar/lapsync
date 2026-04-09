@@ -11,11 +11,13 @@ import { ClientEventActionButton } from '../buttons/ClientEventActionButton';
 type ClientEventCardProps = {
   event: Event;
   userRegistrations: Registration[];
+  linkPrefix?: string;
 };
 
 export default function ClientEventCard({
   event,
   userRegistrations,
+  linkPrefix = '/client/events',
 }: ClientEventCardProps) {
   const distances = event.raceCategories.map((c) => c.distanceKm);
   const minDistance = Math.min(...distances);
@@ -104,7 +106,7 @@ export default function ClientEventCard({
               </div>
               <div className='flex gap-2'>
                 <Button asChild variant='ghost' size='sm' className='rounded-lg hover:bg-primary/10 text-primary gap-1'>
-                  <Link to={`/client/events/${event._id}`}>
+                  <Link to={`${linkPrefix}/${event._id}`}>
                     Details
                     <ChevronRight className='w-3.5 h-3.5' />
                   </Link>
