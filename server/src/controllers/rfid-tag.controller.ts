@@ -100,18 +100,19 @@ export const assignRfidTag = asyncHandler(async (req, res) => {
   appAssert(epc, BAD_REQUEST, "EPC is required");
   appAssert(registrationId, BAD_REQUEST, "Registration ID is required");
 
-  // Look up the tag
-  const tag = await RfidTagModel.findOne({ epc });
-  appAssert(
-    tag,
-    NOT_FOUND,
-    "RFID tag not found. Make sure it is registered in the system.",
-  );
-  appAssert(
-    tag.status === "available",
-    BAD_REQUEST,
-    "This RFID tag is already assigned to another participant",
-  );
+  // Look up the tag — auto-create if it doesn't exist yet
+  let tag = await RfidTagModel.findOne({ epc });
+
+  if (tag) {
+    appAssert(
+      tag.status === "available",
+      BAD_REQUEST,
+      "This RFID tag is already assigned to another participant",
+    );
+  } else {
+    // Auto-register the tag on the fly
+    tag = await RfidTagModel.create({ epc, status: "available" });
+  }
 
   // Look up the registration
   const registration = await RegistrationModel.findById(registrationId);

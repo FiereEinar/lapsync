@@ -111,40 +111,33 @@ wss.on('connection', (ws: WebSocket) => {
 				return;
 			}
 
-			// Look up device mapping
-			const mapping = await RfidDeviceMappingModel.findOne({
+			// Look up all active device mappings for this device
+			const mappings = await RfidDeviceMappingModel.find({
 				deviceName: device,
+				isActive: true,
 			});
 
-			if (!mapping) {
+			if (mappings.length === 0) {
 				rfidScannerNamespace.emit('rfidScanSkipped', {
 					tag,
 					device,
-					reason: `No mapping configured for device "${device}"`,
+					reason: `No active mapping configured for device "${device}"`,
 					timestamp: Date.now(),
 				});
 				return;
 			}
 
-			if (!mapping.isActive) {
-				rfidScannerNamespace.emit('rfidScanSkipped', {
+			// Process the scan against each active mapping
+			for (const mapping of mappings) {
+				const result = await processScan(tag, scanTime, mapping);
+
+				rfidScannerNamespace.emit('rfidScanProcessed', {
 					tag,
 					device,
-					reason: `Device "${device}" mapping is inactive`,
+					result,
 					timestamp: Date.now(),
 				});
-				return;
 			}
-
-			// Process the scan
-			const result = await processScan(tag, scanTime, mapping);
-
-			rfidScannerNamespace.emit('rfidScanProcessed', {
-				tag,
-				device,
-				result,
-				timestamp: Date.now(),
-			});
 		} catch (err: any) {
 			console.error('[RFID WS] Error processing message:', err);
 			rfidScannerNamespace.emit('rfidScanError', {

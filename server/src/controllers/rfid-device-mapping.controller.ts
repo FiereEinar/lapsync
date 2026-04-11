@@ -65,20 +65,6 @@ export const createDeviceMapping = asyncHandler(async (req, res) => {
     );
   }
 
-  // Check for duplicate device name
-  const existing = await RfidDeviceMappingModel.findOne({ deviceName });
-  if (existing) {
-    res
-      .status(BAD_REQUEST)
-      .json(
-        new CustomResponse(
-          false,
-          null,
-          `A mapping for device "${deviceName}" already exists`,
-        ),
-      );
-    return;
-  }
 
   const mapping = await RfidDeviceMappingModel.create({
     deviceName,
@@ -112,6 +98,32 @@ export const updateDeviceMapping = asyncHandler(async (req, res) => {
   if (raceCategory !== undefined) mapping.raceCategory = raceCategory;
   if (scanType !== undefined) mapping.scanType = scanType;
   if (checkpointName !== undefined) mapping.checkpointName = checkpointName;
+
+  // ── Activation guard ──
+  // When activating, ensure no other active mapping for the same device + event
+  // has a DIFFERENT scanType (e.g. can't be start AND finish at the same time).
+  if (isActive === true) {
+    const conflicting = await RfidDeviceMappingModel.findOne({
+      _id: { $ne: mapping._id },
+      deviceName: mapping.deviceName,
+      event: mapping.event,
+      isActive: true,
+      scanType: { $ne: mapping.scanType },
+    });
+
+    if (conflicting) {
+      const conflictType = conflicting.scanType.toUpperCase();
+      res.status(BAD_REQUEST).json(
+        new CustomResponse(
+          false,
+          null,
+          `Cannot activate — device "${mapping.deviceName}" already has an active "${conflictType}" mapping for this event. Deactivate it first.`,
+        ),
+      );
+      return;
+    }
+  }
+
   if (isActive !== undefined) mapping.isActive = isActive;
 
   await mapping.save();

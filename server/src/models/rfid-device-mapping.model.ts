@@ -15,7 +15,7 @@ export type RfidDeviceMapping = {
 
 const RfidDeviceMappingSchema = new mongoose.Schema<RfidDeviceMapping>(
   {
-    deviceName: { type: String, required: true, unique: true },
+    deviceName: { type: String, required: true },
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
@@ -31,7 +31,7 @@ const RfidDeviceMappingSchema = new mongoose.Schema<RfidDeviceMapping>(
       required: true,
     },
     checkpointName: { type: String },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

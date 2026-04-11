@@ -7,17 +7,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Loader2, CheckCircle2, Radio, Tag } from "lucide-react";
+import { Search, Loader2, CheckCircle2, Radio, Tag, Wifi, WifiOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Event } from "@/types/event";
 import { Registration } from "@/types/registration";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/constants";
 import axiosInstance from "@/api/axios";
+import { io, Socket } from "socket.io-client";
 
 type RaceCheckInProps = {
   event: Event;
@@ -26,8 +27,55 @@ type RaceCheckInProps = {
 export default function RaceCheckIn({ event }: RaceCheckInProps) {
   const [epcInput, setEpcInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [lastScanFlash, setLastScanFlash] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const socketRef = useRef<Socket | null>(null);
+  const epcInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Socket.IO – listen for RFID scans ──
+  useEffect(() => {
+    const socket = io(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/rfid-scanner`,
+      { transports: ["websocket"] },
+    );
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setIsConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    // When a raw RFID scan comes through, capture the tag EPC into the input
+    socket.on(
+      "rfidRawScan",
+      (data: { tag: string; time: string; device: string; timestamp: number }) => {
+        if (data.tag) {
+          setEpcInput(data.tag);
+
+          // Flash the input briefly to give visual feedback
+          setLastScanFlash(true);
+          setTimeout(() => setLastScanFlash(false), 800);
+
+          // Focus the input so the admin can immediately see the value
+          epcInputRef.current?.focus();
+
+          toast({
+            title: "Tag Scanned",
+            description: `Captured RFID tag "${data.tag}" from device "${data.device}"`,
+          });
+        }
+      },
+    );
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [toast]);
 
   // ── Fetch registrations for this event ──
   const { data: registrations = [] } = useQuery({
@@ -112,6 +160,30 @@ export default function RaceCheckIn({ event }: RaceCheckInProps) {
               </p>
             </div>
             <div className='flex items-center gap-3'>
+              {/* Live scanner connection indicator */}
+              <Badge
+                variant='outline'
+                className={`border-0 uppercase tracking-wider text-[10px] gap-1.5 ${
+                  isConnected
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {isConnected ? (
+                  <>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                    </span>
+                    Live Scanner
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className='w-3 h-3' />
+                    Scanner Offline
+                  </>
+                )}
+              </Badge>
               <Badge
                 variant='outline'
                 className='bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-0 uppercase tracking-wider text-[10px]'
@@ -129,10 +201,19 @@ export default function RaceCheckIn({ event }: RaceCheckInProps) {
           </div>
 
           {/* EPC Input Section */}
-          <div className='flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-muted/30 ml-0 md:ml-12'>
-            <Tag className='w-5 h-5 text-muted-foreground shrink-0' />
+          <div
+            className={`flex items-center gap-3 p-4 rounded-xl border bg-muted/30 ml-0 md:ml-12 transition-all duration-300 ${
+              lastScanFlash
+                ? "border-primary bg-primary/10 shadow-[0_0_15px_rgba(var(--primary),0.15)]"
+                : "border-border/50"
+            }`}
+          >
+            <Tag className={`w-5 h-5 shrink-0 transition-colors duration-300 ${
+              lastScanFlash ? "text-primary" : "text-muted-foreground"
+            }`} />
             <Input
-              placeholder='Enter or scan RFID tag EPC...'
+              ref={epcInputRef}
+              placeholder={isConnected ? 'Waiting for RFID scan or type manually...' : 'Enter RFID tag EPC...'}
               className='max-w-sm font-mono rounded-lg border-border/50'
               value={epcInput}
               onChange={(e) => setEpcInput(e.target.value)}
