@@ -29,6 +29,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Devices from "./pages/Devices";
 import RfidTags from "./pages/RfidTags";
+import RfidScanner from "./pages/RfidScanner";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import CompletedEvents from "./pages/client/CompletedEvents";
@@ -110,6 +111,10 @@ const router = createBrowserRouter([
       {
         path: "rfid-tags",
         element: <RfidTags />,
+      },
+      {
+        path: "rfid-scanner",
+        element: <RfidScanner />,
       },
       {
         path: "settings",

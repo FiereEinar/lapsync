@@ -1,10 +1,10 @@
 import {
   Calendar,
   Computer,
-  FileText,
   Home,
   LayoutDashboard,
   Radio,
+  ScanLine,
   Settings,
   Users,
 } from "lucide-react";
@@ -38,6 +38,7 @@ const menuItems: MenuItem[] = [
   { title: "Participants", url: "/participants", icon: Users },
   { title: "Devices", url: "/devices", icon: Computer },
   { title: "RFID Tags", url: "/rfid-tags", icon: Radio },
+  { title: "RFID Scanner", url: "/rfid-scanner", icon: ScanLine },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 

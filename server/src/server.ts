@@ -4,6 +4,9 @@ import { NODE_ENV, PORT } from './constant/env';
 import { corsOptions } from './utils/cors';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
+import RfidDeviceMappingModel from './models/rfid-device-mapping.model';
+import { processScan } from './services/rfidScanService';
 dotenv.config();
 
 const server = createServer(app);
@@ -27,22 +30,155 @@ raceNamespace.on('connection', (socket) => {
 	});
 });
 
-let position = [8.163334, 125.130747];
+/* -------------------------
+   RFID SCANNER NAMESPACE
+   (Admin live feed)
+-------------------------- */
+const rfidScannerNamespace = io.of('/rfid-scanner');
+let isScanning = true; // Global scanner state
 
-// setInterval(() => {
-// 	console.log('Emitting GPS update');
-// 	if (position[0] && position[1]) {
-// 		position = [
-// 			position[0] + Math.random() * 0.0003,
-// 			position[1] + Math.random() * 0.0003,
-// 		];
+rfidScannerNamespace.on('connection', (socket) => {
+	console.log(`[RFID Scanner] Admin client connected: ${socket.id}`);
 
-// 		raceNamespace.emit('gpsUpdate', {
-// 			lat: position[0],
-// 			lon: position[1],
-// 		});
-// 	}
-// }, 2000);
+	// Send current scanner state on connect
+	socket.emit('scannerState', { isScanning });
+
+	socket.on('startScanner', () => {
+		isScanning = true;
+		rfidScannerNamespace.emit('scannerState', { isScanning });
+		console.log('[RFID Scanner] Scanner started by admin');
+	});
+
+	socket.on('stopScanner', () => {
+		isScanning = false;
+		rfidScannerNamespace.emit('scannerState', { isScanning });
+		console.log('[RFID Scanner] Scanner stopped by admin');
+	});
+
+	socket.on('disconnect', () => {
+		console.log(`[RFID Scanner] Admin client disconnected: ${socket.id}`);
+	});
+});
+
+/* -------------------------
+   RFID HARDWARE WEBSOCKET
+   /ws/device/rfid
+-------------------------- */
+const wss = new WebSocketServer({ noServer: true });
+
+// Track connected hardware devices
+const connectedDevices = new Set<string>();
+
+wss.on('connection', (ws: WebSocket) => {
+	let deviceId = 'unknown';
+	console.log('[RFID WS] Hardware device connected');
+
+	rfidScannerNamespace.emit('rfidDeviceConnected', {
+		connectedCount: wss.clients.size,
+	});
+
+	ws.on('message', async (raw: Buffer | string) => {
+		try {
+			const message = JSON.parse(raw.toString());
+			const { tag, time, device } = message;
+
+			if (!tag || !device) {
+				console.warn('[RFID WS] Invalid message format:', message);
+				return;
+			}
+
+			deviceId = device;
+			connectedDevices.add(device);
+
+			const scanTime = time ? new Date(time) : new Date();
+
+			// Forward raw scan to admin clients
+			rfidScannerNamespace.emit('rfidRawScan', {
+				tag,
+				time: scanTime.toISOString(),
+				device,
+				timestamp: Date.now(),
+			});
+
+			// If scanner is paused, skip processing
+			if (!isScanning) {
+				rfidScannerNamespace.emit('rfidScanSkipped', {
+					tag,
+					device,
+					reason: 'Scanner is paused',
+					timestamp: Date.now(),
+				});
+				return;
+			}
+
+			// Look up device mapping
+			const mapping = await RfidDeviceMappingModel.findOne({
+				deviceName: device,
+			});
+
+			if (!mapping) {
+				rfidScannerNamespace.emit('rfidScanSkipped', {
+					tag,
+					device,
+					reason: `No mapping configured for device "${device}"`,
+					timestamp: Date.now(),
+				});
+				return;
+			}
+
+			if (!mapping.isActive) {
+				rfidScannerNamespace.emit('rfidScanSkipped', {
+					tag,
+					device,
+					reason: `Device "${device}" mapping is inactive`,
+					timestamp: Date.now(),
+				});
+				return;
+			}
+
+			// Process the scan
+			const result = await processScan(tag, scanTime, mapping);
+
+			rfidScannerNamespace.emit('rfidScanProcessed', {
+				tag,
+				device,
+				result,
+				timestamp: Date.now(),
+			});
+		} catch (err: any) {
+			console.error('[RFID WS] Error processing message:', err);
+			rfidScannerNamespace.emit('rfidScanError', {
+				error: err.message || 'Unknown error',
+				timestamp: Date.now(),
+			});
+		}
+	});
+
+	ws.on('close', () => {
+		console.log(`[RFID WS] Hardware device disconnected: ${deviceId}`);
+		connectedDevices.delete(deviceId);
+		rfidScannerNamespace.emit('rfidDeviceDisconnected', {
+			device: deviceId,
+			connectedCount: wss.clients.size - 1, // -1 because the closing one is still counted
+		});
+	});
+
+	ws.on('error', (err) => {
+		console.error('[RFID WS] WebSocket error:', err);
+	});
+});
+
+// Handle HTTP upgrade for /ws/device/rfid path
+server.on('upgrade', (request, socket, head) => {
+	const { url } = request;
+
+	if (url === '/ws/device/rfid') {
+		wss.handleUpgrade(request, socket, head, (ws) => {
+			wss.emit('connection', ws, request);
+		});
+	}
+	// Let socket.io handle its own upgrades (it does this automatically)
+});
 
 if (NODE_ENV === 'development') {
 	server.listen(Number(PORT), '0.0.0.0', () => {
