@@ -233,7 +233,7 @@ export default function MapLive() {
       <Tabs defaultValue='runners' className='w-full'>
         <TabsList className='grid w-full max-w-md grid-cols-2'>
           <TabsTrigger value='runners'>Active Runners</TabsTrigger>
-          <TabsTrigger value='alerts'>Emergency Alerts</TabsTrigger>
+          <TabsTrigger value='alerts'>Warnings</TabsTrigger>
         </TabsList>
 
         <TabsContent value='runners' className='mt-4'>
