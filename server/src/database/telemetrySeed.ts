@@ -207,9 +207,9 @@ export const seedTelemetry = async () => {
 				// Simulate heart rate rising and staying elevated (130 - 180 bpm)
 				const heartRate = Math.floor(130 + Math.random() * 50);
 
-				// Simulate EMG readings as stringified array or arbitrary value depending on schema expectation (we'll just use a mock amplitude string)
-				const emgAmplitude = (0.5 + Math.random() * 1.5).toFixed(2);
-				const emg = `[${emgAmplitude}mV, ${(parseFloat(emgAmplitude) - 0.1).toFixed(2)}mV]`;
+				// Amplitude 20-50 when moving, occasionally higher bursts
+				const emgAmplitude = (20 + Math.random() * 30 + (Math.random() > 0.9 ? 30 : 0)).toFixed(1);
+				const emg = `[${emgAmplitude}, ${(parseFloat(emgAmplitude) - 2.5).toFixed(1)}]`;
 
 				telemetryDocs.push({
 					registration: reg._id,
@@ -233,4 +233,64 @@ export const seedTelemetry = async () => {
 	} catch (error) {
 		console.error('Error seeding telemetry:', error);
 	}
+};
+
+export const regenerateTelemetry = async () => {
+    try {
+        console.log('--- Starting Telemetry Regeneration ---');
+
+        // Restrict to Bukidnon Trail Run so we only regenerate for our main test data
+        const event = await EventModel.findOne({ name: 'Bukidnon Trail Run' });
+        if (!event) {
+            console.log("Event not found. Cannot regenerate telemetry.");
+            return;
+        }
+
+        const registrations = await RegistrationModel.find({ event: event._id });
+        if (registrations.length === 0) {
+            console.log("No registrations found for this event.");
+            return;
+        }
+
+        // Only delete telemetry data belonging to this specific event
+        await TelemetryModel.deleteMany({ registration: { $in: registrations.map(r => r._id) } });
+        console.log("Cleared existing telemetry for seeded event.");
+
+        const telemetryDocs = [];
+        let baseTime = new Date('2026-08-10T05:35:00').getTime();
+
+        for (const reg of registrations) {
+            baseTime += Math.floor(Math.random() * 10000);
+
+            for (let i = 0; i < trailPoints.length; i++) {
+                const point = trailPoints[i];
+                if (!point) continue;
+
+                const latJitter = (Math.random() - 0.5) * 0.00008;
+                const lonJitter = (Math.random() - 0.5) * 0.00008;
+                const heartRate = Math.floor(130 + Math.random() * 50);
+
+                // Amplitude 20-50 when moving, occasionally higher bursts
+                const emgAmplitude = (20 + Math.random() * 30 + (Math.random() > 0.9 ? 30 : 0)).toFixed(1);
+                const emg = `[${emgAmplitude}, ${(parseFloat(emgAmplitude) - 2.5).toFixed(1)}]`;
+
+                telemetryDocs.push({
+                    registration: reg._id,
+                    gps: {
+                        lat: point.lat + latJitter,
+                        lon: point.lon + lonJitter,
+                    },
+                    heartRate,
+                    emg,
+                    createdAt: new Date(baseTime + i * 3000), 
+                });
+            }
+        }
+
+        await TelemetryModel.insertMany(telemetryDocs);
+        console.log(`Successfully generated ${telemetryDocs.length} Telemetries for ${registrations.length} registrations!`);
+        console.log('--- Telemetry Regeneration Complete ---');
+    } catch (err) {
+        console.error("Error regenerating telemetry:", err);
+    }
 };

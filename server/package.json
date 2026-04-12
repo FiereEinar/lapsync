@@ -8,6 +8,7 @@
 		"start": "node dist/src/app.js",
 		"check:ts": "tsc --noEmit",
 		"prod": "node ./dist/app.js",
+		"regen:telemetry": "ts-node src/scripts/regenTelemetry.ts",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [],

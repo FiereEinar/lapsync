@@ -84,12 +84,17 @@ export const getRegistrationAnalytics = asyncHandler(
       }
 
       if (t.emg) {
-        const emgVal = parseFloat(t.emg);
-        if (!isNaN(emgVal)) {
-          sumEmg += emgVal;
-          if (emgVal > maxEmg) maxEmg = emgVal;
-          validEmgCount++;
-          rawEmg.push({ time: timeLabel, value: emgVal });
+        const match = t.emg.match(/[\d.]+/);
+        if (match) {
+          const rawAmp = parseFloat(match[0]);
+          if (!isNaN(rawAmp)) {
+            sumEmg += rawAmp;
+            if (rawAmp > maxEmg) maxEmg = rawAmp;
+            validEmgCount++;
+            
+            // Send the raw amplitude value to the plotter
+            rawEmg.push({ time: timeLabel, value: Number(rawAmp.toFixed(1)) });
+          }
         }
       }
     });
@@ -108,8 +113,8 @@ export const getRegistrationAnalytics = asyncHandler(
     const peakFatigue = maxEmg > -Infinity ? Math.round(maxEmg) : 0;
     
     let fatigueLevel = 'Low';
-    if (avgFatigue > 60) fatigueLevel = 'High';
-    else if (avgFatigue > 40) fatigueLevel = 'Moderate';
+    if (avgFatigue >= 90) fatigueLevel = 'High';
+    else if (avgFatigue >= 50) fatigueLevel = 'Moderate';
 
     res.json(
       new CustomResponse(

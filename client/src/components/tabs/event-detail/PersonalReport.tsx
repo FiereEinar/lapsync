@@ -205,13 +205,13 @@ export default function PersonalReport({ event, registrationId }: { event: Event
                   <div className='p-3 bg-background rounded-lg border border-border/50 shadow-sm'>
                     <div className='flex justify-between text-sm items-center'>
                       <span className='text-muted-foreground text-xs'>Average</span>
-                      <span className='font-bold text-lg'>{semg.avgFatigue}%</span>
+                      <span className='font-bold text-lg'>{semg.avgFatigue}</span>
                     </div>
                   </div>
                   <div className='p-3 bg-background rounded-lg border border-border/50 shadow-sm'>
                     <div className='flex justify-between text-sm items-center'>
                       <span className='text-muted-foreground text-xs'>Peak Load</span>
-                      <span className='font-bold text-lg'>{semg.peakFatigue}%</span>
+                      <span className='font-bold text-lg'>{semg.peakFatigue}</span>
                     </div>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function PersonalReport({ event, registrationId }: { event: Event
                           : semg.fatigueLevel === 'Moderate' ? 'bg-amber-500'
                             : 'bg-red-500'
                       }`}
-                      style={{ width: `${semg.peakFatigue}%` }}
+                      style={{ width: `${Math.min(100, (semg.peakFatigue / 120) * 100)}%` }}
                     />
                   </div>
                 </div>
