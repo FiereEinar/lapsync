@@ -4,6 +4,7 @@ export const raceCategorySchema = z.object({
 	name: z.string().min(1, 'Category name is required'),
 	distanceKm: z.coerce.number().positive(),
 	cutoffTime: z.coerce.number().positive(),
+	gunStartTime: z.string().optional(),
 	price: z.coerce.number().min(0),
 	slots: z.coerce.number().int().positive(),
 });
@@ -14,6 +15,7 @@ export const createEventSchema = z.object({
 	date: z.string(),
 	startTime: z.string().optional(),
 	endTime: z.string().optional(),
+	hardwarePickupLocation: z.string().optional(),
 
 	location: z.object({
 		venue: z.string().min(1),

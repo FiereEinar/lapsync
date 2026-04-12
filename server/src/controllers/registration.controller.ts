@@ -163,5 +163,7 @@ export const adminRegisterHandler = asyncHandler(async (req, res) => {
 
   res
     .status(CREATED)
-    .json(new CustomResponse(true, registration, "Participant added successfully"));
+    .json(
+      new CustomResponse(true, registration, "Participant added successfully"),
+    );
 });
