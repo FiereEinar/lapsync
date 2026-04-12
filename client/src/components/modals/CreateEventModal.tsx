@@ -30,12 +30,13 @@ export function CreateEventDialog() {
       city: '',
       province: '',
     },
+    hardwarePickupLocation: '',
     registration: {
       opensAt: '',
       closesAt: '',
     },
     raceCategories: [
-      { name: '', distanceKm: 5, cutoffTime: 60, price: 500, slots: 100 },
+      { name: '', distanceKm: 5, cutoffTime: 60, price: 500, slots: 100, gunStartTime: '' },
     ],
   };
 

@@ -25,6 +25,7 @@ export type Event = {
 	date: string;
 	startTime: string;
 	endTime: string;
+	hardwarePickupLocation?: string;
 	location: {
 		venue: string;
 		city: string;

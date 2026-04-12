@@ -150,6 +150,19 @@ export function EventForm({
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name='hardwarePickupLocation'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hardware & Bib Pickup</FormLabel>
+                <FormControl>
+                  <Input placeholder='Location where runners pickup bibs/hardware' className='rounded-xl' {...field} value={field.value || ""} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
         </div>
 
         {/* Section: Registration */}
@@ -203,6 +216,7 @@ export function EventForm({
                   name: "",
                   distanceKm: 5,
                   cutoffTime: 60,
+                  gunStartTime: "",
                   price: 500,
                   slots: 100,
                 })
@@ -235,7 +249,7 @@ export function EventForm({
                     </Button>
                   )}
                 </div>
-                <div className='grid grid-cols-5 gap-3'>
+                <div className='grid grid-cols-6 gap-3'>
                   <FormField
                     control={form.control}
                     name={`raceCategories.${index}.name`}
@@ -270,6 +284,19 @@ export function EventForm({
                         <FormLabel className='text-xs'>Cutoff (min)</FormLabel>
                         <FormControl>
                           <Input type='number' placeholder='min' className='rounded-lg h-9 text-sm' {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`raceCategories.${index}.gunStartTime`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-xs'>Gun Start</FormLabel>
+                        <FormControl>
+                          <Input type='time' className='rounded-lg h-9 text-sm' {...field} value={field.value || ""} />
                         </FormControl>
                       </FormItem>
                     )}

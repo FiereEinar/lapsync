@@ -139,11 +139,9 @@ export default function ClientEventDetail() {
       ? [sortedCheckpoints[0].location.lat, sortedCheckpoints[0].location.lng]
       : [14.5995, 120.9842];
 
-  const pickupLocation =
-    typeof event?.location === "object"
-      ? `${event.location.venue}, ${event.location.city}`
-      : event?.location || "TBA";
-  const pickupTime = event?.date
+  const pickupLocation = event?.hardwarePickupLocation || "No pickup location set";
+
+  const pickupTime = event?.hardwarePickupLocation && event?.date
     ? new Date(event.date).toLocaleDateString() + " - Morning prior to race"
     : "TBA";
 

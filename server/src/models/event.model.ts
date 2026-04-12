@@ -12,7 +12,7 @@ export type RaceCategory = {
 	name: string;
 	distanceKm: number;
 	cutoffTime: number; // minutes
-	gunStartTime: Date;
+	gunStartTime: string;
 	price: number;
 	slots: number;
 	registeredCount: number;
@@ -26,6 +26,7 @@ export type Event = {
 	date: Date;
 	startTime: string;
 	endTime: string;
+	hardwarePickupLocation?: string;
 	location: {
 		venue: string;
 		city: string;
@@ -50,7 +51,7 @@ const RaceCategorySchema = new Schema<RaceCategory>({
 	name: { type: String, required: true },
 	distanceKm: { type: Number, required: true },
 	cutoffTime: { type: Number, required: true }, // minutes
-	gunStartTime: { type: Date },
+	gunStartTime: { type: String },
 	price: { type: Number, required: true },
 	slots: { type: Number, required: true },
 	registeredCount: { type: Number, default: 0 },
@@ -69,6 +70,7 @@ const EventSchema = new Schema<Event>(
 		date: { type: Date, required: true },
 		startTime: String,
 		endTime: String,
+		hardwarePickupLocation: String,
 
 		location: {
 			venue: String,
