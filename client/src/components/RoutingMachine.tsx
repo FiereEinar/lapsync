@@ -20,7 +20,10 @@ export default function RoutingMachine({ waypoints, onRouteFound }: RoutingMachi
         serviceUrl: "https://router.project-osrm.org/route/v1",
       }),
       lineOptions: {
-        styles: [{ color: "#3b82f6", weight: 4, opacity: 0.7 }],
+        styles: [
+          { color: "#3b82f6", weight: 6, opacity: 0.7 },
+          { color: "white", weight: 2, opacity: 0.8, className: "route-direction" }
+        ],
         extendToWaypoints: true,
         missingRouteTolerance: 10,
       },

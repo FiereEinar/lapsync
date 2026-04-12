@@ -11,7 +11,14 @@ import RaceCategoryTable from "@/components/RaceCategoryTable";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/stores/user";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -63,6 +70,7 @@ export default function ClientEventDetail() {
   const { id } = useParams();
   const { user } = useUserStore();
   const [totalRouteDistance, setTotalRouteDistance] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const { data: event } = useQuery({
     queryKey: [QUERY_KEYS.EVENT, id],
@@ -73,12 +81,14 @@ export default function ClientEventDetail() {
   });
 
   const { data: checkpoints = [] } = useQuery({
-    queryKey: ["checkpoints", id],
+    queryKey: ["checkpoints", id, selectedCategory],
     queryFn: async (): Promise<Checkpoint[]> => {
-      const { data } = await axiosInstance.get(`/race-checkpoint/event/${id}`);
+      const { data } = await axiosInstance.get(
+        `/race-checkpoint/event/${id}?raceCategory=${selectedCategory}`,
+      );
       return data.data;
     },
-    enabled: !!id,
+    enabled: !!id && !!selectedCategory,
   });
 
   const { data: userRegistrations = [] } = useQuery({
@@ -93,6 +103,25 @@ export default function ClientEventDetail() {
   });
 
   const registration = userRegistrations[0];
+
+  useEffect(() => {
+    if (
+      event?.raceCategories &&
+      event.raceCategories.length > 0 &&
+      !selectedCategory
+    ) {
+      if (registration && registration.category) {
+        // Find if the category is an object or ID. Usually it's an ObjectId string or populated.
+        const catId =
+          typeof registration.category === "object"
+            ? registration.category._id
+            : registration.category;
+        setSelectedCategory(catId);
+      } else {
+        setSelectedCategory(event.raceCategories[0]._id);
+      }
+    }
+  }, [event, registration, selectedCategory]);
 
   const sortedCheckpoints = useMemo(() => {
     return [...checkpoints].sort((a, b) => {
@@ -199,11 +228,30 @@ export default function ClientEventDetail() {
       <Card className='rounded-xl border border-border shadow-sm'>
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
-            <div className='flex items-center gap-2'>
-              <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
-                <MapPin className='w-4 h-4 text-primary' />
+            <div className='flex items-center gap-4'>
+              <div className='flex items-center gap-2'>
+                <div className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+                  <MapPin className='w-4 h-4 text-primary' />
+                </div>
+                Route & Checkpoints
               </div>
-              Route & Checkpoints
+              {event?.raceCategories && (
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className='w-[180px]'>
+                    <SelectValue placeholder='Select Category' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {event.raceCategories.map((cat: any) => (
+                      <SelectItem key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             {totalRouteDistance > 0 &&
               checkpoints.filter((cp) => cp.type !== "waypoint").length >=
@@ -218,60 +266,76 @@ export default function ClientEventDetail() {
           </CardTitle>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='w-full h-[500px] bg-muted/30 rounded-xl flex items-center justify-center overflow-hidden border z-0 relative'>
-            {checkpoints.length === 0 ? (
-              <div className='text-center text-muted-foreground'>
-                <MapPin className='w-12 h-12 mx-auto mb-2 opacity-30' />
-                <p>Route map preview</p>
-                <p className='text-sm'>Map will be available soon</p>
+          {!selectedCategory ? (
+            <div className='flex flex-col items-center justify-center p-8 border rounded-xl bg-card text-center gap-2'>
+              <h3 className='text-xl font-bold'>No Category Selected</h3>
+              <p className='text-muted-foreground'>
+                Please select a race category from the dropdown to view the
+                route map.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className='w-full h-[500px] bg-muted/30 rounded-xl flex items-center justify-center overflow-hidden border z-0 relative'>
+                {checkpoints.length === 0 ? (
+                  <div className='text-center text-muted-foreground'>
+                    <MapPin className='w-12 h-12 mx-auto mb-2 opacity-30' />
+                    <p>Route map preview</p>
+                    <p className='text-sm'>
+                      Map will be available soon or no checkpoints are set yet.
+                    </p>
+                  </div>
+                ) : (
+                  <MapContainer
+                    key={mapCenter.join(",")}
+                    center={mapCenter}
+                    zoom={14}
+                    className='w-full h-full z-0'
+                  >
+                    <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+                    {sortedCheckpoints
+                      .filter((cp) => cp.type !== "waypoint")
+                      .map((cp) => (
+                        <Marker
+                          key={cp._id}
+                          position={[cp.location.lat, cp.location.lng]}
+                          icon={getPinIcon(cp.type)}
+                        >
+                          <Popup>
+                            <div className='font-bold text-sm'>{cp.name}</div>
+                            <div className='text-xs capitalize text-muted-foreground'>
+                              {cp.type}
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ))}
+                    {sortedCheckpoints.length >= 2 && (
+                      <RoutingMachine
+                        waypoints={sortedCheckpoints.map(
+                          (cp) =>
+                            [cp.location.lat, cp.location.lng] as [
+                              number,
+                              number,
+                            ],
+                        )}
+                        onRouteFound={setTotalRouteDistance}
+                      />
+                    )}
+                  </MapContainer>
+                )}
               </div>
-            ) : (
-              <MapContainer
-                center={mapCenter}
-                zoom={14}
-                className='w-full h-full z-0'
-              >
-                <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+
+              <div className='space-y-2'>
                 {sortedCheckpoints
                   .filter((cp) => cp.type !== "waypoint")
-                  .map((cp) => (
-                    <Marker
-                      key={cp._id}
-                      position={[cp.location.lat, cp.location.lng]}
-                      icon={getPinIcon(cp.type)}
-                    >
-                      <Popup>
-                        <div className='font-bold text-sm'>{cp.name}</div>
-                        <div className='text-xs capitalize text-muted-foreground'>
-                          {cp.type}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                {sortedCheckpoints.length >= 2 && (
-                  <RoutingMachine
-                    waypoints={sortedCheckpoints.map(
-                      (cp) =>
-                        [cp.location.lat, cp.location.lng] as [number, number],
-                    )}
-                    onRouteFound={setTotalRouteDistance}
-                  />
-                )}
-              </MapContainer>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            {sortedCheckpoints
-              .filter((cp) => cp.type !== "waypoint")
-              .map((checkpoint, index) => (
-                <div
-                  key={checkpoint._id}
-                  className='flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/30 transition-colors'
-                >
-                  <div className='flex items-center gap-3'>
+                  .map((checkpoint, index) => (
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                      key={checkpoint._id}
+                      className='flex items-center justify-between p-3 border border-border rounded-xl hover:bg-muted/30 transition-colors'
+                    >
+                      <div className='flex items-center gap-3'>
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
 										${
                       checkpoint.type === "start"
                         ? "bg-emerald-500/15 text-emerald-600"
@@ -279,25 +343,27 @@ export default function ClientEventDetail() {
                           ? "bg-red-500/15 text-red-600"
                           : "bg-blue-500/15 text-blue-600"
                     }`}
-                    >
-                      {index + 1}
+                        >
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className='font-semibold'>{checkpoint.name}</p>
+                          <p className='text-xs capitalize text-muted-foreground'>
+                            {checkpoint.type}
+                          </p>
+                        </div>
+                      </div>
+                      <div className='text-right'>
+                        <p className='text-[10px] uppercase font-mono text-muted-foreground'>
+                          {checkpoint.location.lat.toFixed(4)}°,{" "}
+                          {checkpoint.location.lng.toFixed(4)}°
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='font-semibold'>{checkpoint.name}</p>
-                      <p className='text-xs capitalize text-muted-foreground'>
-                        {checkpoint.type}
-                      </p>
-                    </div>
-                  </div>
-                  <div className='text-right'>
-                    <p className='text-[10px] uppercase font-mono text-muted-foreground'>
-                      {checkpoint.location.lat.toFixed(4)}°,{" "}
-                      {checkpoint.location.lng.toFixed(4)}°
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </div>
+                  ))}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

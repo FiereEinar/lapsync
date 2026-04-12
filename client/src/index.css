@@ -110,3 +110,17 @@
 		-moz-osx-font-smoothing: grayscale;
 	}
 }
+
+@keyframes dash-animation {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.route-direction {
+  stroke-dasharray: 10, 15;
+  animation: dash-animation 2s linear infinite;
+}

@@ -106,7 +106,7 @@ export const updateDeviceMapping = asyncHandler(async (req, res) => {
     const conflicting = await RfidDeviceMappingModel.findOne({
       _id: { $ne: mapping._id },
       deviceName: mapping.deviceName,
-      event: mapping.event,
+      event: mapping.event as any,
       isActive: true,
       scanType: { $ne: mapping.scanType },
     });

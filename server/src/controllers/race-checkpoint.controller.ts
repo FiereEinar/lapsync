@@ -3,13 +3,13 @@ import { RaceCheckpointModel } from '../models/race-checkpoint.model';
 
 export const createCheckpoint = async (req: Request, res: Response) => {
   try {
-    const { event, name, type, location, order } = req.body;
+    const { event, raceCategory, name, type, location, order } = req.body;
     
-    if (!event || !name || !location || location.lat === undefined || location.lng === undefined) {
+    if (!event || !raceCategory || !name || !location || location.lat === undefined || location.lng === undefined) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
-    const checkpoint = new RaceCheckpointModel({ event, name, type, location, order });
+    const checkpoint = new RaceCheckpointModel({ event, raceCategory, name, type, location, order });
     await checkpoint.save();
     
     res.status(201).json({ success: true, data: checkpoint });
@@ -21,7 +21,14 @@ export const createCheckpoint = async (req: Request, res: Response) => {
 export const getCheckpointsByEvent = async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    const checkpoints = await RaceCheckpointModel.find({ event: eventId }).sort({ order: 1, createdAt: 1 });
+    const { raceCategory } = req.query;
+    
+    const query: any = { event: eventId };
+    if (raceCategory) {
+      query.raceCategory = raceCategory;
+    }
+    
+    const checkpoints = await RaceCheckpointModel.find(query).sort({ order: 1, createdAt: 1 });
     res.status(200).json({ success: true, data: checkpoints });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });

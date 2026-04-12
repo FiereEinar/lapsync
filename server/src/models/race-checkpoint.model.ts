@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IRaceCheckpoint extends Document {
   event: Types.ObjectId;
+  raceCategory: Types.ObjectId;
   name: string;
   type: 'start' | 'finish' | 'checkpoint' | 'waypoint';
   location: {
@@ -14,6 +15,7 @@ export interface IRaceCheckpoint extends Document {
 const raceCheckpointSchema = new Schema<IRaceCheckpoint>(
   {
     event: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
+    raceCategory: { type: Schema.Types.ObjectId, ref: 'RaceCategory', required: true },
     name: { type: String, required: true },
     type: { type: String, enum: ['start', 'finish', 'checkpoint', 'waypoint'], default: 'checkpoint' },
     location: {

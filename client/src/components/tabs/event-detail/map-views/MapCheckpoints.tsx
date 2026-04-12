@@ -66,6 +66,7 @@ type Checkpoint = {
   _id: string;
   name: string;
   type: "start" | "finish" | "checkpoint" | "waypoint";
+  raceCategory: string;
   location: {
     lat: number;
     lng: number;
@@ -92,16 +93,29 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
 
   const [activeTab, setActiveTab] = useState<"view" | "add">("view");
   const [totalRouteDistance, setTotalRouteDistance] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
-  const { data: checkpoints = [], isLoading } = useQuery({
-    queryKey: ["checkpoints", eventIDToUse],
-    queryFn: async (): Promise<Checkpoint[]> => {
-      const { data } = await axiosInstance.get(
-        `/race-checkpoint/event/${eventIDToUse}`,
-      );
+  const { data: eventData } = useQuery({
+    queryKey: ["event", eventIDToUse],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/event/${eventIDToUse}`);
+      if (data.data && data.data.raceCategories?.length > 0 && !selectedCategory) {
+        setSelectedCategory(data.data.raceCategories[0]._id);
+      }
       return data.data;
     },
     enabled: !!eventIDToUse,
+  });
+
+  const { data: checkpoints = [], isLoading } = useQuery({
+    queryKey: ["checkpoints", eventIDToUse, selectedCategory],
+    queryFn: async (): Promise<Checkpoint[]> => {
+      const { data } = await axiosInstance.get(
+        `/race-checkpoint/event/${eventIDToUse}?raceCategory=${selectedCategory}`,
+      );
+      return data.data;
+    },
+    enabled: !!eventIDToUse && !!selectedCategory,
   });
 
   const centerCalculated = useRef(false);
@@ -119,7 +133,7 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse] });
+      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse, selectedCategory] });
       toast.success("Checkpoint added successfully!");
       setNewCheckpointPoint(null);
       setNewName("");
@@ -137,7 +151,7 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse] });
+      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse, selectedCategory] });
       toast.success("Checkpoint updated successfully!");
     },
     onError: (error: any) => {
@@ -152,7 +166,7 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
       await axiosInstance.delete(`/race-checkpoint/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse] });
+      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse, selectedCategory] });
       toast.success("Checkpoint deleted successfully!");
     },
     onError: (error: any) => {
@@ -190,9 +204,15 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
       toast.error("Please provide a name for the checkpoint");
       return;
     }
+    
+    if (!selectedCategory) {
+      toast.error("Please select a race category first");
+      return;
+    }
 
     addCheckpointMutation.mutate({
       event: eventIDToUse,
+      raceCategory: selectedCategory,
       name: newName,
       type: newType,
       location: {
@@ -248,7 +268,21 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
-        <CardTitle>Race Checkpoints</CardTitle>
+        <div className="flex items-center gap-4">
+          <CardTitle>Race Checkpoints</CardTitle>
+          {eventData && eventData.raceCategories && (
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {eventData.raceCategories.map((cat: any) => (
+                  <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
         <div className='flex gap-2'>
           <Button
             variant={activeTab === "view" ? "default" : "outline"}
@@ -319,12 +353,19 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
           </div>
         )}
 
-        <MapContainer
-          key={mapCenter.join(",")} // Key helps reset view if center changes drastically
-          center={mapCenter}
-          zoom={14}
-          className='w-full h-[500px] rounded-lg z-0 border'
-        >
+        {!selectedCategory ? (
+          <div className="flex flex-col items-center justify-center p-8 border rounded-lg bg-card text-center gap-2">
+            <h3 className="text-xl font-bold">No Category Selected</h3>
+            <p className="text-muted-foreground">Please select a race category from the dropdown above to view or manage checkpoints.</p>
+          </div>
+        ) : (
+          <>
+            <MapContainer
+              key={mapCenter.join(",")} // Key helps reset view if center changes drastically
+              center={mapCenter}
+              zoom={14}
+              className='w-full h-[500px] rounded-lg z-0 border'
+            >
           <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
           <MapClickHandler />
 
@@ -474,6 +515,8 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
             </div>
           </div>
         )}
+        </>
+      )}
       </CardContent>
     </Card>
   );

@@ -1,0 +1,13 @@
+
+> server@1.0.0 check:ts
+> tsc --noEmit
+
+src/controllers/rfid-device-mapping.controller.ts(106,54): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(filter?: _QueryFilter<{ createdAt: Date; updatedAt: Date; _id: ObjectId; event: NonNullable<ObjectId | PopulatedDoc<Event>>; ... 4 more ...; checkpointName: string; }> | undefined, projection?: ProjectionType<...> | ... 1 more ... | undefined, options?: (QueryOptions<...> & Abortable) | ... 1 more ... | undefined): Query<...>', gave the following error.
+    Argument of type '{ _id: { $ne: Types.ObjectId; }; deviceName: string; event: Types.ObjectId | PopulatedDoc<Event>; isActive: true; scanType: { $ne: "finish" | "start" | "checkpoint"; }; }' is not assignable to parameter of type '_QueryFilter<{ createdAt: Date; updatedAt: Date; _id: ObjectId; event: NonNullable<ObjectId | PopulatedDoc<Event>>; raceCategory: ObjectId; isActive: boolean; deviceName: string; scanType: NonNullable<...>; checkpointName: string; }>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Type '{ _id: { $ne: Types.ObjectId; }; deviceName: string; event: Types.ObjectId | PopulatedDoc<Event>; isActive: true; scanType: { $ne: "finish" | "start" | "checkpoint"; }; }' is not assignable to type '{ createdAt?: Condition<ApplyBasicQueryCasting<Date>>; updatedAt?: Condition<ApplyBasicQueryCasting<Date>>; ... 6 more ...; checkpointName?: Condition<...>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+        Types of property 'event' are incompatible.
+          Type 'ObjectId | PopulatedDoc<Event>' is not assignable to type 'Condition<ApplyBasicQueryCasting<NonNullable<ObjectId | PopulatedDoc<Event>>>>'.
+            Type 'undefined' is not assignable to type 'Condition<ApplyBasicQueryCasting<NonNullable<ObjectId | PopulatedDoc<Event>>>>'.
+  Overload 2 of 4, '(filter?: Query<any, any, {}, unknown, "find", Record<string, never>> | undefined, projection?: ProjectionType<RfidDeviceMapping> | null | undefined, options?: (QueryOptions<...> & Abortable) | ... 1 more ... | undefined): Query<...>', gave the following error.
+    Object literal may only specify known properties, and '_id' does not exist in type 'Query<any, any, {}, unknown, "find", Record<string, never>>'.
