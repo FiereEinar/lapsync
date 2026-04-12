@@ -43,10 +43,10 @@ export default function Participants({ event }: ParticipantsProps) {
   const filteredParticipants = registrations.filter(
     (p) =>
       p.status === "confirmed" &&
-      (p.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.bibNumber.includes(searchQuery) ||
-        p.user.phone.toString().includes(searchQuery)),
+      ((p.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.bibNumber || "").toString().includes(searchQuery) ||
+        (p.user?.phone || "").toString().includes(searchQuery)),
   );
 
   return (

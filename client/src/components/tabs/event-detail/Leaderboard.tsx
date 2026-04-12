@@ -15,7 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trophy, Timer, CircleDot, Ban, AlertTriangle } from "lucide-react";
+import {
+  Trophy,
+  Timer,
+  CircleDot,
+  Ban,
+  AlertTriangle,
+  Download,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { useEffect, useState } from "react";
 import { Event } from "@/types/event";
 import { RaceResult } from "@/types/race-result";
@@ -85,8 +95,12 @@ export default function Leaderboard({ event, isPublic }: LeaderboardProps) {
     queryParams.append("raceCategory", categoryFilter);
   }
 
-  const queryKeyName = isPublic ? [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter, "public"] : [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter];
-  const endpoint = isPublic ? `/public/race-result?${queryParams.toString()}` : `/race-result?${queryParams.toString()}`;
+  const queryKeyName = isPublic
+    ? [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter, "public"]
+    : [QUERY_KEYS.RACE_RESULTS, event._id, categoryFilter];
+  const endpoint = isPublic
+    ? `/public/race-result?${queryParams.toString()}`
+    : `/race-result?${queryParams.toString()}`;
 
   const { data: results = [] } = useQuery({
     queryKey: queryKeyName,
@@ -120,6 +134,48 @@ export default function Leaderboard({ event, isPublic }: LeaderboardProps) {
   const finishedCount = results.filter((r) => r.status === "finished").length;
   const runningCount = results.filter((r) => r.status === "running").length;
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const eventName = event.name || "Event";
+    const categoryName =
+      categoryFilter === "all"
+        ? "All Categories"
+        : event.raceCategories.find((c) => c._id === categoryFilter)?.name ||
+          "Unknown";
+
+    doc.setFontSize(16);
+    doc.text(`${eventName} - Leaderboard`, 14, 20);
+    doc.setFontSize(11);
+    doc.text(`Category: ${categoryName}`, 14, 28);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 34);
+
+    const tableColumn = ["Rank", "Bib #", "Name", "Category", "Time", "Status"];
+    const tableRows: any[] = [];
+
+    results.forEach((result, index) => {
+      const reg = result.registration;
+      const rowData = [
+        result.rank ?? index + 1,
+        reg?.bibNumber ?? "--",
+        reg?.user?.name ?? "--",
+        reg?.raceCategory?.name ?? "--",
+        formatElapsed(result.elapsedMs),
+        statusConfig[result.status]?.label ?? "Not Started",
+      ];
+      tableRows.push(rowData);
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+    });
+
+    doc.save(
+      `${eventName.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_leaderboard.pdf`,
+    );
+  };
+
   return (
     <Card className='rounded-xl border border-border shadow-sm'>
       <CardHeader>
@@ -136,105 +192,122 @@ export default function Leaderboard({ event, isPublic }: LeaderboardProps) {
               {results.length} total
             </p>
           </div>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className='w-[200px] rounded-xl'>
-              <SelectValue placeholder='All Categories' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>All Categories</SelectItem>
-              {event.raceCategories.map((cat) => (
-                <SelectItem key={cat._id} value={cat._id}>
-                  {cat.name} ({cat.distanceKm}km)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+          <div className='flex gap-2 justify-center'>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className='w-[200px] rounded-xl'>
+                <SelectValue placeholder='All Categories' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Categories</SelectItem>
+                {event.raceCategories.map((cat) => (
+                  <SelectItem key={cat._id} value={cat._id}>
+                    {cat.name} ({cat.distanceKm}km)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant='outline'
+              className='gap-2 rounded-xl'
+              onClick={handleExportPDF}
+            >
+              <Download className='w-4 h-4' />
+              Export PDF
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className='rounded-xl border border-border overflow-hidden'>
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/30">
+              <TableRow className='bg-muted/30'>
                 <TableHead className='w-[80px] font-semibold'>Rank</TableHead>
-                <TableHead className="font-semibold">Bib #</TableHead>
-                <TableHead className="font-semibold">Name</TableHead>
-                <TableHead className="font-semibold">Category</TableHead>
-                <TableHead className="font-semibold">Time</TableHead>
-                <TableHead className="font-semibold">Start</TableHead>
-                <TableHead className="font-semibold">Finish</TableHead>
+                <TableHead className='font-semibold'>Bib #</TableHead>
+                <TableHead className='font-semibold'>Name</TableHead>
+                <TableHead className='font-semibold'>Category</TableHead>
+                <TableHead className='font-semibold'>Time</TableHead>
+                <TableHead className='font-semibold'>Start</TableHead>
+                <TableHead className='font-semibold'>Finish</TableHead>
                 {/* <TableHead>Checkpoints</TableHead> */}
-                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className='font-semibold'>Status</TableHead>
               </TableRow>
             </TableHeader>
-          <TableBody>
-            {results &&
-              results.map((result, index) => {
-                const reg = result.registration;
-                const cfg =
-                  statusConfig[result.status] ?? statusConfig.not_started;
+            <TableBody>
+              {results &&
+                results.map((result, index) => {
+                  const reg = result.registration;
+                  const cfg =
+                    statusConfig[result.status] ?? statusConfig.not_started;
 
-                return (
-                  <TableRow key={result._id} className="hover:bg-muted/30 transition-colors">
-                    <TableCell>
-                      <div className='flex items-center gap-2'>
-                        {result.rank === 1 && (
-                          <Trophy className='w-4 h-4 text-yellow-500' />
-                        )}
-                        {result.rank === 2 && (
-                          <Trophy className='w-4 h-4 text-gray-400' />
-                        )}
-                        {result.rank === 3 && (
-                          <Trophy className='w-4 h-4 text-amber-600' />
-                        )}
-                        <span className='font-bold'>
-                          {result.rank ?? index + 1}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className='font-medium'>
-                      {reg?.bibNumber ?? "--"}
-                    </TableCell>
-                    <TableCell>{reg?.user?.name ?? "--"}</TableCell>
-                    <TableCell>
-                      <Badge variant='secondary'>
-                        {reg?.raceCategory?.name ?? "--"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className='font-mono'>
-                      {formatElapsed(result.elapsedMs)}
-                    </TableCell>
-                    <TableCell className='font-mono text-xs text-muted-foreground'>
-                      {result.startTime
-                        ? format(new Date(result.startTime), "HH:mm:ss")
-                        : "--"}
-                    </TableCell>
-                    <TableCell className='font-mono text-xs text-muted-foreground'>
-                      {result.finishTime
-                        ? format(new Date(result.finishTime), "HH:mm:ss")
-                        : "--"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant='outline' className={`${cfg.className} border-0 uppercase tracking-wider text-[10px]`}>
-                        {cfg.icon}
-                        {cfg.label}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            {results.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className='text-center py-8 text-muted-foreground'
-                >
-                  No race results yet. Results will appear here once RFID scans
-                  are received.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+                  return (
+                    <TableRow
+                      key={result._id}
+                      className='hover:bg-muted/30 transition-colors'
+                    >
+                      <TableCell>
+                        <div className='flex items-center gap-2'>
+                          {result.rank === 1 && (
+                            <Trophy className='w-4 h-4 text-yellow-500' />
+                          )}
+                          {result.rank === 2 && (
+                            <Trophy className='w-4 h-4 text-gray-400' />
+                          )}
+                          {result.rank === 3 && (
+                            <Trophy className='w-4 h-4 text-amber-600' />
+                          )}
+                          <span className='font-bold'>
+                            {result.rank ?? index + 1}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className='font-medium'>
+                        {reg?.bibNumber ?? "--"}
+                      </TableCell>
+                      <TableCell>{reg?.user?.name ?? "--"}</TableCell>
+                      <TableCell>
+                        <Badge variant='secondary'>
+                          {reg?.raceCategory?.name ?? "--"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className='font-mono'>
+                        {formatElapsed(result.elapsedMs)}
+                      </TableCell>
+                      <TableCell className='font-mono text-xs text-muted-foreground'>
+                        {result.startTime
+                          ? format(new Date(result.startTime), "HH:mm:ss")
+                          : "--"}
+                      </TableCell>
+                      <TableCell className='font-mono text-xs text-muted-foreground'>
+                        {result.finishTime
+                          ? format(new Date(result.finishTime), "HH:mm:ss")
+                          : "--"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant='outline'
+                          className={`${cfg.className} border-0 uppercase tracking-wider text-[10px]`}
+                        >
+                          {cfg.icon}
+                          {cfg.label}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              {results.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className='text-center py-8 text-muted-foreground'
+                  >
+                    No race results yet. Results will appear here once RFID
+                    scans are received.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
           </Table>
         </div>
       </CardContent>
