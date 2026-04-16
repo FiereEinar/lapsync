@@ -29,6 +29,7 @@ import { StatusBadge } from "@/src/components/StatusBadge";
 import { RaceCategoryTable } from "@/src/components/RaceCategoryTable";
 import { EditEventModal } from "@/src/components/modals/EditEventModal";
 import { Participants } from "@/src/components/tabs/event-detail/Participants";
+import { MapTrack } from "@/src/components/tabs/event-detail/MapTrack";
 
 export default function AdminEventDetails() {
   const { id } = useLocalSearchParams();
@@ -339,11 +340,17 @@ export default function AdminEventDetails() {
       </View>
 
       {/* Tab Payload Rendering Block */}
-      {activeTab === 'participants' ? (
+      {activeTab === 'participants' && (
          <View className="pt-6">
             <Participants event={event} />
          </View>
-      ) : (
+      )}
+      {activeTab === 'map' && (
+         <View className="pt-4">
+            <MapTrack event={event} />
+         </View>
+      )}
+      {activeTab !== 'participants' && activeTab !== 'map' && (
          <View className="p-6 pt-6 pb-24 min-h-[400px]">
             <View className="bg-muted/10 border border-border/50 rounded-2xl p-8 items-center justify-center">
                <ActivityIndicator color="hsl(0, 0%, 70%)" className="mb-4" />
