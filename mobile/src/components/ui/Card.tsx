@@ -3,13 +3,6 @@ import { View, Text, ViewProps, TextProps } from 'react-native';
 
 export const Card = ({ children, className = '', ...props }: ViewProps) => (
   <View 
-    style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 4,
-    }}
     className={`rounded-2xl border border-border/60 bg-card ${className}`} 
     {...props}
   >

@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import ClientEventCard from '../../src/components/cards/ClientEventCard';
 import { Input } from '../../src/components/ui/Input';
-import { Search } from 'lucide-react-native';
+import { StatCard } from '../../src/components/StatCard';
+import { Search, Calendar, CalendarCheck, Users } from 'lucide-react-native';
 import api from '../../src/api/axios';
-import { useAuthStore } from '../../src/store/useAuthStore';
 
 export default function ClientEvents() {
-  const { user } = useAuthStore();
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchAll = async () => {
     try {
@@ -31,39 +31,73 @@ export default function ClientEvents() {
     fetchAll();
   }, []);
 
+  const filteredEvents = useMemo(() => {
+    const activeEvents = events.filter((e: any) => e.status !== "finished");
+    if (!searchTerm) return activeEvents;
+    return activeEvents.filter(
+      (ev: any) =>
+        ev.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (ev.location?.city || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [events, searchTerm]);
+
+  const registeredCount = registrations.filter((r: any) => r.event?.status !== "finished").length;
+  const upcomingCount = events.filter((e: any) => e.status === "upcoming").length;
+  const totalSlots = events.filter((e: any) => e.status !== "finished").reduce((sum: number, ev: any) => {
+    return sum + (ev.raceCategories ? ev.raceCategories.reduce((s: number, cat: any) => s + (cat.slots - (cat.registeredCount || 0)), 0) : 0);
+  }, 0);
+
+  if (loading) {
+    return (
+       <View className="flex-1 bg-background items-center justify-center">
+          <ActivityIndicator size="large" color="hsl(173, 50%, 50%)" />
+       </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-background">
       <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <View className="mb-8 mt-2">
-          <Text className="text-3xl font-extrabold text-foreground mb-1">Available Events</Text>
-          <Text className="text-muted-foreground text-base">Register for upcoming running events</Text>
+        {/* Hero Section */}
+        <View className="mb-6 mt-2 relative">
+           <View className="bg-primary/10 rounded-2xl p-6 border border-primary/20 overflow-hidden">
+             <Text className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2">Events</Text>
+             <Text className="text-2xl font-extrabold text-foreground mb-1">Available Events</Text>
+             <Text className="text-muted-foreground text-sm">Register for upcoming running events</Text>
+           </View>
         </View>
 
-        <View className="relative mb-8 shadow-sm">
+        {/* Stats */}
+        <StatCard title="My Registrations" value={registeredCount} subtitle="Events registered for" icon={({size, color}:any) => <CalendarCheck size={size} color={color} />} />
+        <StatCard title="Upcoming Events" value={upcomingCount} subtitle="Open for registration" icon={({size, color}:any) => <Calendar size={size} color={color} />} />
+        <StatCard title="Spots Available" value={totalSlots} subtitle="Across all events" icon={({size, color}:any) => <Users size={size} color={color} />} />
+
+        {/* Search */}
+        <View className="relative mb-6 mt-2 shadow-sm">
           <View className="absolute left-3 top-3.5 z-10">
              <Search size={18} color="hsl(0, 0%, 70%)" />
           </View>
-          <Input placeholder="Search events..." className="pl-10 h-12" />
+          <Input placeholder="Search events by name or city..." value={searchTerm} onChangeText={setSearchTerm} className="pl-10 h-12" />
         </View>
 
-        {loading ? (
-            <ActivityIndicator size="large" color="hsl(142, 76%, 36%)" className="mt-8" />
-        ) : (
-            <View className="flex flex-col">
-              {events.length === 0 ? (
-                  <Text className="text-muted-foreground text-center mt-4">No events found.</Text>
-              ) : (
-                  events.map((event: any) => (
-                      <ClientEventCard 
-                          key={event._id} 
-                          event={event} 
-                          userRegistrations={registrations} 
-                          onRegister={() => {}} 
-                      />
-                  ))
-              )}
-            </View>
-        )}
+        {/* List */}
+        <View className="flex flex-col">
+          {filteredEvents.length === 0 ? (
+              <View className="py-12 items-center">
+                 <Calendar size={40} color="hsl(0, 0%, 70%)" className="mb-3 opacity-50" />
+                 <Text className="text-muted-foreground text-center">No events found matching your search.</Text>
+              </View>
+          ) : (
+              filteredEvents.map((event: any) => (
+                  <ClientEventCard 
+                      key={event._id} 
+                      event={event} 
+                      userRegistrations={registrations} 
+                      onRegister={() => {}} 
+                  />
+              ))
+          )}
+        </View>
       </ScrollView>
     </View>
   );
