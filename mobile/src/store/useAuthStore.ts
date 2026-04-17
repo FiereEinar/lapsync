@@ -26,10 +26,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ isLoading: true });
       await api.get('/auth/logout');
-      set({ user: null, isLoading: false });
     } catch (error) {
-      set({ isLoading: false });
       console.error(error);
+    } finally {
+      set({ user: null, isLoading: false });
     }
   },
 }));

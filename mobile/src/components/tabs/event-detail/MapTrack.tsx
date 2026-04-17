@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Download, Play, Radio, Map as MapIcon } from 'lucide-react-native';
 import { MapLive } from './map-views/MapLive';
+import { MapReplay } from './map-views/MapReplay';
+import { MapCheckpoints } from './map-views/MapCheckpoints';
 
 export function MapTrack({ event }: { event: any }) {
   const [activeTab, setActiveTab] = useState<'replay' | 'live' | 'checkpoints'>('live');
@@ -50,9 +52,8 @@ export function MapTrack({ event }: { event: any }) {
 
       <View className="mt-2 min-h-[500px]">
          {activeTab === 'live' && <MapLive event={event} />}
-         
-         {activeTab === 'replay' && <View className="flex-1 bg-card border border-border/60 rounded-2xl items-center justify-center"><Text className="text-muted-foreground font-bold py-32 text-center px-8">Replay Native Module is under construction.</Text></View>}
-         {activeTab === 'checkpoints' && <View className="flex-1 bg-card border border-border/60 rounded-2xl items-center justify-center"><Text className="text-muted-foreground font-bold py-32 text-center px-8">Checkpoints Tracker Native Module is under construction.</Text></View>}
+         {activeTab === 'replay' && <MapReplay event={event} />}
+         {activeTab === 'checkpoints' && <MapCheckpoints event={event} />}
       </View>
     </View>
   );
