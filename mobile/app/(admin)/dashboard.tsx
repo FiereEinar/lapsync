@@ -96,7 +96,7 @@ export default function AdminDashboard() {
               Dashboard
             </Text>
             <Text className='text-2xl font-extrabold text-foreground'>
-              Welcome back! 👋
+              Welcome back!
             </Text>
             <Text className='text-muted-foreground text-sm mt-1'>
               Here's your platform overview

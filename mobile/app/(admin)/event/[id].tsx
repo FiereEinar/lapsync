@@ -30,6 +30,10 @@ import { RaceCategoryTable } from "@/src/components/RaceCategoryTable";
 import { EditEventModal } from "@/src/components/modals/EditEventModal";
 import { Participants } from "@/src/components/tabs/event-detail/Participants";
 import { MapTrack } from "@/src/components/tabs/event-detail/MapTrack";
+import { Leaderboard } from "@/src/components/tabs/event-detail/Leaderboard";
+import { PendingPayments } from "@/src/components/tabs/event-detail/PendingPayments";
+import { RaceCheckIn } from "@/src/components/tabs/event-detail/RaceCheckIn";
+import { RunnerStatus } from "@/src/components/tabs/event-detail/RunnerStatus";
 
 export default function AdminEventDetails() {
   const { id } = useLocalSearchParams();
@@ -341,24 +345,33 @@ export default function AdminEventDetails() {
 
       {/* Tab Payload Rendering Block */}
       {activeTab === 'participants' && (
-         <View className="pt-6">
+         <View className="pt-6 pb-24 px-4">
             <Participants event={event} />
          </View>
       )}
       {activeTab === 'map' && (
-         <View className="pt-4">
+         <View className="pt-4 pb-24 px-4">
             <MapTrack event={event} />
          </View>
       )}
-      {activeTab !== 'participants' && activeTab !== 'map' && (
-         <View className="p-6 pt-6 pb-24 min-h-[400px]">
-            <View className="bg-muted/10 border border-border/50 rounded-2xl p-8 items-center justify-center">
-               <ActivityIndicator color="hsl(0, 0%, 70%)" className="mb-4" />
-               <Text className="text-muted-foreground font-semibold text-lg">Under Construction</Text>
-               <Text className="text-muted-foreground text-center mt-2 text-sm leading-relaxed">
-                  The "{tabs.find(t => t.id === activeTab)?.label}" integration module is currently being built natively!
-               </Text>
-            </View>
+      {activeTab === 'leaderboard' && (
+         <View className="pt-6 pb-24 px-4">
+            <Leaderboard event={event} />
+         </View>
+      )}
+      {activeTab === 'pending' && (
+         <View className="pt-6 pb-24 px-4">
+            <PendingPayments event={event} />
+         </View>
+      )}
+      {activeTab === 'checkin' && (
+         <View className="pt-6 pb-24 px-4">
+            <RaceCheckIn event={event} />
+         </View>
+      )}
+      {activeTab === 'status' && (
+         <View className="pt-6 pb-24 px-4">
+            <RunnerStatus event={event} />
          </View>
       )}
 
