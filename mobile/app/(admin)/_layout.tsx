@@ -181,6 +181,15 @@ export default function AdminLayout() {
           drawerIcon: ({ color }) => <Settings size={20} color={color} />,
         }}
       />
+      
+      {/* Hidden Dynamic Routes */}
+      <Drawer.Screen
+        name='event/[id]'
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerShown: false,
+        }}
+      />
     </Drawer>
   );
 }

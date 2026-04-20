@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { StatusBadge } from "../StatusBadge";
 import { Calendar, MapPin, Users, Activity } from "lucide-react-native";
 import { Card, CardContent } from "../ui/Card";
@@ -9,10 +9,12 @@ export default function ClientEventCard({
   event,
   userRegistrations,
   onRegister,
+  onPress,
 }: {
   event: any;
   userRegistrations: any[];
   onRegister: () => void;
+  onPress?: () => void;
 }) {
   const distances =
     event.raceCategories && event.raceCategories.length > 0
@@ -52,92 +54,96 @@ export default function ClientEventCard({
   );
 
   return (
-    <Card className='mb-4 overflow-hidden'>
-      <CardContent className='pt-4 pb-4 px-4 flex-row'>
-        {/* Big Date block */}
-        <View className='bg-primary/10 rounded-xl p-2 mr-4 min-w-[56px] items-center justify-center self-start mt-1'>
-          <Text className='text-primary text-xl font-extrabold pb-0.5'>
-            {shortDate.split(" ")[1]}
-          </Text>
-          <Text className='text-primary text-[10px] uppercase font-bold tracking-wider'>
-            {shortDate.split(" ")[0]}
-          </Text>
-        </View>
-
-        <View className='flex-1'>
-          <Text
-            className='text-lg font-bold text-foreground mb-1'
-            numberOfLines={1}
-          >
-            {event.name}
-          </Text>
-          <View className='flex-row items-center gap-2 mb-2 flex-wrap'>
-            <StatusBadge status={event.status} />
-            <View className='flex-row items-center bg-muted/20 px-2 py-0.5 rounded-full border border-border/50'>
-              <Activity
-                size={10}
-                color='hsl(173, 50%, 50%)'
-                style={{ marginRight: 4 }}
-              />
-              <Text className='text-foreground text-[10px] font-medium'>
-                {distanceLabel}
-              </Text>
-            </View>
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={{ marginBottom: 16 }}
+    >
+      <Card className='overflow-hidden'>
+        <CardContent className='pt-4 pb-4 px-4 flex-row'>
+          {/* Big Date block */}
+          <View className='bg-primary/10 rounded-xl p-2 mr-4 min-w-[56px] items-center justify-center self-start mt-1'>
+            <Text className='text-primary text-xl font-extrabold pb-0.5'>
+              {shortDate.split(" ")[1]}
+            </Text>
+            <Text className='text-primary text-[10px] uppercase font-bold tracking-wider'>
+              {shortDate.split(" ")[0]}
+            </Text>
           </View>
 
-          <View className='flex-row items-center gap-3 flex-wrap mt-1'>
-            <View className='flex-row items-center w-full mb-1'>
-              <MapPin
-                size={12}
-                color='hsl(0, 0%, 50%)'
-                style={{ marginRight: 4 }}
-              />
-              <Text
-                className='text-muted-foreground text-[10px] font-medium uppercase tracking-wider'
-                numberOfLines={1}
-              >
-                {location}
-              </Text>
-            </View>
-            <View className='flex-row items-center'>
-              <Users
-                size={12}
-                color='hsl(0, 0%, 50%)'
-                style={{ marginRight: 4 }}
-              />
-              <Text className='text-muted-foreground text-[10px] font-medium uppercase tracking-wider'>
-                {Math.max(0, totalSlots - totalRegistered)} spots remaining
-              </Text>
-            </View>
-          </View>
-
-          <View className='flex-row items-center mt-4 gap-2 border-t border-border/50 pt-4'>
-            <Button
-              variant='outline'
-              size='sm'
-              className='flex-1 border-primary/30'
+          <View className='flex-1'>
+            <Text
+              className='text-lg font-bold text-foreground mb-1'
+              numberOfLines={1}
             >
-              <Text className='text-xs text-primary font-bold'>
-                View Details
-              </Text>
-            </Button>
-            {event.status === "upcoming" && !isRegistered && (
-              <Button size='sm' onPress={onRegister} className='flex-1'>
-                <Text className='text-xs text-primary-foreground font-bold'>
-                  Register
+              {event.name}
+            </Text>
+            <View className='flex-row items-center gap-2 mb-2 flex-wrap'>
+              <StatusBadge status={event.status} />
+              <View className='flex-row items-center bg-muted/20 px-2 py-0.5 rounded-full border border-border/50'>
+                <Activity
+                  size={10}
+                  color='hsl(173, 50%, 50%)'
+                  style={{ marginRight: 4 }}
+                />
+                <Text className='text-foreground text-[10px] font-medium'>
+                  {distanceLabel}
                 </Text>
-              </Button>
-            )}
-            {isRegistered && (
-              <Button size='sm' variant='secondary' disabled className='flex-1'>
-                <Text className='text-xs text-muted-foreground font-bold'>
-                  Registered
+              </View>
+            </View>
+
+            <View className='flex-row items-center gap-3 flex-wrap mt-1'>
+              <View className='flex-row items-center w-full mb-1'>
+                <MapPin
+                  size={12}
+                  color='hsl(0, 0%, 50%)'
+                  style={{ marginRight: 4 }}
+                />
+                <Text
+                  className='text-muted-foreground text-[10px] font-medium uppercase tracking-wider'
+                  numberOfLines={1}
+                >
+                  {location}
                 </Text>
-              </Button>
+              </View>
+              <View className='flex-row items-center'>
+                <Users
+                  size={12}
+                  color='hsl(0, 0%, 50%)'
+                  style={{ marginRight: 4 }}
+                />
+                <Text className='text-muted-foreground text-[10px] font-medium uppercase tracking-wider'>
+                  {Math.max(0, totalSlots - totalRegistered)} spots remaining
+                </Text>
+              </View>
+            </View>
+
+            {((event.status === "upcoming" && !isRegistered) || isRegistered) && (
+              <View className='flex-row items-center mt-4 gap-2 border-t border-border/50 pt-4'>
+                {event.status === "upcoming" && !isRegistered && (
+                  <Button size='sm' onPress={onRegister} className='flex-1'>
+                    <Text className='text-xs text-primary-foreground font-bold'>
+                      Register
+                    </Text>
+                  </Button>
+                )}
+                {isRegistered && (
+                  <Button
+                    size='sm'
+                    variant='secondary'
+                    disabled
+                    className='flex-1'
+                  >
+                    <Text className='text-xs text-muted-foreground font-bold'>
+                      Registered
+                    </Text>
+                  </Button>
+                )}
+              </View>
             )}
           </View>
-        </View>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </TouchableOpacity>
   );
 }

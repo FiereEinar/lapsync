@@ -40,7 +40,7 @@ export function Participants({ event }: { event: any }) {
   }, [registrations, searchQuery]);
 
   return (
-    <View className='mx-6 mb-12'>
+    <View className='mx-2 mb-12'>
       <View className='flex-row items-center gap-3 mb-4'>
         <View className='w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center'>
           <Users size={20} color='hsl(173, 50%, 50%)' />

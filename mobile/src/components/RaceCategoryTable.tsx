@@ -5,7 +5,7 @@ export function RaceCategoryTable({ categories }: { categories: any[] }) {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <View className="bg-card border border-border/60 rounded-2xl overflow-hidden mt-6 mb-2 mx-6">
+    <View className="bg-card border border-border/60 rounded-2xl overflow-hidden">
        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View>
              {/* Header */}

@@ -83,7 +83,7 @@ export default function ClientLayout() {
         }}
       />
       <Drawer.Screen
-        name="events"
+        name="client-events"
         options={{
           drawerLabel: 'Events',
           title: 'Events',
@@ -112,6 +112,14 @@ export default function ClientLayout() {
           drawerLabel: 'Profile',
           title: 'Profile',
           drawerIcon: ({ color }) => <User size={20} color={color} />,
+        }}
+      />
+      {/* Hidden Dynamic Routes */}
+      <Drawer.Screen
+        name='client-event/[id]'
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerShown: false,
         }}
       />
     </Drawer>
