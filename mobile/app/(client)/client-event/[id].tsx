@@ -6,12 +6,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Calendar,
   MapPin,
+  Users,
+  Flag,
   CheckCircle,
   Radio,
   ChevronLeft,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react-native";
 import api from "@/src/api/axios";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { StatusBadge } from "@/src/components/StatusBadge";
 import { RaceCategoryTable } from "@/src/components/RaceCategoryTable";
 import { ClientMapRoute } from "@/src/components/tabs/event-detail/map-views/ClientMapRoute";
 import MapView from "react-native-maps";
@@ -126,6 +128,18 @@ export default function ClientEventDetails() {
       ? new Date(event.date).toLocaleDateString() + " - Morning prior to race"
       : "TBA";
 
+  const totalSlots = event.raceCategories
+    ? event.raceCategories.reduce((a: any, b: any) => a + b.slots, 0)
+    : 0;
+  const totalRegistered = event.raceCategories
+    ? event.raceCategories.reduce(
+        (a: any, b: any) => a + b.registeredCount,
+        0,
+      )
+    : 0;
+  const fillPercentage =
+    totalSlots > 0 ? Math.round((totalRegistered / totalSlots) * 100) : 0;
+
   const getPinColor = (type: string) => {
     if (type === "start") return "hsl(160, 84%, 39%)"; // emerald
     if (type === "finish") return "hsl(348, 83%, 47%)"; // red
@@ -134,71 +148,131 @@ export default function ClientEventDetails() {
   };
 
   return (
-    <ScrollView className='flex-1 bg-background' stickyHeaderIndices={[0]}>
-      {/* Absolute Stickied Header Node Wrapper Navigators */}
-      <View className='bg-background pt-[env(safe-area-inset-top)] pb-2 px-4 shadow-sm z-50'>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className='flex-row items-center mt-2 w-16'
-        >
-          <ChevronLeft size={24} color='hsl(0, 0%, 50%)' />
-          <Text className='text-muted-foreground font-bold ml-1 text-sm top-[-1]'>
-            Back
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View className='p-4 sm:p-6 pb-24'>
-        {/* Title Section Banner Container Natively Rendered */}
-        <View className='bg-primary/10 p-6 rounded-3xl border border-primary/20 mb-6 relative overflow-hidden'>
-          <View
-            className={`absolute top-4 right-4 px-2.5 py-1 rounded-md ${event.registration?.isOpen ? "bg-emerald-500/15" : "bg-destructive/15"}`}
-          >
-            <Text
-              className={`text-[10px] uppercase font-extrabold tracking-wider ${event.registration?.isOpen ? "text-emerald-500" : "text-destructive"}`}
+    <ScrollView className='flex-1 bg-background'>
+      {/* Header View - Matching Admin Style */}
+      <View className='bg-primary/10 overflow-hidden pt-12 pb-6 px-6 border-b border-primary/20'>
+        <View className='flex-col gap-3 flex-1 w-full mb-3'>
+          <View className='flex-row items-center gap-3'>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className='bg-background/80 p-2 rounded-full border border-border/50'
             >
-              {event.registration?.isOpen
-                ? "Registration Open"
-                : "Registration Closed"}
-            </Text>
-          </View>
-          <Text
-            className='text-3xl font-extrabold text-foreground mt-2'
-            numberOfLines={3}
-          >
-            {event.name}
-          </Text>
-          {event.description && (
-            <Text
-              className='text-muted-foreground text-sm mt-3 leading-relaxed'
-              numberOfLines={4}
+              <ChevronLeft size={20} color='hsl(0, 0%, 50%)' />
+            </TouchableOpacity>
+            <StatusBadge status={event.status} />
+            <View
+              className={`px-2 py-1 rounded-md ${event.registration?.isOpen ? "bg-emerald-500/15" : "bg-destructive/15"}`}
             >
-              {event.description}
-            </Text>
-          )}
-          <View className='flex-row flex-wrap gap-4 mt-6'>
-            <View className='flex-row items-center gap-2'>
-              <Calendar size={16} color='hsl(152, 60%, 42%)' />
-              <Text className='text-foreground font-semibold text-sm'>
-                {dateStr}
+              <Text
+                className={`text-[10px] uppercase font-extrabold tracking-wider ${event.registration?.isOpen ? "text-emerald-500" : "text-destructive"}`}
+              >
+                {event.registration?.isOpen
+                  ? "Registration Open"
+                  : "Registration Closed"}
               </Text>
             </View>
-            <View className='flex-row items-center gap-2'>
-              <MapPin size={16} color='hsl(152, 60%, 42%)' />
+          </View>
+
+          <View className='flex-row items-center justify-between mt-2'>
+            <View className='flex-1 pr-4'>
               <Text
-                className='text-foreground font-semibold text-sm'
+                className='text-3xl font-extrabold text-foreground'
+                numberOfLines={2}
+              >
+                {event.name}
+              </Text>
+              {event.description && (
+                <Text
+                  className='text-muted-foreground text-sm mt-1'
+                  numberOfLines={2}
+                >
+                  {event.description}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* 4 Details Blocks */}
+        <View className='flex-row flex-wrap gap-4 pt-4 border-t border-border/50'>
+          <View className='flex-row items-center w-[45%]'>
+            <View className='w-10 h-10 rounded-xl bg-primary/20 items-center justify-center mr-3'>
+              <Calendar size={20} color='hsl(173, 50%, 50%)' />
+            </View>
+            <View className='flex-1'>
+              <Text className='font-bold text-foreground text-sm'>
+                {dateStr}
+              </Text>
+              <Text className='text-xs text-muted-foreground mt-0.5'>
+                {event.startTime || "05:00"} - {event.endTime || "10:00"}
+              </Text>
+            </View>
+          </View>
+          <View className='flex-row items-center w-[45%]'>
+            <View className='w-10 h-10 rounded-xl bg-primary/20 items-center justify-center mr-3'>
+              <MapPin size={20} color='hsl(173, 50%, 50%)' />
+            </View>
+            <View className='flex-1'>
+              <Text
+                className='font-bold text-foreground text-sm'
                 numberOfLines={1}
               >
                 {location}
               </Text>
+              <Text
+                className='text-xs text-muted-foreground mt-0.5'
+                numberOfLines={1}
+              >
+                Location
+              </Text>
             </View>
           </View>
+          <View className='flex-row items-center w-[45%] mt-2'>
+            <View className='w-10 h-10 rounded-xl bg-primary/20 items-center justify-center mr-3'>
+              <Flag size={20} color='hsl(173, 50%, 50%)' />
+            </View>
+            <View className='flex-1'>
+              <Text
+                className='font-bold text-foreground text-sm'
+                numberOfLines={1}
+              >
+                {event.raceCategories
+                  ?.map((c: any) => `${c.distanceKm}K`)
+                  .join(", ")}
+              </Text>
+              <Text className='text-xs text-muted-foreground mt-0.5'>
+                Categories
+              </Text>
+            </View>
+          </View>
+          <View className='w-[45%] mt-2 pr-2'>
+            <View className='flex-row justify-between mb-1.5 mt-1'>
+              <Text className='text-[10px] font-bold text-muted-foreground uppercase tracking-wider'>
+                Capacity
+              </Text>
+              <Text className='text-[10px] text-primary font-bold'>
+                {fillPercentage}%
+              </Text>
+            </View>
+            <View className='h-2.5 bg-background/50 rounded-full overflow-hidden border border-border/50'>
+              <View
+                className='h-full bg-primary'
+                style={{ width: `${fillPercentage}%` }}
+              />
+            </View>
+            <Text className='text-[10px] text-muted-foreground mt-1.5 uppercase tracking-wider text-right'>
+              {totalRegistered} / {totalSlots} filled
+            </Text>
+          </View>
         </View>
+      </View>
 
-        <View className='mb-6'>
-          <RaceCategoryTable categories={event.raceCategories || []} />
-        </View>
+      {/* Race Categories Native Table */}
+      <RaceCategoryTable categories={event.raceCategories || []} />
 
+      {/* Content Sections */}
+      <View className='p-4 pb-24'>
+        {/* Registration Status & Hardware Pickup */}
         <View className='flex-row flex-wrap justify-between gap-4 mb-6'>
           <View className='flex-1 min-w-[280px] bg-card border border-border/60 rounded-2xl p-5'>
             <View className='flex-row items-center gap-3 mb-4'>
@@ -281,6 +355,7 @@ export default function ClientEventDetails() {
           </View>
         </View>
 
+        {/* Route Map */}
         <View className='bg-card border border-border/60 rounded-2xl p-5 mb-6'>
           <View className='flex-row items-center justify-between mb-4'>
             <View className='flex-row items-center gap-3'>
@@ -294,7 +369,7 @@ export default function ClientEventDetails() {
           </View>
 
           <View>
-            {/* Category Filter Horizontal Selector mappings natively porting web selects */}
+            {/* Category Filter Horizontal Selector */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -331,7 +406,9 @@ export default function ClientEventDetails() {
                     <View className='flex-row items-center gap-3'>
                       <View
                         className='w-8 h-8 rounded-full flex items-center justify-center'
-                        style={{ backgroundColor: getPinColor(cp.type) + "20" }}
+                        style={{
+                          backgroundColor: getPinColor(cp.type) + "20",
+                        }}
                       >
                         <Text
                           style={{ color: getPinColor(cp.type) }}
@@ -359,6 +436,7 @@ export default function ClientEventDetails() {
           </View>
         </View>
 
+        {/* Event Instructions */}
         <View className='bg-primary/5 border border-primary/20 rounded-2xl p-5 mb-8'>
           <View className='flex-row items-center gap-3 mb-4'>
             <View className='w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center'>
