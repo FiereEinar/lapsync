@@ -21,6 +21,7 @@ import {
   Calendar,
   Heart,
   Zap,
+  LogOut,
 } from "lucide-react-native";
 
 export default function AdminSettings() {
@@ -33,7 +34,7 @@ export default function AdminSettings() {
       <ScrollView>
         {/* Hero Section */}
         <View className='mb-2 relative'>
-          <View className='bg-primary/10 py-10 px-6 border border-primary/20 overflow-hidden'>
+          <View className='bg-primary/10 pt-16 pb-8 px-6 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               System
             </Text>
@@ -163,11 +164,18 @@ function TabButton({
 // 1. Profile Tab (Working)
 // ----------------------------------------------------------------------
 function ProfileTab() {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, logout } = useAuthStore();
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState(user?.phone ? String(user.phone) : "");
   const [loading, setLoading] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", onPress: logout, style: "destructive" },
+    ]);
+  };
 
   const handleUpdate = async () => {
     setLoading(true);
@@ -249,6 +257,16 @@ function ProfileTab() {
             </Text>
           )}
         </Button>
+
+        <TouchableOpacity
+          onPress={handleLogout}
+          className='flex-row items-center justify-center bg-destructive/10 px-4 py-4 rounded-xl border border-destructive/20 mt-2'
+        >
+          <LogOut size={20} color='hsl(0, 84%, 60%)' />
+          <Text className='text-destructive font-bold text-base ml-2'>
+            Logout
+          </Text>
+        </TouchableOpacity>
       </CardContent>
     </Card>
   );

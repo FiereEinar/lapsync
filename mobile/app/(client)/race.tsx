@@ -143,7 +143,7 @@ export default function LiveRace() {
   return (
     <ScrollView className='flex-1 bg-background' stickyHeaderIndices={[1]}>
       {/* Hero Section */}
-      <View className='bg-amber-500/10 pt-12 pb-6 px-6 border-b border-amber-500/20'>
+      <View className='bg-amber-500/10 pt-16 pb-8 px-6 border-b border-amber-500/20'>
         <View className='flex-row items-center gap-2 mb-2'>
           <View className='w-2 h-2 rounded-full bg-amber-500 animate-pulse' />
           <Text className='text-xs font-bold text-amber-500 uppercase tracking-widest'>
@@ -172,9 +172,7 @@ export default function LiveRace() {
           ) : (
             events.map((evt) => {
               const isSelected = evt._id === selectedEventId;
-              const isReg = registrations.some(
-                (r) => r.event?._id === evt._id,
-              );
+              const isReg = registrations.some((r) => r.event?._id === evt._id);
               return (
                 <TouchableOpacity
                   key={evt._id}
@@ -207,7 +205,8 @@ export default function LiveRace() {
               No Race Selected
             </Text>
             <Text className='text-muted-foreground text-center mt-2 px-4'>
-              Please select an active event from the list above to view the live broadcast.
+              Please select an active event from the list above to view the live
+              broadcast.
             </Text>
           </View>
         ) : (
@@ -277,14 +276,22 @@ export default function LiveRace() {
                         Bio-Signals
                       </Text>
                     </View>
-                    
+
                     <View className='flex-row items-center justify-between py-3 border-b border-border/50'>
                       <View>
-                        <Text className='text-sm font-semibold text-foreground mb-1'>Heart Rate Zone</Text>
-                        <Text className='text-xs text-muted-foreground'>Current exertion level</Text>
+                        <Text className='text-sm font-semibold text-foreground mb-1'>
+                          Heart Rate Zone
+                        </Text>
+                        <Text className='text-xs text-muted-foreground'>
+                          Current exertion level
+                        </Text>
                       </View>
-                      <View className={`px-3 py-1 rounded-full ${raceData.heartRateZone === 'Peak' ? 'bg-destructive/15' : 'bg-primary/10'}`}>
-                        <Text className={`text-xs font-bold ${raceData.heartRateZone === 'Peak' ? 'text-destructive' : 'text-primary'}`}>
+                      <View
+                        className={`px-3 py-1 rounded-full ${raceData.heartRateZone === "Peak" ? "bg-destructive/15" : "bg-primary/10"}`}
+                      >
+                        <Text
+                          className={`text-xs font-bold ${raceData.heartRateZone === "Peak" ? "text-destructive" : "text-primary"}`}
+                        >
                           {raceData.heartRateZone}
                         </Text>
                       </View>
@@ -292,11 +299,19 @@ export default function LiveRace() {
 
                     <View className='flex-row items-center justify-between py-3'>
                       <View>
-                        <Text className='text-sm font-semibold text-foreground mb-1'>Muscle Status (EMG)</Text>
-                        <Text className='text-xs text-muted-foreground'>Current fatigue level</Text>
+                        <Text className='text-sm font-semibold text-foreground mb-1'>
+                          Muscle Status (EMG)
+                        </Text>
+                        <Text className='text-xs text-muted-foreground'>
+                          Current fatigue level
+                        </Text>
                       </View>
-                      <View className={`px-3 py-1 rounded-full ${raceData.emg === 'High Fatigue' ? 'bg-amber-500/15' : 'bg-emerald-500/15'}`}>
-                        <Text className={`text-xs font-bold ${raceData.emg === 'High Fatigue' ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      <View
+                        className={`px-3 py-1 rounded-full ${raceData.emg === "High Fatigue" ? "bg-amber-500/15" : "bg-emerald-500/15"}`}
+                      >
+                        <Text
+                          className={`text-xs font-bold ${raceData.emg === "High Fatigue" ? "text-amber-600" : "text-emerald-600"}`}
+                        >
                           {raceData.emg}
                         </Text>
                       </View>
@@ -304,10 +319,18 @@ export default function LiveRace() {
 
                     {raceData.warning && (
                       <View className='mt-3 bg-destructive/10 border border-destructive/20 rounded-lg p-3 flex-row items-start gap-3'>
-                        <AlertTriangle size={16} color='hsl(0, 84%, 60%)' className='mt-0.5' />
+                        <AlertTriangle
+                          size={16}
+                          color='hsl(0, 84%, 60%)'
+                          className='mt-0.5'
+                        />
                         <View className='flex-1'>
-                          <Text className='text-sm font-bold text-destructive'>Alert Triggered</Text>
-                          <Text className='text-xs text-destructive/80 mt-1'>{raceData.warning}</Text>
+                          <Text className='text-sm font-bold text-destructive'>
+                            Alert Triggered
+                          </Text>
+                          <Text className='text-xs text-destructive/80 mt-1'>
+                            {raceData.warning}
+                          </Text>
                         </View>
                       </View>
                     )}
@@ -323,7 +346,7 @@ export default function LiveRace() {
                         Checkpoints
                       </Text>
                     </View>
-                    
+
                     {raceData.checkpoints.length === 0 ? (
                       <Text className='text-muted-foreground text-sm py-4 text-center'>
                         Waiting for checkpoint updates...
@@ -331,10 +354,17 @@ export default function LiveRace() {
                     ) : (
                       <View className='space-y-3'>
                         {raceData.checkpoints.map((cp, idx) => (
-                          <View key={idx} className='flex-row items-center gap-3 py-2 border-b border-border/30 last:border-0'>
-                            <View className={`w-3 h-3 rounded-full ${cp.status === 'completed' ? 'bg-emerald-500' : cp.status === 'approaching' ? 'bg-amber-500' : 'bg-muted border border-border'}`} />
+                          <View
+                            key={idx}
+                            className='flex-row items-center gap-3 py-2 border-b border-border/30 last:border-0'
+                          >
+                            <View
+                              className={`w-3 h-3 rounded-full ${cp.status === "completed" ? "bg-emerald-500" : cp.status === "approaching" ? "bg-amber-500" : "bg-muted border border-border"}`}
+                            />
                             <View className='flex-1'>
-                              <Text className={`text-sm font-semibold ${cp.status === 'completed' ? 'text-emerald-600' : 'text-foreground'}`}>
+                              <Text
+                                className={`text-sm font-semibold ${cp.status === "completed" ? "text-emerald-600" : "text-foreground"}`}
+                              >
                                 {cp.name}
                               </Text>
                               <Text className='text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5'>
@@ -342,7 +372,7 @@ export default function LiveRace() {
                               </Text>
                             </View>
                             <Text className='text-xs font-mono font-bold text-muted-foreground'>
-                              {cp.time || '--:--'}
+                              {cp.time || "--:--"}
                             </Text>
                           </View>
                         ))}
@@ -362,9 +392,10 @@ export default function LiveRace() {
                   </View>
                   <Text className='text-muted-foreground text-sm mb-6'>
                     You are not registered for this event. You are currently
-                    viewing the live standard broadcast for {selectedEvent?.name}.
+                    viewing the live standard broadcast for{" "}
+                    {selectedEvent?.name}.
                   </Text>
-                  
+
                   {/* Using the MapLive component for spectators */}
                   <View className='border border-border/50 rounded-xl overflow-hidden'>
                     <MapLive event={selectedEvent} />

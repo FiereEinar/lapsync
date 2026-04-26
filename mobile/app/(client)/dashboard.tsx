@@ -78,7 +78,7 @@ export default function ClientHome() {
     <ScrollView className='flex-1 bg-background'>
       {/* Hero Section */}
       <View className='mb-4 relative'>
-        <View className='bg-primary/10 py-10  px-6 border border-primary/20 overflow-hidden'>
+        <View className='bg-primary/10 pt-16 pb-8 px-6 border border-primary/20 overflow-hidden'>
           <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
             Welcome, {firstName}
           </Text>

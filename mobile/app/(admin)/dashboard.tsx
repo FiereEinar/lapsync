@@ -82,7 +82,7 @@ export default function AdminDashboard() {
       <ScrollView>
         {/* Hero Section */}
         <View className='mb-4 relative'>
-          <View className='bg-primary/10 px-6 py-10 border border-primary/20 overflow-hidden'>
+          <View className='bg-primary/10 px-6 pt-16 pb-8 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               Welcome, Admin!
             </Text>
@@ -103,9 +103,7 @@ export default function AdminDashboard() {
                 title='Participants'
                 value={totalParticipants}
                 subtitle='Across all events'
-                icon={({ size, color }: any) => (
-                  <Users size={size} color={color} />
-                )}
+                icon={Users}
                 accentColor='hsl(173, 50%, 50%)'
                 gradientColors={[
                   "hsla(173, 50%, 50%, 0.12)",
@@ -118,9 +116,7 @@ export default function AdminDashboard() {
                 title='Active'
                 value={activeEvents}
                 subtitle='Running now'
-                icon={({ size, color }: any) => (
-                  <CalendarCheck size={size} color={color} />
-                )}
+                icon={CalendarCheck}
                 accentColor='hsl(152, 60%, 42%)'
                 gradientColors={[
                   "hsla(152, 60%, 42%, 0.12)",
@@ -136,9 +132,7 @@ export default function AdminDashboard() {
                 title='Total Events'
                 value={events.length}
                 subtitle='All time'
-                icon={({ size, color }: any) => (
-                  <TrendingUp size={size} color={color} />
-                )}
+                icon={TrendingUp}
                 accentColor='hsl(250, 60%, 60%)'
                 gradientColors={[
                   "hsla(250, 60%, 60%, 0.12)",
@@ -151,9 +145,7 @@ export default function AdminDashboard() {
                 title='Hardware'
                 value='0'
                 subtitle='Unavailable'
-                icon={({ size, color }: any) => (
-                  <Cpu size={size} color={color} />
-                )}
+                icon={Cpu}
                 accentColor='hsl(40, 90%, 52%)'
                 gradientColors={[
                   "hsla(40, 90%, 52%, 0.12)",

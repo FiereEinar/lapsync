@@ -85,7 +85,7 @@ export default function AdminEvents() {
       <ScrollView>
         {/* Hero Section */}
         <View className='mb-2 relative'>
-          <View className='bg-primary/10 py-10  px-6 border border-primary/20 overflow-hidden'>
+          <View className='bg-primary/10 pt-16 pb-8 px-6 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               Events
             </Text>
