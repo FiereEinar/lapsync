@@ -15,13 +15,7 @@ export default function AdminLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: {
-          backgroundColor: "hsl(220, 20%, 8%)",
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        headerTintColor: "hsl(210, 20%, 95%)",
-        headerShadowVisible: false,
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopWidth: 0,

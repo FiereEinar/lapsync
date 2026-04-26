@@ -76,10 +76,10 @@ export default function ClientEvents() {
 
   return (
     <View className='flex-1 bg-background'>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+      <ScrollView>
         {/* Hero Section */}
-        <View className='mb-6 mt-2 relative'>
-          <View className='bg-primary/10 rounded-2xl p-6 border border-primary/20 overflow-hidden'>
+        <View className='mb-2 mt-2 relative'>
+          <View className='bg-primary/10 py-10  px-6 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               Events
             </Text>
@@ -92,70 +92,48 @@ export default function ClientEvents() {
           </View>
         </View>
 
-        {/* Stats */}
-        <StatCard
-          title='My Registrations'
-          value={registeredCount}
-          subtitle='Events registered for'
-          icon={({ size, color }: any) => (
-            <CalendarCheck size={size} color={color} />
-          )}
-        />
-        <StatCard
-          title='Upcoming Events'
-          value={upcomingCount}
-          subtitle='Open for registration'
-          icon={({ size, color }: any) => (
-            <Calendar size={size} color={color} />
-          )}
-        />
-        <StatCard
-          title='Spots Available'
-          value={totalSlots}
-          subtitle='Across all events'
-          icon={({ size, color }: any) => <Users size={size} color={color} />}
-        />
-
-        {/* Search */}
-        <View className='relative mb-6 mt-2'>
-          <View className='absolute left-4 top-4 z-10'>
-            <Search size={20} color='hsl(173, 50%, 50%)' />
-          </View>
-          <Input
-            placeholder='Search events by name or city...'
-            value={searchTerm}
-            onChangeText={setSearchTerm}
-            className='pl-12 h-14 bg-card border border-border/50 rounded-2xl text-base text-foreground focus:border-primary/50 focus:bg-background transition-colors'
-            placeholderTextColor='hsl(0, 0%, 50%)'
-          />
-        </View>
-
-        {/* List */}
-        <View className='flex flex-col'>
-          {filteredEvents.length === 0 ? (
-            <View className='py-12 items-center'>
-              <Calendar
-                size={40}
-                color='hsl(0, 0%, 70%)'
-                className='mb-3 opacity-50'
-              />
-              <Text className='text-muted-foreground text-center'>
-                No events found matching your search.
-              </Text>
+        <View className='px-4 pb-20'>
+          {/* Search */}
+          <View className='relative mb-4 mt-2'>
+            <View className='absolute left-4 top-4 z-10'>
+              <Search size={20} color='hsl(173, 50%, 50%)' />
             </View>
-          ) : (
-            filteredEvents.map((event: any) => (
-              <ClientEventCard
-                key={event._id}
-                event={event}
-                userRegistrations={registrations}
-                onRegister={() => {}}
-                onPress={() =>
-                  router.push(`/(client)/client-event/${event._id}` as any)
-                }
-              />
-            ))
-          )}
+            <Input
+              placeholder='Search events by name or city...'
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+              className='pl-12 h-14 bg-card border border-border/50 rounded-2xl text-base text-foreground focus:border-primary/50 focus:bg-background transition-colors'
+              placeholderTextColor='hsl(0, 0%, 50%)'
+            />
+          </View>
+
+          {/* List */}
+          <View className='flex flex-col'>
+            {filteredEvents.length === 0 ? (
+              <View className='py-12 items-center'>
+                <Calendar
+                  size={40}
+                  color='hsl(0, 0%, 70%)'
+                  className='mb-3 opacity-50'
+                />
+                <Text className='text-muted-foreground text-center'>
+                  No events found matching your search.
+                </Text>
+              </View>
+            ) : (
+              filteredEvents.map((event: any) => (
+                <ClientEventCard
+                  key={event._id}
+                  event={event}
+                  userRegistrations={registrations}
+                  onRegister={() => {}}
+                  onPress={() =>
+                    router.push(`/(client)/client-event/${event._id}` as any)
+                  }
+                />
+              ))
+            )}
+          </View>
         </View>
       </ScrollView>
     </View>

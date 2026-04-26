@@ -79,33 +79,24 @@ export default function AdminDashboard() {
 
   return (
     <View className='flex-1 bg-background'>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Hero Section with Gradient */}
-        <LinearGradient
-          colors={[
-            "hsla(173, 50%, 50%, 0.15)",
-            "hsla(173, 50%, 50%, 0.02)",
-            "transparent",
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 8 }}
-        >
-          <View className='mb-2'>
-            <Text className='text-sm font-semibold text-primary uppercase tracking-widest mb-1'>
+      <ScrollView>
+        {/* Hero Section */}
+        <View className='mb-4 mt-2 relative'>
+          <View className='bg-primary/10 px-6 py-10 border border-primary/20 overflow-hidden'>
+            <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
+              Welcome, Admin!
+            </Text>
+            <Text className='text-2xl font-extrabold text-foreground mb-1'>
               Dashboard
             </Text>
-            <Text className='text-2xl font-extrabold text-foreground'>
-              Welcome back!
-            </Text>
-            <Text className='text-muted-foreground text-sm mt-1'>
+            <Text className='text-muted-foreground text-sm'>
               Here's your platform overview
             </Text>
           </View>
-        </LinearGradient>
+        </View>
 
-        <View style={{ padding: 20 }}>
-          {/* Stats Grid - 2 columns */}
+        {/* Stats Grid - 2 columns */}
+        <View className='px-4 pb-20'>
           <View className='flex-row gap-3 mb-1'>
             <View className='flex-1'>
               <StatCard
@@ -138,6 +129,7 @@ export default function AdminDashboard() {
               />
             </View>
           </View>
+
           <View className='flex-row gap-3 mb-4'>
             <View className='flex-1'>
               <StatCard

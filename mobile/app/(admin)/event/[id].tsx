@@ -22,7 +22,7 @@ import {
   Radio,
   Activity,
   CreditCard,
-  Edit2
+  Edit2,
 } from "lucide-react-native";
 import api from "@/src/api/axios";
 import { StatusBadge } from "@/src/components/StatusBadge";
@@ -68,18 +68,29 @@ export default function AdminEventDetails() {
       Alert.alert("Success", `Event status updated successfully!`);
     } catch (error: any) {
       console.error("Status Update Error: ", error);
-      const errMsg = error?.response?.data?.message || error?.message || "An error occurred while updating status.";
+      const errMsg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred while updating status.";
       Alert.alert("Error", errMsg);
     }
   };
 
   const handleAction = (type: string) => {
-    if (Platform.OS === 'web') {
-        const confirm = window.confirm(`Are you sure you want to ${type} this event?`);
-        if (confirm) {
-            onStatusUpdate(type === "start" ? "active" : type === "pause" ? "stopped" : "finished");
-        }
-        return;
+    if (Platform.OS === "web") {
+      const confirm = window.confirm(
+        `Are you sure you want to ${type} this event?`,
+      );
+      if (confirm) {
+        onStatusUpdate(
+          type === "start"
+            ? "active"
+            : type === "pause"
+              ? "stopped"
+              : "finished",
+        );
+      }
+      return;
     }
 
     if (type === "start") {
@@ -196,7 +207,7 @@ export default function AdminEventDetails() {
               >
                 <Edit2 size={20} color='hsl(0, 0%, 50%)' />
               </TouchableOpacity>
-            
+
               {(event.status === "upcoming" || event.status === "stopped") && (
                 <TouchableOpacity
                   onPress={() => handleAction("start")}
@@ -344,42 +355,45 @@ export default function AdminEventDetails() {
       </View>
 
       {/* Tab Payload Rendering Block */}
-      {activeTab === 'participants' && (
-         <View className="pt-6 pb-24 px-4">
-            <Participants event={event} />
-         </View>
+      {activeTab === "participants" && (
+        <View className='pt-6 pb-24 px-4'>
+          <Participants event={event} />
+        </View>
       )}
-      {activeTab === 'map' && (
-         <View className="pt-4 pb-24 px-4">
-            <MapTrack event={event} />
-         </View>
+      {activeTab === "map" && (
+        <View className='pt-4 pb-24 px-4'>
+          <MapTrack event={event} />
+        </View>
       )}
-      {activeTab === 'leaderboard' && (
-         <View className="pt-6 pb-24 px-4">
-            <Leaderboard event={event} />
-         </View>
+      {activeTab === "leaderboard" && (
+        <View className='pt-6 pb-24 px-4'>
+          <Leaderboard event={event} />
+        </View>
       )}
-      {activeTab === 'pending' && (
-         <View className="pt-6 pb-24 px-4">
-            <PendingPayments event={event} />
-         </View>
+      {activeTab === "pending" && (
+        <View className='pt-6 pb-24 px-4'>
+          <PendingPayments event={event} />
+        </View>
       )}
-      {activeTab === 'checkin' && (
-         <View className="pt-6 pb-24 px-4">
-            <RaceCheckIn event={event} />
-         </View>
+      {activeTab === "checkin" && (
+        <View className='pt-6 pb-24 px-4'>
+          <RaceCheckIn event={event} />
+        </View>
       )}
-      {activeTab === 'status' && (
-         <View className="pt-6 pb-24 px-4">
-            <RunnerStatus event={event} />
-         </View>
+      {activeTab === "status" && (
+        <View className='pt-6 pb-24 px-4'>
+          <RunnerStatus event={event} />
+        </View>
       )}
 
-      <EditEventModal 
-         visible={editModalVisible} 
-         onClose={() => setEditModalVisible(false)}
-         event={event}
-         onSuccess={() => { setEditModalVisible(false); fetchEvent(); }}
+      <EditEventModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        event={event}
+        onSuccess={() => {
+          setEditModalVisible(false);
+          fetchEvent();
+        }}
       />
     </ScrollView>
   );
