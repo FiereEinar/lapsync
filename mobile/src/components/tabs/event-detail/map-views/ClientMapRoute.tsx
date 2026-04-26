@@ -49,11 +49,6 @@ export function ClientMapRoute({ sortedCheckpoints }: { sortedCheckpoints: any[]
             longitudeDelta: 0.05
          }}
       >
-         <Polyline
-            coordinates={sortedCheckpoints.map(cp => ({ latitude: cp.location.lat, longitude: cp.location.lng }))}
-            strokeColor="hsl(152, 60%, 42%)"
-            strokeWidth={3}
-         />
          
          {sortedCheckpoints.filter(c => c.type !== "waypoint").map(cp => (
             <Marker

@@ -9,6 +9,7 @@ import MapView, {
 import Slider from "@react-native-community/slider";
 import { Play, Pause } from "lucide-react-native";
 import api from "@/src/api/axios";
+import axios from "axios";
 
 type TelemetryData = {
   _id: string;
@@ -32,6 +33,7 @@ const COLORS = [
 
 export function MapReplay({ event }: { event: any }) {
   const [telemetryPoints, setTelemetryPoints] = useState<TelemetryData[]>([]);
+  const [routeLine, setRouteLine] = useState<{ latitude: number; longitude: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -41,12 +43,27 @@ export function MapReplay({ event }: { event: any }) {
   useEffect(() => {
     const fetchTelemetry = async () => {
       try {
-        const { data } = await api.get(`/telemetry/event/${event?._id}`);
-        if (data?.data) {
-          setTelemetryPoints(data.data);
+        const { data: telemetryRes } = await api.get(`/telemetry/event/${event?._id}`);
+        if (telemetryRes?.data) {
+          setTelemetryPoints(telemetryRes.data);
+        }
+        
+        // Fetch route line
+        const { data: cpData } = await api.get(`/race-checkpoint/event/${event?._id}`);
+        if (cpData?.data && cpData.data.length > 1) {
+          const sorted = cpData.data.sort((a: any, b: any) => a.order - b.order);
+          const coords = sorted.map((cp: any) => `${cp.location.lng},${cp.location.lat}`).join(";");
+          const osrmRes = await axios.get(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+          if (osrmRes.data.routes[0]) {
+            const line = osrmRes.data.routes[0].geometry.coordinates.map((coord: [number, number]) => ({
+              latitude: coord[1],
+              longitude: coord[0]
+            }));
+            setRouteLine(line);
+          }
         }
       } catch (error) {
-        console.error("Failed to load telemetry", error);
+        console.error("Failed to load telemetry or route", error);
       } finally {
         setIsLoading(false);
       }
@@ -185,6 +202,14 @@ export function MapReplay({ event }: { event: any }) {
                 maximumZ={19}
                 flipY={false}
               />
+
+              {routeLine.length > 0 && (
+                <Polyline
+                  coordinates={routeLine}
+                  strokeColor='hsl(217, 91%, 60%)'
+                  strokeWidth={4}
+                />
+              )}
 
               {positions.map(({ track, currentPoint }, index) => {
                 const latLngs = track.map((t) => ({
