@@ -1,24 +1,29 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Linking, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import ClientEventCard from "../../src/components/cards/ClientEventCard";
 import { Input } from "../../src/components/ui/Input";
 import { StatCard } from "../../src/components/StatCard";
 import { Search, Calendar, CalendarCheck, Users } from "lucide-react-native";
 import api from "../../src/api/axios";
+import { RegisterEventModal } from "../../src/components/modals/RegisterEventModal";
+import { useAuthStore } from "../../src/store/useAuthStore";
 
 export default function ClientEvents() {
+  const user = useAuthStore((state) => state.user);
   const router = useRouter();
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [registerModalVisible, setRegisterModalVisible] = useState(false);
+  const [activeEventToRegister, setActiveEventToRegister] = useState<any>(null);
 
   const fetchAll = async () => {
     try {
       const [eventsRes, regRes] = await Promise.all([
         api.get("/event"),
-        api.get("/registration"),
+        api.get("/registration", { params: { user: user?._id } }),
       ]);
       setEvents(eventsRes.data.data || []);
       setRegistrations(regRes.data.data || []);
@@ -30,8 +35,22 @@ export default function ClientEvents() {
   };
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (user?._id) {
+      fetchAll();
+    }
+  }, [user?._id]);
+
+  const handlePayment = async (registrationId: string) => {
+    try {
+      const { data } = await api.post("/payment/create", { registrationId });
+      if (data.checkoutUrl) {
+        Linking.openURL(data.checkoutUrl);
+      }
+    } catch (err: any) {
+      console.error(err);
+      Alert.alert("Payment Error", err.response?.data?.message || "Could not initialize checkout.");
+    }
+  };
 
   const filteredEvents = useMemo(() => {
     const activeEvents = events.filter((e: any) => e.status !== "finished");
@@ -126,7 +145,11 @@ export default function ClientEvents() {
                   key={event._id}
                   event={event}
                   userRegistrations={registrations}
-                  onRegister={() => {}}
+                  onRegister={() => {
+                    setActiveEventToRegister(event);
+                    setRegisterModalVisible(true);
+                  }}
+                  onPay={handlePayment}
                   onPress={() =>
                     router.push(`/(client)/client-event/${event._id}` as any)
                   }
@@ -136,6 +159,19 @@ export default function ClientEvents() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Registration Modal */}
+      {registerModalVisible && activeEventToRegister && (
+        <RegisterEventModal
+          event={activeEventToRegister}
+          visible={registerModalVisible}
+          onClose={() => setRegisterModalVisible(false)}
+          onSuccess={() => {
+            setRegisterModalVisible(false);
+            fetchAll();
+          }}
+        />
+      )}
     </View>
   );
 }
