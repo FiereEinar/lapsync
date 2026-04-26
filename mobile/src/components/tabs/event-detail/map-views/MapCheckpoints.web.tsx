@@ -382,6 +382,14 @@ export function MapCheckpoints({ event }: { event: any }) {
                   </Marker>
                 ))}
 
+                <Polyline
+                  positions={sortedCheckpoints.map(
+                    (cp) => [cp.location.lat, cp.location.lng] as [number, number],
+                  )}
+                  color='hsl(152, 60%, 42%)'
+                  weight={3}
+                />
+
                 {routeLine.length > 1 && (
                   <Polyline
                     positions={routeLine.map(

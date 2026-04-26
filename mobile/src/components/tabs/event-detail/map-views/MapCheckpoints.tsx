@@ -315,6 +315,12 @@ export function MapCheckpoints({ event }: { event: any }) {
                   />
                 ))}
 
+                <Polyline
+                  coordinates={sortedCheckpoints.map(cp => ({ latitude: cp.location.lat, longitude: cp.location.lng }))}
+                  strokeColor="hsl(152, 60%, 42%)"
+                  strokeWidth={3}
+                />
+
                 {routeLine.length > 0 && (
                   <Polyline
                     coordinates={routeLine}
@@ -460,7 +466,7 @@ export function MapCheckpoints({ event }: { event: any }) {
                   </View>
                   <View className='flex-1 pr-4'>
                     <Text
-                      className='font-extrabold text-foreground tracking-tight'
+                      className='font-bold text-foreground'
                       numberOfLines={1}
                     >
                       {cp.name}

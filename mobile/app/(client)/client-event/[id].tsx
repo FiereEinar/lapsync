@@ -474,30 +474,31 @@ export default function ClientEventDetails() {
                   .map((cp, idx) => (
                     <View
                       key={cp._id}
-                      className='flex-row items-center justify-between p-3 border border-border/50 rounded-xl bg-card'
+                      className='flex-row bg-muted/10 border border-border/50 rounded-xl p-3 items-center'
                     >
-                      <View className='flex-row items-center gap-3'>
-                        <View
-                          className='w-8 h-8 rounded-full flex items-center justify-center'
-                          style={{
-                            backgroundColor: getPinColor(cp.type) + "20",
-                          }}
+                      <View
+                        className={`w-8 h-8 rounded-full items-center justify-center border mr-3
+                               ${cp.type === "start" ? "bg-emerald-500/20 border-emerald-500/30" : cp.type === "finish" ? "bg-destructive/20 border-destructive/30" : cp.type === "waypoint" ? "bg-slate-500/20 border-slate-500/30" : "bg-blue-500/20 border-blue-500/30"}
+                            `}
+                      >
+                        <Text
+                          className={`font-bold text-[10px] 
+                                  ${cp.type === "start" ? "text-emerald-700 dark:text-emerald-400" : cp.type === "finish" ? "text-destructive" : cp.type === "waypoint" ? "text-slate-700 dark:text-slate-400" : "text-blue-700 dark:text-blue-400"}
+                               `}
                         >
-                          <Text
-                            style={{ color: getPinColor(cp.type) }}
-                            className='font-extrabold text-xs'
-                          >
-                            {idx + 1}
-                          </Text>
-                        </View>
-                        <View>
-                          <Text className='font-bold text-foreground text-sm'>
-                            {cp.name}
-                          </Text>
-                          <Text className='text-[10px] text-muted-foreground uppercase font-bold tracking-wider'>
-                            {cp.type}
-                          </Text>
-                        </View>
+                          {idx + 1}
+                        </Text>
+                      </View>
+                      <View className='flex-1 pr-4'>
+                        <Text
+                          className='font-bold text-foreground'
+                          numberOfLines={1}
+                        >
+                          {cp.name}
+                        </Text>
+                        <Text className='text-muted-foreground text-[10px] uppercase font-semibold'>
+                          {cp.type}
+                        </Text>
                       </View>
                       <Text className='text-[10px] text-muted-foreground font-mono uppercase text-right tracking-widest'>
                         {cp.location.lat.toFixed(4)}°,{"\n"}
