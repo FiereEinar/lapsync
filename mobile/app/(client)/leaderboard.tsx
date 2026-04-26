@@ -22,10 +22,7 @@ import api from "../../src/api/axios";
 import { useAuthStore } from "../../src/store/useAuthStore";
 import { useRouter } from "expo-router";
 import { StatusBadge } from "../../src/components/StatusBadge";
-import {
-  Card,
-  CardContent,
-} from "../../src/components/ui/Card";
+import { Card, CardContent } from "../../src/components/ui/Card";
 
 export default function CompletedEvents() {
   const { user } = useAuthStore();
@@ -86,20 +83,6 @@ export default function CompletedEvents() {
       </View>
 
       <View className='px-4 pb-24'>
-        {/* Stats */}
-        <StatCard
-          title='Races Finished'
-          value={completedEvents.length}
-          subtitle='Successfully completed'
-          icon={({ size, color }: any) => <Flag size={size} color={color} />}
-        />
-        <StatCard
-          title='History Vault'
-          value='Available'
-          subtitle='Check any finished records'
-          icon={({ size, color }: any) => <Clock size={size} color={color} />}
-        />
-
         {/* Event Cards */}
         {completedEvents.length === 0 ? (
           <View className='py-16 items-center border border-dashed border-border rounded-2xl bg-muted/10 mt-4'>
@@ -155,9 +138,7 @@ export default function CompletedEvents() {
                 <TouchableOpacity
                   key={event._id}
                   onPress={() =>
-                    router.push(
-                      `/(client)/client-event/${event._id}` as any,
-                    )
+                    router.push(`/(client)/client-event/${event._id}` as any)
                   }
                   activeOpacity={0.8}
                 >
