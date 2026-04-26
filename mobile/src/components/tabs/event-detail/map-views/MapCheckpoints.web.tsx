@@ -8,13 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import {
-  MapPin,
-  Navigation,
-  Trash2,
-  PlusCircle,
-  LocateFixed,
-} from "lucide-react-native";
+import { Trash2, LocateFixed } from "lucide-react-native";
 import * as Location from "expo-location";
 import api from "@/src/api/axios";
 
@@ -84,8 +78,14 @@ const getPinIcon = (type: string, index?: number) => {
   });
 };
 
-function MapClickHandler({ onClick, active }: { onClick: (latlng: any) => void; active: boolean }) {
-  if (typeof useMapEvents === 'undefined') return null;
+function MapClickHandler({
+  onClick,
+  active,
+}: {
+  onClick: (latlng: any) => void;
+  active: boolean;
+}) {
+  if (typeof useMapEvents === "undefined") return null;
   useMapEvents({
     click(e: any) {
       if (active) onClick(e.latlng);
@@ -334,7 +334,10 @@ export function MapCheckpoints({ event }: { event: any }) {
                 <MapClickHandler
                   active={activeTab === "add"}
                   onClick={(latlng) => {
-                    setNewCheckpointPoint({ latitude: latlng.lat, longitude: latlng.lng });
+                    setNewCheckpointPoint({
+                      latitude: latlng.lat,
+                      longitude: latlng.lng,
+                    });
                   }}
                 />
 
@@ -343,7 +346,10 @@ export function MapCheckpoints({ event }: { event: any }) {
                     key={cp._id}
                     position={[cp.location.lat, cp.location.lng]}
                     draggable={true}
-                    icon={getPinIcon(cp.type, cp.type !== "waypoint" ? idx + 1 : undefined)}
+                    icon={getPinIcon(
+                      cp.type,
+                      cp.type !== "waypoint" ? idx + 1 : undefined,
+                    )}
                     eventHandlers={{
                       dragend: async (e: any) => {
                         const marker = e.target;
@@ -378,7 +384,9 @@ export function MapCheckpoints({ event }: { event: any }) {
 
                 {routeLine.length > 1 && (
                   <Polyline
-                    positions={routeLine.map((r) => [r.latitude, r.longitude] as [number, number])}
+                    positions={routeLine.map(
+                      (r) => [r.latitude, r.longitude] as [number, number],
+                    )}
                     color='hsl(217, 91%, 60%)'
                     weight={4}
                   />
@@ -386,14 +394,20 @@ export function MapCheckpoints({ event }: { event: any }) {
 
                 {activeTab === "add" && newCheckpointPoint && (
                   <Marker
-                    position={[newCheckpointPoint.latitude, newCheckpointPoint.longitude]}
+                    position={[
+                      newCheckpointPoint.latitude,
+                      newCheckpointPoint.longitude,
+                    ]}
                     draggable={true}
                     icon={getPinIcon("new")}
                     eventHandlers={{
                       dragend: (e: any) => {
                         const marker = e.target;
                         const position = marker.getLatLng();
-                        setNewCheckpointPoint({ latitude: position.lat, longitude: position.lng });
+                        setNewCheckpointPoint({
+                          latitude: position.lat,
+                          longitude: position.lng,
+                        });
                       },
                     }}
                   >

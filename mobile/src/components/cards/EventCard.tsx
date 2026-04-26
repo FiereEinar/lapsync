@@ -6,6 +6,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Alert,
+  Platform,
 } from "react-native";
 import { StatusBadge } from "../StatusBadge";
 import {
@@ -16,7 +17,8 @@ import {
   Activity,
 } from "lucide-react-native";
 import api from "../../api/axios";
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
+import { EditEventModal } from "../modals/EditEventModal";
 
 export default function EventCard({
   event,
@@ -26,6 +28,7 @@ export default function EventCard({
   onRefresh: () => void;
 }) {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const router = useRouter();
 
   const distances = event.raceCategories
@@ -63,28 +66,39 @@ export default function EventCard({
 
   const handleDelete = async () => {
     setDropdownVisible(false);
+
+    const performDelete = async () => {
+      try {
+        await api.delete(`/event/${event._id}`);
+        onRefresh();
+      } catch (error) {
+        Alert.alert("Error", "Could not delete event");
+      }
+    };
+
+    if (Platform.OS === "web") {
+      const confirm = window.confirm(
+        "Are you sure you want to delete this event?",
+      );
+      if (confirm) performDelete();
+      return;
+    }
+
     Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
-        onPress: async () => {
-          try {
-            await api.delete(`/event/${event._id}`);
-            onRefresh();
-          } catch (error) {
-            Alert.alert("Error", "Could not delete event");
-          }
-        },
+        onPress: performDelete,
       },
     ]);
   };
 
   return (
-    <TouchableOpacity 
-       activeOpacity={0.7} 
-       onPress={() => router.push(`/(admin)/event/${event._id}` as any)}
-       className='flex-row items-center p-4 border border-border/60 bg-card rounded-2xl mb-4 overflow-hidden'
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => router.push(`/(admin)/event/${event._id}` as any)}
+      className='flex-row items-center p-4 border border-border/60 bg-card rounded-2xl mb-4 overflow-hidden'
     >
       {/* Date badge */}
       <View className='bg-primary/10 rounded-xl p-2 mr-4 min-w-[56px] items-center justify-center self-start mt-1'>
@@ -162,7 +176,10 @@ export default function EventCard({
                 </View>
                 {event.status === "upcoming" && (
                   <TouchableOpacity
-                    onPress={() => setDropdownVisible(false)}
+                    onPress={() => {
+                      setDropdownVisible(false);
+                      setEditModalVisible(true);
+                    }}
                     className='px-4 py-4 border-b border-border'
                   >
                     <Text className='text-popover-foreground text-base'>
@@ -170,22 +187,6 @@ export default function EventCard({
                     </Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                  onPress={() => setDropdownVisible(false)}
-                  className='px-4 py-4 border-b border-border'
-                >
-                  <Text className='text-popover-foreground text-base'>
-                    Manage Participants
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setDropdownVisible(false)}
-                  className='px-4 py-4 border-b border-border'
-                >
-                  <Text className='text-popover-foreground text-base'>
-                    View Results
-                  </Text>
-                </TouchableOpacity>
                 <TouchableOpacity onPress={handleDelete} className='px-4 py-4'>
                   <Text className='text-destructive font-bold text-base'>
                     Delete Event
@@ -196,6 +197,18 @@ export default function EventCard({
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      {editModalVisible && (
+        <EditEventModal
+          event={event}
+          visible={editModalVisible}
+          onClose={() => setEditModalVisible(false)}
+          onSuccess={() => {
+            setEditModalVisible(false);
+            onRefresh();
+          }}
+        />
+      )}
     </TouchableOpacity>
   );
 }
