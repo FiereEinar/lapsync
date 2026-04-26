@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                     >
                       {/* Date badge */}
                       <View
-                        className='bg-primary/10 rounded-xl p-3 mr-4 items-center justify-center'
+                        className='bg-primary/10 shrink-0 rounded-xl p-3 mr-4 items-center justify-center'
                         style={{ minWidth: 52 }}
                       >
                         <Text className='text-primary text-lg font-extrabold'>
