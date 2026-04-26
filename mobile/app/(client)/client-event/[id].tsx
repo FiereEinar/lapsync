@@ -25,7 +25,6 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { StatusBadge } from "@/src/components/StatusBadge";
 import { RaceCategoryTable } from "@/src/components/RaceCategoryTable";
 import { ClientMapRoute } from "@/src/components/tabs/event-detail/map-views/ClientMapRoute";
-import MapView from "react-native-maps";
 
 import { Participants } from "@/src/components/tabs/event-detail/Participants";
 import { MapTrack } from "@/src/components/tabs/event-detail/MapTrack";
@@ -37,7 +36,6 @@ export default function ClientEventDetails() {
   const eventId = Array.isArray(id) ? id[0] : id;
   const router = useRouter();
   const { user } = useAuthStore();
-  const mapRef = useRef<MapView>(null);
 
   const [event, setEvent] = useState<any>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
