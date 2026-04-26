@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, Calendar, Trophy, Activity, User } from "lucide-react-native";
+import { Home, Calendar, CheckCircle, Activity, User } from "lucide-react-native";
 import { View, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -61,10 +61,10 @@ export default function ClientLayout() {
       <Tabs.Screen
         name="leaderboard"
         options={{
-          title: "Leaderboard",
+          title: "Completed",
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIconContainer : undefined}>
-              <Trophy size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+              <CheckCircle size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
             </View>
           ),
         }}
