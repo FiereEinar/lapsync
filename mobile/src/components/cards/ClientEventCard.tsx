@@ -126,7 +126,11 @@ export default function ClientEventCard({
               registration) && (
               <View className='flex-row items-center mt-4 gap-2 border-t border-border/50 pt-4'>
                 {event.status === "upcoming" && !registration && (
-                  <Button size='sm' onPress={onRegister} className='flex-1'>
+                  <Button
+                    size='sm'
+                    onPress={onRegister}
+                    className='flex-1 shadow-none'
+                  >
                     <Text className='text-xs text-primary-foreground font-bold'>
                       Register
                     </Text>
@@ -138,7 +142,7 @@ export default function ClientEventCard({
                       size='sm'
                       variant='secondary'
                       disabled
-                      className='flex-1'
+                      className='flex-1 shadow-none'
                     >
                       <Text className='text-xs text-muted-foreground font-bold'>
                         Registered
@@ -149,7 +153,7 @@ export default function ClientEventCard({
                       <Button
                         size='sm'
                         onPress={() => onPay(registration._id)}
-                        className='flex-1'
+                        className='flex-1 shadow-none'
                       >
                         <Text className='text-xs text-primary-foreground font-bold'>
                           Pay now
@@ -161,7 +165,7 @@ export default function ClientEventCard({
                       <Button
                         size='sm'
                         disabled
-                        className='flex-1 bg-teal-500/20'
+                        className='flex-1 shadow-none bg-teal-500/20'
                       >
                         <Text className='text-xs text-teal-700 dark:text-teal-400 font-bold'>
                           Paid
