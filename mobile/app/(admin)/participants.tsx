@@ -5,19 +5,25 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Input } from "../../src/components/ui/Input";
 import { Card, CardContent } from "../../src/components/ui/Card";
 import { StatusBadge } from "../../src/components/StatusBadge";
-import { Search, Users, Mail, Phone, Calendar, Tag } from "lucide-react-native";
+import { Search, Users, Mail, Phone, Calendar, Tag, MoreVertical } from "lucide-react-native";
 import api from "../../src/api/axios";
 import { useRouter } from "expo-router";
+import { AssignDeviceModal } from "../../src/components/modals/AssignDeviceModal";
 
 export default function AdminParticipants() {
   const router = useRouter();
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [deviceModalVisible, setDeviceModalVisible] = useState(false);
+  const [activeRegistration, setActiveRegistration] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -162,6 +168,15 @@ export default function AdminParticipants() {
                             </View>
                           </View>
                           <StatusBadge status={reg.status} />
+                          <TouchableOpacity
+                            onPress={() => {
+                              setActiveRegistration(reg);
+                              setActiveDropdownId(reg._id);
+                            }}
+                            className='p-2 -mr-2 ml-1'
+                          >
+                            <MoreVertical size={18} color='hsl(0, 0%, 70%)' />
+                          </TouchableOpacity>
                         </View>
 
                         {/* Detail chips row */}
@@ -233,6 +248,71 @@ export default function AdminParticipants() {
           )}
         </View>
       </ScrollView>
+
+      {/* Shared Dropdown Modal */}
+      <Modal visible={!!activeDropdownId} transparent={true} animationType='fade'>
+        <TouchableWithoutFeedback onPress={() => setActiveDropdownId(null)}>
+          <View className='flex-1 justify-end bg-black/40'>
+            <TouchableWithoutFeedback>
+              <View className='bg-popover m-4 rounded-xl border border-border p-2 bottom-6 shadow-lg'>
+                <View className='p-4 border-b border-border'>
+                  <Text className='text-popover-foreground font-semibold text-lg'>
+                    Actions for {activeRegistration?.user?.name}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    setActiveDropdownId(null);
+                    if (activeRegistration?.event?._id) {
+                      router.push(
+                        `/(admin)/event/${activeRegistration.event._id}` as any,
+                      );
+                    }
+                  }}
+                  className='px-4 py-4 border-b border-border'
+                >
+                  <Text className='text-popover-foreground text-base'>
+                    View Details
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setActiveDropdownId(null);
+                    setDeviceModalVisible(true);
+                  }}
+                  className='px-4 py-4'
+                >
+                  <Text className='text-popover-foreground text-base'>
+                    Assign / Unassign Hardware
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Assign Device Modal */}
+      {deviceModalVisible && (
+        <AssignDeviceModal
+          registration={activeRegistration}
+          visible={deviceModalVisible}
+          onClose={() => setDeviceModalVisible(false)}
+          onSuccess={() => {
+            setDeviceModalVisible(false);
+            // Re-fetch or update local state
+            const fetchData = async () => {
+              try {
+                const { data } = await api.get("/registration");
+                setRegistrations(Array.isArray(data.data) ? data.data : []);
+              } catch (error) {
+                console.error("Participants Fetch Error:", error);
+              }
+            };
+            fetchData();
+          }}
+        />
+      )}
     </View>
   );
 }
