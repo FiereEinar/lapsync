@@ -77,7 +77,7 @@ export default function ClientHome() {
   return (
     <ScrollView
       className='flex-1 bg-background'
-      contentContainerStyle={{ padding: 20 }}
+      contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
     >
       {/* Hero Section */}
       <View className='mb-6 mt-2'>

@@ -55,7 +55,7 @@ export default function AdminEvents() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
         {/* Hero Section */}
         <View className="mb-6 mt-2 relative">
            <View className="bg-primary/10 rounded-2xl p-6 border border-primary/20 overflow-hidden">

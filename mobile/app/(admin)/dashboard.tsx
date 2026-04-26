@@ -79,7 +79,7 @@ export default function AdminDashboard() {
 
   return (
     <View className='flex-1 bg-background'>
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Hero Section with Gradient */}
         <LinearGradient
           colors={[

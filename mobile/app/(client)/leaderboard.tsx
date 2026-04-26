@@ -60,7 +60,7 @@ export default function Leaderboard() {
   return (
     <ScrollView
       className='flex-1 bg-background'
-      contentContainerStyle={{ padding: 20 }}
+      contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
     >
       {/* Header */}
       <View className='mb-6 mt-2'>
