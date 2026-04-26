@@ -125,7 +125,7 @@ export default function AdminDevices() {
     <View className='flex-1 bg-background'>
       <ScrollView>
         {/* Hero Section */}
-        <View className='mb-2 mt-2 relative'>
+        <View className='mb-2 relative'>
           <View className='bg-primary/10 py-10 px-6 border border-primary/20 overflow-hidden'>
             <View className='flex-row justify-between items-start'>
               <View>

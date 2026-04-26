@@ -11,7 +11,15 @@ import {
 import { Input } from "../../src/components/ui/Input";
 import { Card, CardContent } from "../../src/components/ui/Card";
 import { StatusBadge } from "../../src/components/StatusBadge";
-import { Search, Users, Mail, Phone, Calendar, Tag, MoreVertical } from "lucide-react-native";
+import {
+  Search,
+  Users,
+  Mail,
+  Phone,
+  Calendar,
+  Tag,
+  MoreVertical,
+} from "lucide-react-native";
 import api from "../../src/api/axios";
 import { useRouter } from "expo-router";
 import { AssignDeviceModal } from "../../src/components/modals/AssignDeviceModal";
@@ -63,7 +71,7 @@ export default function AdminParticipants() {
     <View className='flex-1 bg-background'>
       <ScrollView>
         {/* Hero Section */}
-        <View className='mb-2 mt-2 relative'>
+        <View className='mb-2 relative'>
           <View className='bg-primary/10 py-10 px-6 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               Participants
@@ -250,7 +258,11 @@ export default function AdminParticipants() {
       </ScrollView>
 
       {/* Shared Dropdown Modal */}
-      <Modal visible={!!activeDropdownId} transparent={true} animationType='fade'>
+      <Modal
+        visible={!!activeDropdownId}
+        transparent={true}
+        animationType='fade'
+      >
         <TouchableWithoutFeedback onPress={() => setActiveDropdownId(null)}>
           <View className='flex-1 justify-end bg-black/40'>
             <TouchableWithoutFeedback>

@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Linking, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Linking,
+  Alert,
+} from "react-native";
 import { useRouter } from "expo-router";
 import ClientEventCard from "../../src/components/cards/ClientEventCard";
 import { Input } from "../../src/components/ui/Input";
@@ -48,7 +55,10 @@ export default function ClientEvents() {
       }
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Payment Error", err.response?.data?.message || "Could not initialize checkout.");
+      Alert.alert(
+        "Payment Error",
+        err.response?.data?.message || "Could not initialize checkout.",
+      );
     }
   };
 
@@ -94,10 +104,10 @@ export default function ClientEvents() {
   }
 
   return (
-    <View className='flex-1 bg-background'>
+    <View className='flex-1 bg-background pb-6'>
       <ScrollView>
         {/* Hero Section */}
-        <View className='mb-2 mt-2 relative'>
+        <View className='mb-2 relative'>
           <View className='bg-primary/10 py-10  px-6 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               Events

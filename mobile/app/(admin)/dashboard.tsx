@@ -81,7 +81,7 @@ export default function AdminDashboard() {
     <View className='flex-1 bg-background'>
       <ScrollView>
         {/* Hero Section */}
-        <View className='mb-4 mt-2 relative'>
+        <View className='mb-4 relative'>
           <View className='bg-primary/10 px-6 py-10 border border-primary/20 overflow-hidden'>
             <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
               Welcome, Admin!

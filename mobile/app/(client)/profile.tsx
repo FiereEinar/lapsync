@@ -98,152 +98,160 @@ export default function Profile() {
   }
 
   return (
-    <ScrollView
-      className='flex-1 bg-background'
-      contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-    >
-      {/* Header */}
-      <View className='mb-6 mt-2'>
-        <Text className='text-3xl font-extrabold text-foreground mb-1'>
-          Profile
-        </Text>
-        <Text className='text-muted-foreground text-sm'>
-          Manage your account and view your stats
-        </Text>
+    <ScrollView className='flex-1 bg-background'>
+      {/* Hero Section */}
+      <View className='mb-4 relative'>
+        <View className='bg-primary/10 py-10  px-6 border border-primary/20 overflow-hidden'>
+          <Text className='text-xs font-bold text-primary uppercase tracking-[0.2em] mb-2'>
+            Profile
+          </Text>
+          <Text className='text-2xl font-extrabold text-foreground mb-1'>
+            {user?.name || "User"}
+          </Text>
+          <Text className='text-muted-foreground text-sm'>
+            Manage your account and view your stats
+          </Text>
+        </View>
       </View>
 
-      {/* User Info Card */}
-      <Card className='mb-6'>
-        <CardHeader className='pb-3'>
-          <View className='flex-row items-center justify-between w-full'>
-            <View className='flex-row items-center gap-3'>
-              <View className='bg-primary/10 p-3 rounded-xl'>
-                <User size={28} color='hsl(173, 50%, 50%)' />
+      <View className='px-4 pb-50'>
+        {/* User Info Card */}
+        <Card className='mb-6'>
+          <CardHeader className='pb-3'>
+            <View className='flex-row items-center justify-between w-full'>
+              <View className='flex-row items-center gap-3'>
+                <View className='bg-primary/10 p-3 rounded-xl'>
+                  <User size={28} color='hsl(173, 50%, 50%)' />
+                </View>
+                <View>
+                  <Text className='text-foreground font-bold text-xl'>
+                    {user?.name || "User"}
+                  </Text>
+                  <Text className='text-muted-foreground text-sm'>
+                    {user?.email}
+                  </Text>
+                </View>
               </View>
-              <View>
-                <Text className='text-foreground font-bold text-xl'>
-                  {user?.name || "User"}
-                </Text>
-                <Text className='text-muted-foreground text-sm'>
-                  {user?.email}
-                </Text>
-              </View>
+              <TouchableOpacity
+                onPress={() => router.push("/(client)/edit-profile" as any)}
+                className='bg-primary/10 px-3 py-2 rounded-full'
+              >
+                <Text className='text-primary text-xs font-bold'>Edit</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onPress={() => router.push("/(client)/edit-profile" as any)}
-              className='bg-primary/10 px-3 py-2 rounded-full'
-            >
-              <Text className='text-primary text-xs font-bold'>Edit</Text>
-            </TouchableOpacity>
-          </View>
-        </CardHeader>
-        <CardContent>
-          <View className='flex-row items-center gap-2 mb-4'>
-            <Shield size={14} color='hsl(0, 0%, 70%)' />
-            <Text className='text-muted-foreground text-sm capitalize'>
-              {user?.role}
-            </Text>
-          </View>
+          </CardHeader>
+          <CardContent>
+            <View className='flex-row items-center gap-2 mb-4'>
+              <Shield size={14} color='hsl(0, 0%, 70%)' />
+              <Text className='text-muted-foreground text-sm capitalize'>
+                {user?.role}
+              </Text>
+            </View>
 
-          <View className='flex-row items-center gap-2 mb-2'>
-            <Phone size={14} color='hsl(0, 0%, 70%)' />
-            <Text className='text-muted-foreground text-sm'>
-              {user?.phone || "Not provided"}
-            </Text>
-          </View>
+            <View className='flex-row items-center gap-2 mb-2'>
+              <Phone size={14} color='hsl(0, 0%, 70%)' />
+              <Text className='text-muted-foreground text-sm'>
+                {user?.phone || "Not provided"}
+              </Text>
+            </View>
 
-          <View className='flex-row items-center gap-2'>
-            <Calendar size={14} color='hsl(0, 0%, 70%)' />
-            <Text className='text-muted-foreground text-sm'>
-              Member since{" "}
-              {user?.createdAt
-                ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                  })
-                : "-"}
-            </Text>
-          </View>
-        </CardContent>
-      </Card>
+            <View className='flex-row items-center gap-2'>
+              <Calendar size={14} color='hsl(0, 0%, 70%)' />
+              <Text className='text-muted-foreground text-sm'>
+                Member since{" "}
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                    })
+                  : "-"}
+              </Text>
+            </View>
+          </CardContent>
+        </Card>
 
-      {/* Stats Cards */}
-      <View className='flex-row gap-3 mb-6'>
-        <Card className='flex-1'>
+        {/* Stats Cards */}
+        <View className='flex-row gap-3 mb-6'>
+          <Card className='flex-1'>
+            <CardHeader className='pb-2'>
+              <View className='flex-row items-center gap-2'>
+                <Trophy size={16} color='hsl(173, 50%, 50%)' />
+                <CardTitle>Rank</CardTitle>
+              </View>
+            </CardHeader>
+            <CardContent>
+              <Text className='text-foreground font-bold text-2xl mb-1'>
+                {stats.rank}
+              </Text>
+              <Text className='text-muted-foreground text-xs'>
+                Best Position
+              </Text>
+            </CardContent>
+          </Card>
+
+          <Card className='flex-1'>
+            <CardHeader className='pb-2'>
+              <View className='flex-row items-center gap-2'>
+                <Users size={16} color='hsl(173, 50%, 50%)' />
+                <CardTitle>Events</CardTitle>
+              </View>
+            </CardHeader>
+            <CardContent>
+              <Text className='text-foreground font-bold text-2xl mb-1'>
+                {stats.totalEvents}
+              </Text>
+              <Text className='text-muted-foreground text-xs'>
+                Total Participations
+              </Text>
+            </CardContent>
+          </Card>
+        </View>
+
+        <Card className='mb-6'>
+          <CardHeader className='pb-2'>
+            <View className='flex-row items-center gap-2'>
+              <Calendar size={16} color='hsl(173, 50%, 50%)' />
+              <CardTitle>Completed Events</CardTitle>
+            </View>
+          </CardHeader>
+          <CardContent>
+            <Text className='text-foreground font-bold text-2xl mb-1'>
+              {stats.completedEvents}
+            </Text>
+            <Text className='text-muted-foreground text-xs'>
+              Finished events
+            </Text>
+          </CardContent>
+        </Card>
+
+        <Card className='mb-6'>
           <CardHeader className='pb-2'>
             <View className='flex-row items-center gap-2'>
               <Trophy size={16} color='hsl(173, 50%, 50%)' />
-              <CardTitle>Rank</CardTitle>
+              <CardTitle>Total Points</CardTitle>
             </View>
           </CardHeader>
           <CardContent>
             <Text className='text-foreground font-bold text-2xl mb-1'>
-              {stats.rank}
-            </Text>
-            <Text className='text-muted-foreground text-xs'>Best Position</Text>
-          </CardContent>
-        </Card>
-
-        <Card className='flex-1'>
-          <CardHeader className='pb-2'>
-            <View className='flex-row items-center gap-2'>
-              <Users size={16} color='hsl(173, 50%, 50%)' />
-              <CardTitle>Events</CardTitle>
-            </View>
-          </CardHeader>
-          <CardContent>
-            <Text className='text-foreground font-bold text-2xl mb-1'>
-              {stats.totalEvents}
+              {stats.points}
             </Text>
             <Text className='text-muted-foreground text-xs'>
-              Total Participations
+              Accumulated points
             </Text>
           </CardContent>
         </Card>
+
+        {/* Logout Button */}
+        <TouchableOpacity
+          onPress={handleLogout}
+          className='flex-row items-center justify-center bg-destructive/10 px-4 py-4 rounded-xl border border-destructive/20'
+        >
+          <LogOut size={20} color='hsl(0, 84%, 60%)' />
+          <Text className='text-destructive font-bold text-base ml-2'>
+            Logout
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      <Card className='mb-6'>
-        <CardHeader className='pb-2'>
-          <View className='flex-row items-center gap-2'>
-            <Calendar size={16} color='hsl(173, 50%, 50%)' />
-            <CardTitle>Completed Events</CardTitle>
-          </View>
-        </CardHeader>
-        <CardContent>
-          <Text className='text-foreground font-bold text-2xl mb-1'>
-            {stats.completedEvents}
-          </Text>
-          <Text className='text-muted-foreground text-xs'>Finished events</Text>
-        </CardContent>
-      </Card>
-
-      <Card className='mb-6'>
-        <CardHeader className='pb-2'>
-          <View className='flex-row items-center gap-2'>
-            <Trophy size={16} color='hsl(173, 50%, 50%)' />
-            <CardTitle>Total Points</CardTitle>
-          </View>
-        </CardHeader>
-        <CardContent>
-          <Text className='text-foreground font-bold text-2xl mb-1'>
-            {stats.points}
-          </Text>
-          <Text className='text-muted-foreground text-xs'>
-            Accumulated points
-          </Text>
-        </CardContent>
-      </Card>
-
-      {/* Logout Button */}
-      <TouchableOpacity
-        onPress={handleLogout}
-        className='flex-row items-center justify-center bg-destructive/10 px-4 py-4 rounded-xl border border-destructive/20'
-      >
-        <LogOut size={20} color='hsl(0, 84%, 60%)' />
-        <Text className='text-destructive font-bold text-base ml-2'>
-          Logout
-        </Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }

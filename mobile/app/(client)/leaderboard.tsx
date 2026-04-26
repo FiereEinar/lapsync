@@ -65,7 +65,7 @@ export default function CompletedEvents() {
   return (
     <ScrollView className='flex-1 bg-background'>
       {/* Hero Section */}
-      <View className='mb-2 mt-2 relative'>
+      <View className='mb-2 relative'>
         <View className='bg-primary/10 py-10 px-6 border border-primary/20 overflow-hidden'>
           <View className='flex-row items-center gap-1.5 mb-2'>
             <CheckCircle size={14} color='hsl(173, 50%, 50%)' />
