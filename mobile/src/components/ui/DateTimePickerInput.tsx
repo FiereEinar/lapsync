@@ -45,6 +45,42 @@ export function DateTimePickerInput({ mode, value, onChange, placeholder, classN
     }
   };
 
+  if (Platform.OS === 'web') {
+    return (
+      <View className={className}>
+        <View className="relative w-full">
+          {React.createElement('input', {
+            type: mode,
+            value: value,
+            onChange: (e: any) => onChange(e.target.value),
+            style: {
+              width: '100%',
+              height: 48,
+              paddingLeft: 40,
+              paddingRight: 12,
+              backgroundColor: 'transparent',
+              color: 'hsl(0, 0%, 70%)',
+              border: '1px solid hsla(240, 3%, 81%, 1.00)',
+              borderRadius: 6,
+              outline: 'none',
+              fontSize: 16,
+              colorScheme: 'light',
+            }
+          })}
+          <View 
+            style={{ position: 'absolute', left: 12, top: 14, pointerEvents: 'none' }}
+          >
+            {mode === 'date' ? (
+               <Calendar size={18} color="hsl(0, 0%, 70%)" />
+            ) : (
+               <Clock size={18} color="hsl(0, 0%, 70%)" />
+            )}
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className={className}>
       <TouchableOpacity 

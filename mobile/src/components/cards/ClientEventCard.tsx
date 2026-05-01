@@ -165,7 +165,7 @@ export default function ClientEventCard({
                       <Button
                         size='sm'
                         disabled
-                        className='flex-1 shadow-none bg-teal-500/20'
+                        className='flex-1 shadow-none border-none bg-teal-500/20'
                       >
                         <Text className='text-xs text-teal-700 dark:text-teal-400 font-bold'>
                           Paid
