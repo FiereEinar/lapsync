@@ -140,10 +140,10 @@ export function MapLive({ event }: { event: any }) {
                   if (focusedRunnerId !== null && !isFocused) return null;
 
                   const pinColor = isOffline
-                    ? "hsl(0, 0%, 50%)"
+                    ? "#808080"
                     : isFocused
-                      ? "hsl(348, 83%, 47%)"
-                      : "hsl(217, 91%, 60%)";
+                      ? "#ef4444"
+                      : "#3b82f6";
 
                   return (
                     <React.Fragment key={r.registrationId}>

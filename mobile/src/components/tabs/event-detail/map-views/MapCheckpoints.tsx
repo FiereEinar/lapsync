@@ -107,7 +107,7 @@ export function MapCheckpoints({ event }: { event: any }) {
   // Calculate generic polyline via OSRM implicitly!
   useEffect(() => {
     const buildRoute = async () => {
-      const mapped = sortedCheckpoints; // Includes all waypoints, checkpoints, start, finish in order
+      const mapped = sortedCheckpoints; 
       if (mapped.length < 2) {
         setRouteLine([]);
         setRouteDistance(0);
@@ -118,10 +118,12 @@ export function MapCheckpoints({ event }: { event: any }) {
         .map((cp) => `${cp.location.lng},${cp.location.lat}`)
         .join(";");
       try {
-        // Native OSRM route mapping directly bypassing heavy mapbox leaflet plugins!
-        const { data } = await api.get(
-          `https://router.project-osrm.org/route/v1/driving/${coordsString}?geometries=geojson`,
+        // Use native fetch to avoid axios baseURL/credential issues on mobile for external APIs
+        const response = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${coordsString}?geometries=geojson`
         );
+        const data = await response.json();
+        
         if (data?.routes?.[0]) {
           const geojsonCoords = data.routes[0].geometry.coordinates as [
             number,
@@ -319,7 +321,7 @@ export function MapCheckpoints({ event }: { event: any }) {
                 {routeLine.length > 0 && (
                   <Polyline
                     coordinates={routeLine}
-                    strokeColor='hsl(217, 91%, 60%)'
+                    strokeColor='#3b82f6'
                     strokeWidth={4}
                   />
                 )}

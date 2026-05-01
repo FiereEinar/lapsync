@@ -23,12 +23,12 @@ type TelemetryData = {
 };
 
 const COLORS = [
-  "hsl(348, 83%, 47%)", // red
-  "hsl(217, 91%, 60%)", // blue
-  "hsl(160, 84%, 39%)", // emerald
-  "hsl(38, 92%, 50%)", // amber
-  "hsl(258, 90%, 66%)", // violet
-  "hsl(330, 81%, 60%)", // pink
+  "#ef4444", // red
+  "#3b82f6", // blue
+  "#10b981", // emerald
+  "#f59e0b", // amber
+  "#8b5cf6", // violet
+  "#ec4899", // pink
 ];
 
 export function MapReplay({ event }: { event: any }) {
@@ -206,7 +206,7 @@ export function MapReplay({ event }: { event: any }) {
               {routeLine.length > 0 && (
                 <Polyline
                   coordinates={routeLine}
-                  strokeColor='hsl(217, 91%, 60%)'
+                  strokeColor='#3b82f6'
                   strokeWidth={4}
                 />
               )}

@@ -7,6 +7,7 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import { CreditCard, Search, CheckCircle } from "lucide-react-native";
 import api from "@/src/api/axios";
@@ -14,6 +15,7 @@ import api from "@/src/api/axios";
 export function PendingPayments({ event }: { event: any }) {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRegistrations = async () => {
@@ -31,26 +33,56 @@ export function PendingPayments({ event }: { event: any }) {
     fetchRegistrations();
   }, [event._id]);
 
+  const processMarkPaid = async (registration: any) => {
+    setProcessingId(registration._id);
+    try {
+      const res = await api.post("/payment/mark-paid", {
+        registrationId: registration._id,
+      });
+      
+      if (res.data?.success) {
+        const successMsg = `${registration.user.name}'s payment has been marked as paid.`;
+        if (Platform.OS === 'web') {
+          window.alert(successMsg);
+        } else {
+          Alert.alert("Success", successMsg);
+        }
+        fetchRegistrations();
+      } else {
+        throw new Error(res.data?.message || "Failed to update payment");
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Could not process payment update via API.";
+      if (Platform.OS === 'web') {
+        window.alert(msg);
+      } else {
+        Alert.alert("Error", msg);
+      }
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const handleMarkPaid = async (registration: any) => {
+    const title = "Confirm Payment";
+    const message = `Are you sure you want to mark ${registration.user.name}'s registration as paid? This will confirm their registration, generate a bib number, and assign a device.`;
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${message}`)) {
+        processMarkPaid(registration);
+      }
+      return;
+    }
+
     Alert.alert(
-      "Confirm Payment",
-      `Are you sure you want to mark ${registration.user.name}'s registration as paid?`,
+      title,
+      message,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Confirm Payment",
           style: "default",
-          onPress: async () => {
-            try {
-              await api.post("/payment/mark-paid", {
-                registrationId: registration._id,
-              });
-              Alert.alert("Success", "Payment marked as paid!");
-              fetchRegistrations();
-            } catch (err) {
-              Alert.alert("Error", "Could not process payment update via API.");
-            }
-          },
+          onPress: () => processMarkPaid(registration),
         },
       ],
     );
@@ -185,11 +217,24 @@ export function PendingPayments({ event }: { event: any }) {
                         <View className='w-[140px] items-end px-4'>
                           <TouchableOpacity
                             onPress={() => handleMarkPaid(reg)}
-                            className='flex-row items-center px-3 py-2 bg-emerald-500/10 rounded-lg border border-emerald-500/30 shadow-sm'
+                            disabled={processingId === reg._id}
+                            className={`flex-row items-center px-3 py-2 rounded-lg border shadow-sm ${
+                              processingId === reg._id 
+                                ? 'bg-muted border-border' 
+                                : 'bg-emerald-500/10 border-emerald-500/30'
+                            }`}
                           >
-                            <CheckCircle size={14} color='hsl(160, 84%, 39%)' />
-                            <Text className='ml-1.5 font-bold text-xs text-emerald-700 dark:text-emerald-400 uppercase tracking-widest'>
-                              Mark Paid
+                            {processingId === reg._id ? (
+                              <ActivityIndicator size='small' color='hsl(0, 0%, 50%)' />
+                            ) : (
+                              <CheckCircle size={14} color='hsl(160, 84%, 39%)' />
+                            )}
+                            <Text className={`ml-1.5 font-bold text-xs uppercase tracking-widest ${
+                              processingId === reg._id 
+                                ? 'text-muted-foreground' 
+                                : 'text-emerald-700 dark:text-emerald-400'
+                            }`}>
+                              {processingId === reg._id ? 'Processing' : 'Mark as Paid'}
                             </Text>
                           </TouchableOpacity>
                         </View>
