@@ -114,7 +114,7 @@ export default function Profile() {
         </View>
       </View>
 
-      <View className='px-4 pb-50'>
+      <View className='px-4 pb-80'>
         {/* User Info Card */}
         <Card className='mb-6'>
           <CardHeader className='pb-3'>

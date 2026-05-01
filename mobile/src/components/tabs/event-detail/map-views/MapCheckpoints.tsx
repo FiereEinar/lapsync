@@ -185,8 +185,8 @@ export function MapCheckpoints({ event }: { event: any }) {
         name: newName,
         type: newType,
         location: {
-          lat: newCheckpointPoint.latitude,
-          lng: newCheckpointPoint.longitude,
+          lat: Number(newCheckpointPoint.latitude),
+          lng: Number(newCheckpointPoint.longitude),
         },
       });
       setNewName("");
@@ -196,9 +196,14 @@ export function MapCheckpoints({ event }: { event: any }) {
       fetchCheckpoints();
       Alert.alert("Success", "Checkpoint Added!");
     } catch (err: any) {
+      console.error("Checkpoint Submission Error:", err);
+      const status = err.response?.status;
+      const serverMessage = err.response?.data?.message || err.response?.data?.error;
+      const errorMessage = serverMessage || err.message || "Unknown error";
+      
       Alert.alert(
-        "Error",
-        err.response?.data?.message || "Failed to add checkpoint",
+        "Submission Failed",
+        `Status: ${status || "N/A"}\nMessage: ${errorMessage}\n\nFull Body: ${JSON.stringify(err.response?.data || {}).substring(0, 100)}`
       );
     } finally {
       setIsSubmitting(false);

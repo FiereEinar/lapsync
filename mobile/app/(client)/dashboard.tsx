@@ -91,7 +91,7 @@ export default function ClientHome() {
         </View>
       </View>
 
-      <View className='px-4 pb-20'>
+      <View className='px-4 pb-80'>
         {/* Quick Stats */}
         <StatCard
           title='Registered Events'
