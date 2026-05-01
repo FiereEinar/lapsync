@@ -261,9 +261,18 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
         if (type === "finish") return 2;
         return 1;
       };
-      return getScore(a.type) - getScore(b.type);
+      const scoreA = getScore(a.type);
+      const scoreB = getScore(b.type);
+      if (scoreA !== scoreB) return scoreA - scoreB;
+      return (a.order || 0) - (b.order || 0);
     });
   }, [checkpoints]);
+
+  const waypoints = useMemo(() => {
+    return sortedCheckpoints.map(
+      (cp) => [cp.location.lat, cp.location.lng] as [number, number],
+    );
+  }, [sortedCheckpoints]);
 
   return (
     <Card>
@@ -402,11 +411,9 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
             ))}
 
           {/* Render Route Path */}
-          {!isLoading && sortedCheckpoints.length >= 2 && (
+          {waypoints.length >= 2 && (
             <RoutingMachine
-              waypoints={sortedCheckpoints.map(
-                (cp) => [cp.location.lat, cp.location.lng] as [number, number],
-              )}
+              waypoints={waypoints}
               onRouteFound={setTotalRouteDistance}
             />
           )}

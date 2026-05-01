@@ -101,7 +101,10 @@ export function MapCheckpoints({ event }: { event: any }) {
       if (type === "finish") return 2;
       return 1;
     };
-    return getScore(a.type) - getScore(b.type);
+    const scoreA = getScore(a.type);
+    const scoreB = getScore(b.type);
+    if (scoreA !== scoreB) return scoreA - scoreB;
+    return (a.order || 0) - (b.order || 0);
   });
 
   // Calculate generic polyline via OSRM implicitly!

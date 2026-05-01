@@ -117,7 +117,7 @@ export function DateTimePickerInput({ mode, value, onChange, placeholder, classN
             mode={mode}
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={handleChange}
-            textColor="#ffffff"
+            textColor="hsl(0, 0%, 70%)"
             themeVariant="dark"
             style={Platform.OS === 'ios' ? { height: 140, width: '100%' } : undefined}
           />
