@@ -23,11 +23,13 @@ import {
   Zap,
   CalendarCheck,
   MapPin,
+  Plus,
 } from "lucide-react-native";
 import api from "../../src/api/axios";
 import { useAuthStore } from "../../src/store/useAuthStore";
 import { useRouter } from "expo-router";
 import { StatusBadge } from "../../src/components/StatusBadge";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function ClientHome() {
   const { user } = useAuthStore();
@@ -306,14 +308,36 @@ export default function ClientHome() {
 
         {/* Bottom Actions */}
         <View className='flex-row gap-3 mb-8 px-2'>
-          <Button
+          <TouchableOpacity
+            onPress={() => router.push("/(client)/client-events")}
+            className='overflow-hidden rounded-xl w-full'
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={["hsl(173, 50%, 48%)", "hsl(173, 60%, 38%)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                paddingVertical: 14,
+                paddingHorizontal: 20,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text className='text-white font-bold text-base'>
+                Browse Events
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          {/* <Button
             className='flex-1 py-4'
             onPress={() => router.push("/(client)/client-events")}
           >
             <Text className='text-primary-foreground font-bold text-base'>
               Browse Events
             </Text>
-          </Button>
+          </Button> */}
         </View>
       </View>
     </ScrollView>

@@ -58,7 +58,7 @@ export function MapTrack({ event }: { event: any }) {
               style={{ marginRight: 6 }}
             />
             <Text
-              className={`text-sm font-bold ${activeTab === "live" ? "text-foreground text-primary" : "text-muted-foreground"}`}
+              className={`text-sm font-bold ${activeTab === "live" ? "text-foreground" : "text-muted-foreground"}`}
             >
               Live
             </Text>
