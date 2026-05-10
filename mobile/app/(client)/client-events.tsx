@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import ClientEventCard from "../../src/components/cards/ClientEventCard";
 import { Input } from "../../src/components/ui/Input";
 import { StatCard } from "../../src/components/StatCard";
@@ -51,7 +52,27 @@ export default function ClientEvents() {
     try {
       const { data } = await api.post("/payment/create", { registrationId });
       if (data.checkoutUrl) {
-        Linking.openURL(data.checkoutUrl);
+        // Open the in-app browser and wait for user to close it
+        const result = await WebBrowser.openBrowserAsync(data.checkoutUrl);
+        
+        // When browser is closed, auto-verify the payment
+        try {
+          const verifyRes = await api.post("/payment/verify", { registrationId });
+          const verifyData = verifyRes.data;
+          
+          if (verifyData.success) {
+            if (verifyData.message === "Payment successful" || verifyData.message === "Payment already confirmed" || verifyData.message === "Payment already processed") {
+              Alert.alert("Success", "Your payment has been successfully confirmed!");
+            } else if (verifyData.message === "Payment pending") {
+              Alert.alert("Pending", "Your payment is still processing. It may take a moment to reflect.");
+            }
+          }
+          // Refresh events and registrations
+          fetchAll();
+        } catch (verifyErr) {
+          console.error("Payment verification failed", verifyErr);
+          Alert.alert("Notice", "We could not automatically verify your payment at this moment. If you completed it, please wait a few minutes.");
+        }
       }
     } catch (err: any) {
       console.error(err);

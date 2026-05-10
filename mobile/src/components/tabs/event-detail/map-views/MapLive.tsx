@@ -1,6 +1,7 @@
 import { getSocket } from "@/src/services/socket";
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import api from "@/src/api/axios";
 import MapView, {
   Marker,
   Polyline,
