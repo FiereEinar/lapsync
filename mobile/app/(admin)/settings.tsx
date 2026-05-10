@@ -260,7 +260,7 @@ function ProfileTab() {
 
         <TouchableOpacity
           onPress={handleLogout}
-          className='flex-row items-center justify-center bg-destructive/10 px-4 py-4 rounded-xl border border-destructive/20 mt-2'
+          className='flex-row h-12 items-center justify-center bg-destructive/10 px-4 rounded-xl border border-destructive/20 mt-2'
         >
           <LogOut size={20} color='hsl(0, 84%, 60%)' />
           <Text className='text-destructive font-bold text-base ml-2'>

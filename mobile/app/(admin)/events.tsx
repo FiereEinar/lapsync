@@ -117,7 +117,7 @@ export default function AdminEvents() {
                 placeholder='Search events...'
                 value={searchTerm}
                 onChangeText={setSearchTerm}
-                className='pl-10 h-14'
+                className='pl-10 h-12'
               />
             </View>
           </View>

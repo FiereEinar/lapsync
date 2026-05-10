@@ -145,14 +145,14 @@ export default function ClientEvents() {
         <View className='px-4 pb-20'>
           {/* Search */}
           <View className='relative mb-4 mt-2'>
-            <View className='absolute left-4 top-4 z-10'>
+            <View className='absolute left-3 top-3.5 z-10'>
               <Search size={20} color='hsl(173, 50%, 50%)' />
             </View>
             <Input
               placeholder='Search events by name or city...'
               value={searchTerm}
               onChangeText={setSearchTerm}
-              className='pl-12 h-14 bg-card border border-border/50 rounded-2xl text-base text-foreground focus:border-primary/50 focus:bg-background transition-colors'
+              className='pl-10 h-12 bg-card border border-border/50 rounded-2xl text-base text-foreground focus:border-primary/50 focus:bg-background transition-colors'
               placeholderTextColor='hsl(0, 0%, 50%)'
             />
           </View>

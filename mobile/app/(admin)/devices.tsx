@@ -154,14 +154,14 @@ export default function AdminDevices() {
 
           {/* Search */}
           <View className='relative mb-4'>
-            <View className='absolute left-3 top-4 z-10'>
+            <View className='absolute left-3 top-3.5 z-10'>
               <Search size={18} color='hsl(0, 0%, 70%)' />
             </View>
             <Input
               placeholder='Search by device, token, or runner name...'
               value={searchTerm}
               onChangeText={setSearchTerm}
-              className='pl-10 h-14'
+              className='pl-10 h-12'
             />
           </View>
 
