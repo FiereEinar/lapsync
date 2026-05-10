@@ -105,7 +105,10 @@ export default function ClientEventDetails() {
         if (type === "finish") return 2;
         return 1;
       };
-      return getScore(a.type) - getScore(b.type);
+      const scoreA = getScore(a.type);
+      const scoreB = getScore(b.type);
+      if (scoreA !== scoreB) return scoreA - scoreB;
+      return (a.order || 0) - (b.order || 0);
     });
   }, [checkpoints]);
 

@@ -80,6 +80,45 @@ export function ClientMapRoute({
 }: {
   sortedCheckpoints: any[];
 }) {
+  const [routeLine, setRouteLine] = React.useState<
+    { latitude: number; longitude: number }[]
+  >([]);
+
+  React.useEffect(() => {
+    const buildRoute = async () => {
+      const mapped = sortedCheckpoints;
+      if (mapped.length < 2) {
+        setRouteLine([]);
+        return;
+      }
+
+      const coordsString = mapped
+        .map((cp) => `${cp.location.lng},${cp.location.lat}`)
+        .join(";");
+      try {
+        const response = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${coordsString}?geometries=geojson`,
+        );
+        const data = await response.json();
+        if (data?.routes?.[0]) {
+          const geojsonCoords = data.routes[0].geometry.coordinates as [
+            number,
+            number,
+          ][];
+          const parsedLine = geojsonCoords.map((coord) => ({
+            latitude: coord[1],
+            longitude: coord[0],
+          }));
+          setRouteLine(parsedLine);
+        }
+      } catch (err) {
+        console.error("OSRM Route mapping error on mobile client web", err);
+      }
+    };
+
+    buildRoute();
+  }, [sortedCheckpoints]);
+
   const center = useMemo(() => {
     if (!sortedCheckpoints || sortedCheckpoints.length === 0) {
       return { lat: 10.3157, lng: 123.8854 }; // Default center
@@ -131,9 +170,11 @@ export function ClientMapRoute({
           </Marker>
         ))}
 
-        {routeCoordinates.length > 1 && (
+        {routeLine.length > 1 && (
           <Polyline
-            positions={routeCoordinates}
+            positions={routeLine.map(
+              (r) => [r.latitude, r.longitude] as [number, number],
+            )}
             color='hsl(217, 91%, 60%)'
             weight={4}
           />

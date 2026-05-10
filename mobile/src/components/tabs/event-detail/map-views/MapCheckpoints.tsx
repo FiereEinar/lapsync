@@ -30,6 +30,7 @@ type Checkpoint = {
   type: "start" | "finish" | "checkpoint" | "waypoint";
   raceCategory: string;
   location: { lat: number; lng: number };
+  order?: number;
 };
 
 export function MapCheckpoints({ event }: { event: any }) {

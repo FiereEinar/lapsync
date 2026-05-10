@@ -24,6 +24,57 @@ export function MapLive({ event }: { event: any }) {
   const [focusedRunnerId, setFocusedRunnerId] = useState<string | null>(null);
   const [now, setNow] = useState(new Date());
 
+  const [routeLine, setRouteLine] = useState<{ latitude: number; longitude: number }[]>([]);
+
+  useEffect(() => {
+    const fetchEventRoute = async () => {
+      if (!event?._id || !event?.raceCategories?.[0]?._id) return;
+      try {
+        const categoryId = event.raceCategories[0]._id;
+        const { data } = await api.get(
+          `/race-checkpoint/event/${event._id}?raceCategory=${categoryId}`
+        );
+        const checkpoints = data.data || [];
+        
+        const sortedCheckpoints = [...checkpoints].sort((a, b) => {
+          const getScore = (type: string) => {
+            if (type === "start") return 0;
+            if (type === "finish") return 2;
+            return 1;
+          };
+          const scoreA = getScore(a.type);
+          const scoreB = getScore(b.type);
+          if (scoreA !== scoreB) return scoreA - scoreB;
+          return (a.order || 0) - (b.order || 0);
+        });
+
+        if (sortedCheckpoints.length < 2) return;
+
+        const coordsString = sortedCheckpoints
+          .map((cp) => `${cp.location.lng},${cp.location.lat}`)
+          .join(";");
+
+        const response = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${coordsString}?geometries=geojson`
+        );
+        const routeData = await response.json();
+
+        if (routeData?.routes?.[0]) {
+          const geojsonCoords = routeData.routes[0].geometry.coordinates as [number, number][];
+          const parsedLine = geojsonCoords.map((coord) => ({
+            latitude: coord[1],
+            longitude: coord[0],
+          }));
+          setRouteLine(parsedLine);
+        }
+      } catch (err) {
+        console.error("Failed to fetch route for MapLive", err);
+      }
+    };
+
+    fetchEventRoute();
+  }, [event]);
+
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 5000);
     return () => clearInterval(interval);
@@ -130,6 +181,15 @@ export function MapLive({ event }: { event: any }) {
                 maximumZ={19}
                 flipY={false}
               />
+
+              {routeLine.length > 0 && (
+                <Polyline
+                  coordinates={routeLine}
+                  strokeColor='rgba(59, 130, 246, 0.4)'
+                  strokeWidth={6}
+                  zIndex={1}
+                />
+              )}
 
               {activeRunners
                 .filter((r) => r.position)

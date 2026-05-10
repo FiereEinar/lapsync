@@ -40,7 +40,10 @@ export function ClientMapRoute({ sortedCheckpoints }: { sortedCheckpoints: any[]
              latitude: coord[1],
              longitude: coord[0],
            }));
+           console.log(`[ClientMapRoute] OSRM success! Parsed ${parsedLine.length} points from ${sortedCheckpoints.length} checkpoints. URL string length: ${coordsString.length}`);
            setRouteLine(parsedLine);
+         } else {
+           console.log(`[ClientMapRoute] OSRM returned no routes for string:`, coordsString);
          }
        } catch (err) {
          console.error("OSRM Route mapping error in client view", err);
@@ -93,14 +96,6 @@ export function ClientMapRoute({ sortedCheckpoints }: { sortedCheckpoints: any[]
            flipY={false}
          />
          
-         {routeLine.length > 0 && (
-           <Polyline
-             coordinates={routeLine}
-             strokeColor="#3b82f6"
-             strokeWidth={4}
-           />
-         )}
-
          {sortedCheckpoints.filter(c => c.type !== "waypoint").map(cp => (
             <Marker
                key={cp._id}
@@ -110,6 +105,15 @@ export function ClientMapRoute({ sortedCheckpoints }: { sortedCheckpoints: any[]
                pinColor={getPinColor(cp.type)}
             />
          ))}
+
+         {routeLine.length > 0 && (
+           <Polyline
+             coordinates={routeLine}
+             strokeColor="#3b82f6"
+             strokeWidth={4}
+             zIndex={10}
+           />
+         )}
       </MapView>
   );
 }
