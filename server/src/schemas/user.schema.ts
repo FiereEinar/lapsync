@@ -30,6 +30,16 @@ export const updateUserSchema = z.object({
 	name: z.string().min(1, 'Full name is required'),
 	email: z.string().email('Invalid email'),
 	phone: z.string().optional(),
+	emergencyContact: z.object({
+		name: z.string().optional(),
+		phone: z.string().optional(),
+		relationship: z.string().optional(),
+	}).optional(),
+	medicalInfo: z.object({
+		conditions: z.string().optional(),
+		allergies: z.string().optional(),
+		medications: z.string().optional(),
+	}).optional(),
 });
 
 export const loginSchema = z.object({

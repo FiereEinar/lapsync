@@ -15,6 +15,16 @@ export interface IUser extends mongoose.Document {
 	resetPasswordExpires?: Date | undefined;
 	googleID: string;
 	archived: boolean;
+	emergencyContact?: {
+		name?: string;
+		phone?: string;
+		relationship?: string;
+	};
+	medicalInfo?: {
+		conditions?: string;
+		allergies?: string;
+		medications?: string;
+	};
 	createdAt: Date;
 	updatedAt: Date;
 	omitPassword: () => Omit<IUser, 'password'>;
@@ -32,6 +42,16 @@ const UserSchema = new Schema<IUser>(
 		resetPasswordExpires: { type: Date, required: false },
 		googleID: { type: String },
 		archived: { type: Boolean, required: true, default: false },
+		emergencyContact: {
+			name: { type: String },
+			phone: { type: String },
+			relationship: { type: String },
+		},
+		medicalInfo: {
+			conditions: { type: String },
+			allergies: { type: String },
+			medications: { type: String },
+		},
 	},
 	{
 		timestamps: true,

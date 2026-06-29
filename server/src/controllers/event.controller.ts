@@ -56,12 +56,16 @@ export const editEventHandler = asyncHandler(async (req, res) => {
 	appAssert(event, NOT_FOUND, 'Event not found');
 
 	if (body.raceCategories) {
-		body.raceCategories = body.raceCategories.map((cat, index) => ({
-			...cat,
-			registeredCount: event.raceCategories[index]?.registeredCount ?? 0,
-			slots: event.raceCategories[index]?.slots ?? 0,
-			_id: event.raceCategories[index]?._id,
-		}));
+		body.raceCategories = body.raceCategories.map((cat) => {
+			let existingCat;
+			if (cat._id) {
+				existingCat = event.raceCategories.find(c => c._id.toString() === cat._id);
+			}
+			return {
+				...cat,
+				registeredCount: existingCat ? existingCat.registeredCount : 0,
+			};
+		});
 	}
 
 	const filteredBody = Object.fromEntries(

@@ -8,6 +8,7 @@ import {
   Activity,
   CreditCard,
   Radio,
+  AlertTriangle,
 } from "lucide-react";
 import Leaderboard from "@/components/tabs/event-detail/Leaderboard";
 import RunnerStatus from "@/components/tabs/event-detail/RunnerStatus";
@@ -60,8 +61,36 @@ export default function EventDetail() {
     (r) => r.status === "confirmed" && !r.rfidTag,
   ).length;
 
+  const { data: allCheckpoints = [] } = useQuery({
+    queryKey: ["all-checkpoints", eventID],
+    queryFn: async (): Promise<any[]> => {
+      if (!eventID) return [];
+      const { data } = await axiosInstance.get(`/race-checkpoint/event/${eventID}`);
+      return data.data;
+    },
+    enabled: !!eventID,
+  });
+
+  const categoriesWithoutCheckpoints = eventDetail?.raceCategories.filter(cat => 
+    allCheckpoints.filter(cp => cp.raceCategory === cat._id).length < 2
+  ) || [];
+
   return (
     <div className='space-y-6 animate-appear'>
+      {categoriesWithoutCheckpoints.length > 0 && user.role === 'admin' && (
+        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
+          <div>
+            <h3 className="font-semibold text-sm">Missing Checkpoints</h3>
+            <p className="text-sm opacity-90 mt-1">
+              The following race categories do not have enough checkpoints (start and finish) set up:{" "}
+              <span className="font-semibold">{categoriesWithoutCheckpoints.map(c => c.name).join(", ")}</span>. 
+              Please go to the Map Track tab to configure them.
+            </p>
+          </div>
+        </div>
+      )}
+
       {eventDetail && <EventFullDetails event={eventDetail} />}
       {eventDetail && (
         <RaceCategoryTable

@@ -29,6 +29,7 @@ export function CreateEventDialog() {
       venue: '',
       city: '',
       province: '',
+      coordinates: { lat: undefined, lng: undefined },
     },
     hardwarePickupLocation: '',
     registration: {

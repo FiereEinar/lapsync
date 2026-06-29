@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, Trophy, Map, MapPin } from "lucide-react";
+import { ArrowLeft, Loader2, Trophy, Map, MapPin, Navigation } from "lucide-react";
 import axiosInstance from "@/api/axios";
 import { QUERY_KEYS } from "@/constants";
 import { Event } from "@/types/event";
@@ -53,6 +53,19 @@ const getPinIcon = (type: string) => {
     iconAnchor: [12, 36],
   });
 };
+
+const venueIcon = L.divIcon({
+  className: "bg-transparent border-none overflow-visible",
+  html: `
+    <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);position:absolute;left:12px;top:36px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#f59e0b" stroke="white" stroke-width="2">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3" fill="white" stroke="none"/>
+      </svg>
+    </div>`,
+  iconSize: [32, 44],
+  iconAnchor: [16, 44],
+});
 
 type Checkpoint = {
   _id: string;
@@ -162,6 +175,50 @@ export default function PublicEventSpectate() {
         <EventFullDetails event={event} />
         <RaceCategoryTable categories={event.raceCategories} event={event} />
       </div>
+
+      {/* Venue Location Map */}
+      {event?.location?.coordinates?.lat && event?.location?.coordinates?.lng && (
+        <Card className='rounded-xl border border-border shadow-sm'>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <div className='w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center'>
+                <Navigation className='w-4 h-4 text-amber-500' />
+              </div>
+              Venue Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent className='p-0 overflow-hidden rounded-b-xl'>
+            <div style={{ height: 280 }} className='relative z-0'>
+              <MapContainer
+                center={[event.location.coordinates.lat, event.location.coordinates.lng]}
+                zoom={16}
+                style={{ height: "100%", width: "100%" }}
+                className='z-0'
+                zoomControl={true}
+              >
+                <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+                <Marker
+                  position={[event.location.coordinates.lat, event.location.coordinates.lng]}
+                  icon={venueIcon}
+                >
+                  <Popup>
+                    <div className='font-bold text-sm'>{event.location.venue}</div>
+                    <div className='text-xs text-muted-foreground'>
+                      {event.location.city}, {event.location.province}
+                    </div>
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+            <div className='px-5 py-3 border-t border-border flex items-center gap-2 text-sm text-muted-foreground'>
+              <MapPin className='w-3.5 h-3.5 text-amber-500 flex-shrink-0' />
+              <span className='font-medium text-foreground'>{event.location.venue}</span>
+              <span>·</span>
+              <span>{event.location.city}, {event.location.province}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Spectator Tabs */}
       <Tabs defaultValue='leaderboard' className='w-full'>

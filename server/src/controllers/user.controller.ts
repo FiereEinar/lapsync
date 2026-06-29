@@ -18,6 +18,14 @@ export const updateProfileHandler = asyncHandler(async (req, res) => {
 		user.phone = isNaN(num) ? body.phone : num;
 	}
 
+	if (body.emergencyContact !== undefined) {
+		user.emergencyContact = body.emergencyContact;
+	}
+
+	if (body.medicalInfo !== undefined) {
+		user.medicalInfo = body.medicalInfo;
+	}
+
 	await user.save();
 
 	res

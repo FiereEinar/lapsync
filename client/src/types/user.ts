@@ -14,4 +14,14 @@ export type User = {
 	googleID: string;
 	createdAt: Date;
 	updatedAt: Date;
+	emergencyContact?: {
+		name?: string;
+		phone?: string;
+		relationship?: string;
+	};
+	medicalInfo?: {
+		conditions?: string;
+		allergies?: string;
+		medications?: string;
+	};
 };

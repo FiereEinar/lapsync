@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const raceCategorySchema = z.object({
+	_id: z.string().optional(),
 	name: z.string().min(1, 'Category name is required'),
 	distanceKm: z.coerce.number().positive(),
 	cutoffTime: z.coerce.number().positive(),

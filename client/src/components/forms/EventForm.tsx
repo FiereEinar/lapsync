@@ -1,7 +1,7 @@
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { DialogClose } from "@radix-ui/react-dialog";
@@ -15,7 +15,48 @@ import {
 } from "../ui/form";
 import { createEventSchema } from "@/schemas/event.schema";
 import { formatDatesForInput } from "@/lib/utils";
-import { MapPin, Calendar, Clock, Users, Plus, Trash2, Loader2 } from "lucide-react";
+import { MapPin, Calendar, Clock, Users, Plus, Trash2, Loader2, CheckCircle2, Map } from "lucide-react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import { useState, useEffect } from "react";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import "leaflet/dist/leaflet.css";
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+const venueIcon = L.divIcon({
+  className: "bg-transparent border-none overflow-visible",
+  html: `
+    <div style="display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-100%);position:absolute;left:12px;top:36px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="#f59e0b" stroke="white" stroke-width="2">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3" fill="white" stroke="none"/>
+      </svg>
+    </div>`,
+  iconSize: [28, 40],
+  iconAnchor: [14, 40],
+});
+
+/** Inner component — listens to map clicks to place the pin */
+function MapClickHandler({
+  onPick,
+}: {
+  onPick: (lat: number, lng: number) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      onPick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
 
 export type EventFormValues = z.infer<typeof createEventSchema>;
 
@@ -39,6 +80,29 @@ export function EventForm({
     control: form.control,
     name: "raceCategories",
   });
+
+  const [showMap, setShowMap] = useState(false);
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(() => {
+    const coords = defaultValues?.location?.coordinates;
+    if (coords?.lat && coords?.lng) return { lat: coords.lat, lng: coords.lng };
+    return null;
+  });
+
+  // Sync pin into form coordinates whenever pin changes
+  useEffect(() => {
+    if (pin) {
+      form.setValue("location.coordinates.lat" as any, pin.lat);
+      form.setValue("location.coordinates.lng" as any, pin.lng);
+    }
+  }, [pin, form]);
+
+  const handlePinPick = (lat: number, lng: number) => {
+    setPin({ lat, lng });
+  };
+
+  const mapCenter: [number, number] = pin
+    ? [pin.lat, pin.lng]
+    : [14.5995, 120.9842];
 
   return (
     <Form {...form}>
@@ -151,12 +215,75 @@ export function EventForm({
             />
           </div>
 
+          {/* Venue Map Picker */}
+          <div className='space-y-2'>
+            <div className='flex items-center justify-between'>
+              <p className='text-sm font-medium text-foreground'>Venue Pin</p>
+              <div className='flex items-center gap-2'>
+                {pin && (
+                  <span className='flex items-center gap-1.5 text-xs font-semibold text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full'>
+                    <CheckCircle2 className='w-3.5 h-3.5' />
+                    Pinned ({pin.lat.toFixed(4)}°, {pin.lng.toFixed(4)}°)
+                  </span>
+                )}
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  className='gap-1.5 rounded-xl text-xs h-8'
+                  onClick={() => setShowMap((v) => !v)}
+                >
+                  <Map className='w-3.5 h-3.5' />
+                  {showMap ? "Hide Map" : pin ? "Move Pin" : "Pin Venue on Map"}
+                </Button>
+                {pin && (
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    className='text-xs h-8 text-muted-foreground hover:text-destructive rounded-xl'
+                    onClick={() => {
+                      setPin(null);
+                      form.setValue("location.coordinates" as any, undefined);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {showMap && (
+              <div className='rounded-xl overflow-hidden border border-border shadow-sm' style={{ height: 280 }}>
+                <MapContainer
+                  key={`${mapCenter[0]},${mapCenter[1]}`}
+                  center={mapCenter}
+                  zoom={pin ? 15 : 6}
+                  style={{ height: "100%", width: "100%" }}
+                  className='z-0'
+                >
+                  <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+                  <MapClickHandler onPick={handlePinPick} />
+                  {pin && (
+                    <Marker position={[pin.lat, pin.lng]} icon={venueIcon} />
+                  )}
+                </MapContainer>
+              </div>
+            )}
+
+            {!showMap && !pin && (
+              <p className='text-xs text-muted-foreground'>
+                Optionally pin the exact venue location on a map so runners can easily find it.
+              </p>
+            )}
+          </div>
+
           <FormField
             control={form.control}
             name='hardwarePickupLocation'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Hardware & Bib Pickup</FormLabel>
+                <FormLabel>Hardware &amp; Bib Pickup</FormLabel>
                 <FormControl>
                   <Input placeholder='Location where runners pickup bibs/hardware' className='rounded-xl' {...field} value={field.value || ""} />
                 </FormControl>
