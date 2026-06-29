@@ -176,26 +176,11 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
     },
   });
 
-  const handleAddCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      return;
+  const handleAddCheckpoint = () => {
+    setActiveTab("add");
+    if (!newCheckpointPoint) {
+      setNewCheckpointPoint(mapCenter);
     }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setNewCheckpointPoint([latitude, longitude]);
-        setMapCenter([latitude, longitude]);
-        setActiveTab("add");
-      },
-      (error) => {
-        toast.error(
-          "Unable to retrieve your location. Please allow location access.",
-        );
-        console.error("Geolocation error:", error);
-      },
-    );
   };
 
   const handleSaveNewCheckpoint = () => {
@@ -304,9 +289,9 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
           </Button>
           <Button
             variant={activeTab === "add" ? "default" : "outline"}
-            onClick={handleAddCurrentLocation}
+            onClick={handleAddCheckpoint}
           >
-            Add Checkpoint via Your GPS
+            Add Checkpoint
           </Button>
         </div>
       </CardHeader>
