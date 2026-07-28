@@ -67,6 +67,12 @@ export const createEventSchema = z
 				.string()
 				.min(1, 'Province is required')
 				.max(100, 'Province must be at most 100 characters'),
+			coordinates: z
+				.object({
+					lat: z.coerce.number().optional(),
+					lng: z.coerce.number().optional(),
+				})
+				.optional(),
 		}),
 
 		registration: z.object({
