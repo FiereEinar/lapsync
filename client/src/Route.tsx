@@ -1,65 +1,66 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import { Layout } from "./components/Layout";
-import { ClientLayout } from "./components/ClientLayout";
+import { Layout } from './components/Layout';
+import { ClientLayout } from './components/ClientLayout';
 
-import Dashboard from "./pages/Dashboard";
-import Events from "./pages/Events";
-import EventDetail from "./pages/EventDetail";
-import Participants from "./pages/Participants";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
+import Dashboard from './pages/Dashboard';
+import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
+import Participants from './pages/Participants';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 
-import ClientHome from "./pages/client/Home";
-import ClientEventList from "./pages/client/EventList";
-import ClientEventDetail from "./pages/client/EventDetail";
-import RaceParticipation from "./pages/client/RaceParticipation";
-import Leaderboard from "./pages/client/Leaderboard";
-import Profile from "./pages/client/Profile";
+import ClientHome from './pages/client/Home';
+import ClientEventList from './pages/client/EventList';
+import ClientEventDetail from './pages/client/EventDetail';
+import RaceParticipation from './pages/client/RaceParticipation';
+import Leaderboard from './pages/client/Leaderboard';
+import Profile from './pages/client/Profile';
 
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
-import Logout from "./pages/auth/Logout";
-import { PublicLayout } from "./components/PublicLayout";
-import Landing from "./pages/public/Landing";
-import PublicEventList from "./pages/public/PublicEventList";
-import PublicEventSpectate from "./pages/public/PublicEventSpectate";
-import ProtectedRoute from "./components/ProtectedRoute";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import Devices from "./pages/Devices";
-import RfidTags from "./pages/RfidTags";
-import RfidScanner from "./pages/RfidScanner";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
-import CompletedEvents from "./pages/client/CompletedEvents";
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
+import Logout from './pages/auth/Logout';
+import { PublicLayout } from './components/PublicLayout';
+import Landing from './pages/public/Landing';
+import PublicEventList from './pages/public/PublicEventList';
+import PublicEventSpectate from './pages/public/PublicEventSpectate';
+import ProtectedRoute from './components/ProtectedRoute';
+import PaymentSuccess from './pages/PaymentSuccess';
+import Devices from './pages/Devices';
+import RfidTags from './pages/RfidTags';
+import RfidScanner from './pages/RfidScanner';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+import CompletedEvents from './pages/client/CompletedEvents';
+import MapStressTest from './pages/admin/MapStressTest';
 
 const router = createBrowserRouter([
   /* ------------------ Auth Routes ------------------ */
   {
-    path: "/login",
+    path: '/login',
     element: <Login />,
   },
   {
-    path: "/signup",
+    path: '/signup',
     element: <Signup />,
   },
   {
-    path: "/logout",
+    path: '/logout',
     element: <Logout />,
   },
   {
-    path: "/forgot-password",
+    path: '/forgot-password',
     element: <ForgotPassword />,
   },
   {
-    path: "/reset-password/:token",
+    path: '/reset-password/:token',
     element: <ResetPassword />,
   },
 
   /* ------------------ Public Routes ------------------ */
   {
-    path: "/",
+    path: '/',
     element: <PublicLayout />,
     errorElement: <NotFound />,
     children: [
@@ -68,11 +69,11 @@ const router = createBrowserRouter([
         element: <Landing />,
       },
       {
-        path: "public/events",
+        path: 'public/events',
         element: <PublicEventList />,
       },
       {
-        path: "public/events/:id",
+        path: 'public/events/:id',
         element: <PublicEventSpectate />,
       },
     ],
@@ -80,7 +81,7 @@ const router = createBrowserRouter([
 
   /* ------------------ Admin Routes ------------------ */
   {
-    path: "/",
+    path: '/',
     element: (
       <ProtectedRoute>
         <Layout />
@@ -89,43 +90,47 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       {
-        path: "dashboard",
+        path: 'dashboard',
         element: <Dashboard />,
       },
       {
-        path: "events",
+        path: 'events',
         element: <Events />,
       },
       {
-        path: "events/:eventID",
+        path: 'events/:eventID',
         element: <EventDetail />,
       },
       {
-        path: "participants",
+        path: 'participants',
         element: <Participants />,
       },
       {
-        path: "devices",
+        path: 'devices',
         element: <Devices />,
       },
       {
-        path: "rfid-tags",
+        path: 'rfid-tags',
         element: <RfidTags />,
       },
       {
-        path: "rfid-scanner",
+        path: 'rfid-scanner',
         element: <RfidScanner />,
       },
       {
-        path: "settings",
+        path: 'settings',
         element: <Settings />,
+      },
+      {
+        path: 'stress-test',
+        element: <MapStressTest />,
       },
     ],
   },
 
   /* ------------------ Client Routes ------------------ */
   {
-    path: "/client",
+    path: '/client',
     element: (
       <ProtectedRoute>
         <ClientLayout />
@@ -137,35 +142,35 @@ const router = createBrowserRouter([
         element: <ClientHome />,
       },
       {
-        path: "events",
+        path: 'events',
         element: <ClientEventList />,
       },
       {
-        path: "events/:id",
+        path: 'events/:id',
         element: <ClientEventDetail />,
       },
       {
-        path: "race/:eventId",
+        path: 'race/:eventId',
         element: <RaceParticipation />,
       },
       {
-        path: "race",
+        path: 'race',
         element: <RaceParticipation />,
       },
       {
-        path: "completed",
+        path: 'completed',
         element: <CompletedEvents />,
       },
       {
-        path: "completed/:eventID",
+        path: 'completed/:eventID',
         element: <EventDetail />,
       },
       {
-        path: "profile",
+        path: 'profile',
         element: <Profile />,
       },
       {
-        path: "payment/success",
+        path: 'payment/success',
         element: <PaymentSuccess />,
       },
     ],
@@ -173,7 +178,7 @@ const router = createBrowserRouter([
 
   /* ------------------ 404 ------------------ */
   {
-    path: "*",
+    path: '*',
     element: <NotFound />,
   },
 ]);

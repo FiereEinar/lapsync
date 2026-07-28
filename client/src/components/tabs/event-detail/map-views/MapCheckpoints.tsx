@@ -1,31 +1,31 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMapEvents,
-} from "react-leaflet";
-import L from "leaflet";
-import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import axiosInstance from "@/api/axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import RoutingMachine from "@/components/RoutingMachine";
+} from 'react-leaflet';
+import L from 'leaflet';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axiosInstance from '@/api/axios';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import RoutingMachine from '@/components/RoutingMachine';
 
 // Fix leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -37,15 +37,15 @@ L.Icon.Default.mergeOptions({
 
 const getPinIcon = (type: string) => {
   const color =
-    type === "start"
-      ? "#10b981"
-      : type === "finish"
-        ? "#ef4444"
-        : type === "new"
-          ? "#8b5cf6"
-          : type === "waypoint"
-          ? "#94a3b8" // slate color for waypoints
-          : "#3b82f6";
+    type === 'start'
+      ? '#10b981'
+      : type === 'finish'
+        ? '#ef4444'
+        : type === 'new'
+          ? '#8b5cf6'
+          : type === 'waypoint'
+            ? '#94a3b8' // slate color for waypoints
+            : '#3b82f6';
   const html = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: translate(-50%, -100%); width: 24px; height: 36px; position: absolute; left: 12px; top: 36px;">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${color}" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -55,7 +55,7 @@ const getPinIcon = (type: string) => {
     </div>
   `;
   return L.divIcon({
-    className: "bg-transparent border-none overflow-visible",
+    className: 'bg-transparent border-none overflow-visible',
     html,
     iconSize: [24, 36],
     iconAnchor: [12, 36],
@@ -63,9 +63,10 @@ const getPinIcon = (type: string) => {
 };
 
 type Checkpoint = {
+  order: number;
   _id: string;
   name: string;
-  type: "start" | "finish" | "checkpoint" | "waypoint";
+  type: 'start' | 'finish' | 'checkpoint' | 'waypoint';
   raceCategory: string;
   location: {
     lat: number;
@@ -86,20 +87,24 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
   const [newCheckpointPoint, setNewCheckpointPoint] = useState<
     [number, number] | null
   >(null);
-  const [newName, setNewName] = useState("");
-  const [newType, setNewType] = useState<"start" | "finish" | "checkpoint" | "waypoint">(
-    "checkpoint",
-  );
+  const [newName, setNewName] = useState('');
+  const [newType, setNewType] = useState<
+    'start' | 'finish' | 'checkpoint' | 'waypoint'
+  >('checkpoint');
 
-  const [activeTab, setActiveTab] = useState<"view" | "add">("view");
+  const [activeTab, setActiveTab] = useState<'view' | 'add'>('view');
   const [totalRouteDistance, setTotalRouteDistance] = useState<number>(0);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
   const { data: eventData } = useQuery({
-    queryKey: ["event", eventIDToUse],
+    queryKey: ['event', eventIDToUse],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/event/${eventIDToUse}`);
-      if (data.data && data.data.raceCategories?.length > 0 && !selectedCategory) {
+      if (
+        data.data &&
+        data.data.raceCategories?.length > 0 &&
+        !selectedCategory
+      ) {
         setSelectedCategory(data.data.raceCategories[0]._id);
       }
       return data.data;
@@ -108,7 +113,7 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
   });
 
   const { data: checkpoints = [], isLoading } = useQuery({
-    queryKey: ["checkpoints", eventIDToUse, selectedCategory],
+    queryKey: ['checkpoints', eventIDToUse, selectedCategory],
     queryFn: async (): Promise<Checkpoint[]> => {
       const { data } = await axiosInstance.get(
         `/race-checkpoint/event/${eventIDToUse}?raceCategory=${selectedCategory}`,
@@ -129,19 +134,21 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
 
   const addCheckpointMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.post("/race-checkpoint", data);
+      const res = await axiosInstance.post('/race-checkpoint', data);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse, selectedCategory] });
-      toast.success("Checkpoint added successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ['checkpoints', eventIDToUse, selectedCategory],
+      });
+      toast.success('Checkpoint added successfully!');
       setNewCheckpointPoint(null);
-      setNewName("");
-      setNewType("checkpoint");
-      setActiveTab("view");
+      setNewName('');
+      setNewType('checkpoint');
+      setActiveTab('view');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to add checkpoint");
+      toast.error(error.response?.data?.message || 'Failed to add checkpoint');
     },
   });
 
@@ -151,12 +158,14 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse, selectedCategory] });
-      toast.success("Checkpoint updated successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ['checkpoints', eventIDToUse, selectedCategory],
+      });
+      toast.success('Checkpoint updated successfully!');
     },
     onError: (error: any) => {
       toast.error(
-        error.response?.data?.message || "Failed to update checkpoint",
+        error.response?.data?.message || 'Failed to update checkpoint',
       );
     },
   });
@@ -166,18 +175,20 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
       await axiosInstance.delete(`/race-checkpoint/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["checkpoints", eventIDToUse, selectedCategory] });
-      toast.success("Checkpoint deleted successfully!");
+      queryClient.invalidateQueries({
+        queryKey: ['checkpoints', eventIDToUse, selectedCategory],
+      });
+      toast.success('Checkpoint deleted successfully!');
     },
     onError: (error: any) => {
       toast.error(
-        error.response?.data?.message || "Failed to delete checkpoint",
+        error.response?.data?.message || 'Failed to delete checkpoint',
       );
     },
   });
 
   const handleAddCheckpoint = () => {
-    setActiveTab("add");
+    setActiveTab('add');
     if (!newCheckpointPoint) {
       setNewCheckpointPoint(mapCenter);
     }
@@ -186,12 +197,12 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
   const handleSaveNewCheckpoint = () => {
     if (!newCheckpointPoint) return;
     if (!newName.trim()) {
-      toast.error("Please provide a name for the checkpoint");
+      toast.error('Please provide a name for the checkpoint');
       return;
     }
-    
+
     if (!selectedCategory) {
-      toast.error("Please select a race category first");
+      toast.error('Please select a race category first');
       return;
     }
 
@@ -231,7 +242,7 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
   function MapClickHandler() {
     useMapEvents({
       click(e) {
-        if (activeTab === "add") {
+        if (activeTab === 'add') {
           setNewCheckpointPoint([e.latlng.lat, e.latlng.lng]);
         }
       },
@@ -242,8 +253,8 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
   const sortedCheckpoints = useMemo(() => {
     return [...checkpoints].sort((a, b) => {
       const getScore = (type: string) => {
-        if (type === "start") return 0;
-        if (type === "finish") return 2;
+        if (type === 'start') return 0;
+        if (type === 'finish') return 2;
         return 1;
       };
       const scoreA = getScore(a.type);
@@ -261,87 +272,97 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
 
   return (
     <Card>
-      <CardHeader className='flex flex-row items-center justify-between'>
+      <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center gap-4">
           <CardTitle>Race Checkpoints</CardTitle>
           {eventData && eventData.raceCategories && (
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>
                 {eventData.raceCategories.map((cat: any) => (
-                  <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
+                  <SelectItem key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           )}
         </div>
-        <div className='flex gap-2'>
+        <div className="flex gap-2">
           <Button
-            variant={activeTab === "view" ? "default" : "outline"}
+            variant={activeTab === 'view' ? 'default' : 'outline'}
             onClick={() => {
-              setActiveTab("view");
+              setActiveTab('view');
               setNewCheckpointPoint(null);
             }}
           >
             View Map
           </Button>
           <Button
-            variant={activeTab === "add" ? "default" : "outline"}
+            variant={activeTab === 'add' ? 'default' : 'outline'}
             onClick={handleAddCheckpoint}
           >
             Add Checkpoint
           </Button>
         </div>
       </CardHeader>
-      <CardContent className='flex flex-col gap-4'>
-        {activeTab === "view" && totalRouteDistance > 0 && checkpoints.filter(cp => cp.type !== 'waypoint').length >= 2 && (
-          <div className="flex justify-start items-center">
-            <span className="font-semibold text-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-md border border-teal-500/20">
-              Total Route Distance: {(totalRouteDistance / 1000).toFixed(2)} km
-            </span>
-          </div>
-        )}
+      <CardContent className="flex flex-col gap-4">
+        {activeTab === 'view' &&
+          totalRouteDistance > 0 &&
+          checkpoints.filter((cp) => cp.type !== 'waypoint').length >= 2 && (
+            <div className="flex justify-start items-center">
+              <span className="font-semibold text-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-md border border-teal-500/20">
+                Total Route Distance: {(totalRouteDistance / 1000).toFixed(2)}{' '}
+                km
+              </span>
+            </div>
+          )}
 
-        {activeTab === "add" && (
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card'>
-            <div className='space-y-2'>
+        {activeTab === 'add' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card">
+            <div className="space-y-2">
               <Label>Checkpoint Name</Label>
               <Input
-                placeholder='e.g. Water Station 1'
+                placeholder="e.g. Water Station 1"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
             </div>
-            <div className='space-y-2'>
+            <div className="space-y-2">
               <Label>Type</Label>
               <Select
                 value={newType}
                 onValueChange={(val: any) => setNewType(val)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder='Type' />
+                  <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='start'>Start</SelectItem>
-                  <SelectItem value='finish'>Finish</SelectItem>
-                  <SelectItem value='checkpoint'>Checkpoint</SelectItem>
-                  <SelectItem value='waypoint'>Waypoint (Route Guide)</SelectItem>
+                  <SelectItem value="start">Start</SelectItem>
+                  <SelectItem value="finish">Finish</SelectItem>
+                  <SelectItem value="checkpoint">Checkpoint</SelectItem>
+                  <SelectItem value="waypoint">
+                    Waypoint (Route Guide)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className='flex items-end'>
+            <div className="flex items-end">
               <Button
-                className='w-full'
+                className="w-full"
                 onClick={handleSaveNewCheckpoint}
                 disabled={
                   !newCheckpointPoint || addCheckpointMutation.isPending
                 }
               >
                 {newCheckpointPoint
-                  ? "Save Checkpoint"
-                  : "Click on Map to Place Pin"}
+                  ? 'Save Checkpoint'
+                  : 'Click on Map to Place Pin'}
               </Button>
             </div>
           </div>
@@ -350,165 +371,175 @@ export default function MapCheckpoints({ eventId }: { eventId?: string } = {}) {
         {!selectedCategory ? (
           <div className="flex flex-col items-center justify-center p-8 border rounded-lg bg-card text-center gap-2">
             <h3 className="text-xl font-bold">No Category Selected</h3>
-            <p className="text-muted-foreground">Please select a race category from the dropdown above to view or manage checkpoints.</p>
+            <p className="text-muted-foreground">
+              Please select a race category from the dropdown above to view or
+              manage checkpoints.
+            </p>
           </div>
         ) : (
           <>
             <MapContainer
-              key={mapCenter.join(",")} // Key helps reset view if center changes drastically
+              key={mapCenter.join(',')} // Key helps reset view if center changes drastically
               center={mapCenter}
               zoom={14}
-              className='w-full h-[500px] rounded-lg z-0 border'
+              className="w-full h-[500px] rounded-lg z-0 border"
             >
-          <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-          <MapClickHandler />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <MapClickHandler />
 
-          {/* Render existing checkpoints */}
-          {!isLoading &&
-            checkpoints.map((cp) => (
-              <Marker
-                key={cp._id}
-                position={[cp.location.lat, cp.location.lng]}
-                draggable={true} // Admin can drag to adjust
-                icon={getPinIcon(cp.type)}
-                eventHandlers={{
-                  dragend: (e) => handleMarkerDragEnd(cp._id, e),
-                }}
-              >
-                <Popup>
-                  <div className='flex flex-col gap-2 p-1 min-w-[150px]'>
-                    <div className='font-bold text-sm'>{cp.name}</div>
-                    <div className='text-xs capitalize text-muted-foreground'>
-                      {cp.type}
-                    </div>
-                    <Button
-                      variant='destructive'
-                      size='sm'
-                      className='h-7 text-xs mt-2'
-                      onClick={() => deleteCheckpointMutation.mutate(cp._id)}
-                      disabled={deleteCheckpointMutation.isPending}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-
-          {/* Render Route Path */}
-          {waypoints.length >= 2 && (
-            <RoutingMachine
-              waypoints={waypoints}
-              onRouteFound={setTotalRouteDistance}
-            />
-          )}
-
-          {/* Render new checkpoint being added */}
-          {activeTab === "add" && newCheckpointPoint && (
-            <Marker
-              position={newCheckpointPoint}
-              draggable={true}
-              icon={getPinIcon("new")}
-              eventHandlers={{
-                dragend: handleNewMarkerDragEnd,
-              }}
-            >
-              <Popup>
-                <div className='text-sm font-semibold'>
-                  New Checkpoint Location
-                </div>
-                <div className='text-xs text-muted-foreground'>
-                  Drag me to adjust!
-                </div>
-              </Popup>
-            </Marker>
-          )}
-        </MapContainer>
-
-        {/* Read-Only View Checkpoints List */}
-        {activeTab === "view" && checkpoints.length > 0 && (
-          <div className='flex flex-col gap-3 p-4 border rounded-lg bg-card mt-4'>
-            <h3 className='font-semibold'>Established Checkpoints</h3>
-            <div className='space-y-2 mt-2'>
-              {sortedCheckpoints
-                .filter((cp) => cp.type !== "waypoint")
-                .map((checkpoint, index) => (
-                <div
-                  key={checkpoint._id}
-                  className='flex items-center justify-between p-3 border border-border rounded-lg bg-background'
-                >
-                  <div className='flex items-center gap-3'>
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
-                      ${
-                        checkpoint.type === "start"
-                          ? "bg-emerald-500/10 text-emerald-600"
-                          : checkpoint.type === "finish"
-                            ? "bg-red-500/10 text-red-600"
-                            : "bg-blue-500/10 text-blue-600"
-                      }`}
-                    >
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className='font-medium'>{checkpoint.name}</p>
-                      <p className='text-xs capitalize text-muted-foreground'>
-                        {checkpoint.type}
-                      </p>
-                    </div>
-                  </div>
-                  <div className='text-right'>
-                    <p className='text-xs text-muted-foreground'>
-                      {checkpoint.location.lat.toFixed(4)}°,{" "}
-                      {checkpoint.location.lng.toFixed(4)}°
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Editable Checkpoints List */}
-        {activeTab === "add" && checkpoints.length > 0 && (
-          <div className='flex flex-col gap-3 p-4 border rounded-lg bg-card mt-4'>
-            <h3 className='font-semibold'>Edit Checkpoint Names</h3>
-            <p className='text-sm text-muted-foreground mb-2'>
-              Checkpoints are ordered: Start &rarr; Checkpoints/Waypoints &rarr; Finish. Edit a name and click outside the box to auto-save.
-            </p>
-            <div className='space-y-3'>
-              {sortedCheckpoints.map((cp) => (
-                <div key={cp._id} className='flex items-center gap-4'>
-                  <div className='w-24 text-sm font-medium capitalize text-muted-foreground flex-shrink-0'>
-                    {cp.type}
-                  </div>
-                  <Input
-                    defaultValue={cp.name}
-                    onBlur={(e) => {
-                      if (e.target.value.trim() && e.target.value !== cp.name) {
-                        updateCheckpointMutation.mutate({
-                          id: cp._id,
-                          data: { name: e.target.value },
-                        });
-                      }
+              {/* Render existing checkpoints */}
+              {!isLoading &&
+                checkpoints.map((cp) => (
+                  <Marker
+                    key={cp._id}
+                    position={[cp.location.lat, cp.location.lng]}
+                    draggable={true} // Admin can drag to adjust
+                    icon={getPinIcon(cp.type)}
+                    eventHandlers={{
+                      dragend: (e) => handleMarkerDragEnd(cp._id, e),
                     }}
-                  />
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className='text-red-500 hover:text-red-700 hover:bg-red-100 flex-shrink-0'
-                    onClick={() => deleteCheckpointMutation.mutate(cp._id)}
-                    disabled={deleteCheckpointMutation.isPending}
                   >
-                    Delete
-                  </Button>
+                    <Popup>
+                      <div className="flex flex-col gap-2 p-1 min-w-[150px]">
+                        <div className="font-bold text-sm">{cp.name}</div>
+                        <div className="text-xs capitalize text-muted-foreground">
+                          {cp.type}
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="h-7 text-xs mt-2"
+                          onClick={() =>
+                            deleteCheckpointMutation.mutate(cp._id)
+                          }
+                          disabled={deleteCheckpointMutation.isPending}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+
+              {/* Render Route Path */}
+              {waypoints.length >= 2 && (
+                <RoutingMachine
+                  waypoints={waypoints}
+                  onRouteFound={setTotalRouteDistance}
+                />
+              )}
+
+              {/* Render new checkpoint being added */}
+              {activeTab === 'add' && newCheckpointPoint && (
+                <Marker
+                  position={newCheckpointPoint}
+                  draggable={true}
+                  icon={getPinIcon('new')}
+                  eventHandlers={{
+                    dragend: handleNewMarkerDragEnd,
+                  }}
+                >
+                  <Popup>
+                    <div className="text-sm font-semibold">
+                      New Checkpoint Location
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Drag me to adjust!
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+            </MapContainer>
+
+            {/* Read-Only View Checkpoints List */}
+            {activeTab === 'view' && checkpoints.length > 0 && (
+              <div className="flex flex-col gap-3 p-4 border rounded-lg bg-card mt-4">
+                <h3 className="font-semibold">Established Checkpoints</h3>
+                <div className="space-y-2 mt-2">
+                  {sortedCheckpoints
+                    .filter((cp) => cp.type !== 'waypoint')
+                    .map((checkpoint, index) => (
+                      <div
+                        key={checkpoint._id}
+                        className="flex items-center justify-between p-3 border border-border rounded-lg bg-background"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+                      ${
+                        checkpoint.type === 'start'
+                          ? 'bg-emerald-500/10 text-emerald-600'
+                          : checkpoint.type === 'finish'
+                            ? 'bg-red-500/10 text-red-600'
+                            : 'bg-blue-500/10 text-blue-600'
+                      }`}
+                          >
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="font-medium">{checkpoint.name}</p>
+                            <p className="text-xs capitalize text-muted-foreground">
+                              {checkpoint.type}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">
+                            {checkpoint.location.lat.toFixed(4)}°,{' '}
+                            {checkpoint.location.lng.toFixed(4)}°
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            )}
+
+            {/* Editable Checkpoints List */}
+            {activeTab === 'add' && checkpoints.length > 0 && (
+              <div className="flex flex-col gap-3 p-4 border rounded-lg bg-card mt-4">
+                <h3 className="font-semibold">Edit Checkpoint Names</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Checkpoints are ordered: Start &rarr; Checkpoints/Waypoints
+                  &rarr; Finish. Edit a name and click outside the box to
+                  auto-save.
+                </p>
+                <div className="space-y-3">
+                  {sortedCheckpoints.map((cp) => (
+                    <div key={cp._id} className="flex items-center gap-4">
+                      <div className="w-24 text-sm font-medium capitalize text-muted-foreground flex-shrink-0">
+                        {cp.type}
+                      </div>
+                      <Input
+                        defaultValue={cp.name}
+                        onBlur={(e) => {
+                          if (
+                            e.target.value.trim() &&
+                            e.target.value !== cp.name
+                          ) {
+                            updateCheckpointMutation.mutate({
+                              id: cp._id,
+                              data: { name: e.target.value },
+                            });
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-100 flex-shrink-0"
+                        onClick={() => deleteCheckpointMutation.mutate(cp._id)}
+                        disabled={deleteCheckpointMutation.isPending}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
-        </>
-      )}
       </CardContent>
     </Card>
   );
