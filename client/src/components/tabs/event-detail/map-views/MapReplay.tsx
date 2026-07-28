@@ -44,6 +44,7 @@ type TelemetryData = {
     lat: number;
     lon: number;
   };
+  heartRate?: number;
   createdAt: string;
 };
 
@@ -60,8 +61,8 @@ const COLORS = [
   "#ec4899", // pink
 ];
 
-const createCustomMarker = (color: string, name: string) => {
-  const formattedName = _.startCase(name);
+const createCustomMarker = (color: string, name: string, hr?: number | null) => {
+  const formattedName = hr ? `${_.startCase(name)} (HR: ${hr})` : _.startCase(name);
 
   const html = `
     <div style="position: relative; width: 0; height: 0; pointer-events: none;">
@@ -261,6 +262,7 @@ export default function MapReplay({ eventId }: { eventId?: string } = {}) {
                         icon={createCustomMarker(
                           color,
                           currentPoint.registration.user.name,
+                          currentPoint.heartRate
                         )}
                       />
                     </div>

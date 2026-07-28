@@ -33,8 +33,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const createCustomMarker = (color: string, name: string) => {
+const createCustomMarker = (color: string, name: string, hr?: number | null) => {
   const shortName = name.split(" ")[0];
+  const displayName = hr ? `${shortName} (HR: ${hr})` : shortName;
 
   const html = `
     <div style="position: relative; width: 0; height: 0;">
@@ -43,7 +44,7 @@ const createCustomMarker = (color: string, name: string) => {
           <path d="M 0 30 L 15 15 L 100 15" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <div style="position: absolute; bottom: 17px; left: 17px; color: black; font-size: 12px; font-weight: 400; font-family: sans-serif; white-space: nowrap; line-height: 1; text-shadow: 1.5px 1.5px 0px white, -1.5px -1.5px 0px white, 1.5px -1.5px 0px white, -1.5px 1.5px 0px white, 0px 1.5px 0px white, 0px -1.5px 0px white, 1.5px 0px 0px white, -1.5px 0px 0px white;">
-          ${shortName}
+          ${displayName}
         </div>
       </div>
     </div>
@@ -185,6 +186,7 @@ export default function MapLive() {
                         icon={createCustomMarker(
                           pinColor,
                           r.user?.name || "Unknown",
+                          r.heartRate
                         )}
                       >
                         <Popup>
