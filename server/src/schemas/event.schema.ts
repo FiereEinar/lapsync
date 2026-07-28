@@ -1,38 +1,132 @@
 import z from 'zod';
 
+/** Validates that a YYYY-MM-DD string is a real calendar date */
+const isValidDateStr = (s: string) => !isNaN(Date.parse(s));
+
+/** Lexicographic compare of YYYY-MM-DD strings */
+const dateGt = (a: string, b: string) => a > b;
+const dateGte = (a: string, b: string) => a >= b;
+
 export const raceCategorySchema = z.object({
 	_id: z.string().optional(),
-	name: z.string().min(1, 'Category name is required'),
-	distanceKm: z.coerce.number().positive(),
-	cutoffTime: z.coerce.number().positive(),
+	name: z
+		.string()
+		.min(1, 'Category name is required')
+		.max(50, 'Category name must be at most 50 characters'),
+	distanceKm: z.coerce
+		.number()
+		.positive('Distance must be positive')
+		.max(500, 'Distance must be at most 500 km'),
+	cutoffTime: z.coerce
+		.number()
+		.positive('Cutoff time must be positive')
+		.max(10080, 'Cutoff time must be at most 10,080 minutes (1 week)'),
 	gunStartTime: z.string().optional(),
-	price: z.coerce.number().min(0),
-	slots: z.coerce.number().int().positive(),
+	price: z.coerce
+		.number()
+		.min(0, 'Price cannot be negative')
+		.max(1_000_000, 'Price must be at most 1,000,000'),
+	slots: z.coerce
+		.number()
+		.int('Slots must be a whole number')
+		.positive('Slots must be at least 1')
+		.max(100_000, 'Slots must be at most 100,000'),
 });
 
-export const createEventSchema = z.object({
-	name: z.string().min(3),
-	description: z.string().optional(),
-	date: z.string(),
-	startTime: z.string().optional(),
-	endTime: z.string().optional(),
-	hardwarePickupLocation: z.string().optional(),
+export const createEventSchema = z
+	.object({
+		name: z
+			.string()
+			.min(3, 'Event name must be at least 3 characters')
+			.max(100, 'Event name must be at most 100 characters'),
+		description: z
+			.string()
+			.max(500, 'Description must be at most 500 characters')
+			.optional(),
+		date: z
+			.string()
+			.min(1, 'Event date is required')
+			.refine(isValidDateStr, 'Please provide a valid event date (YYYY-MM-DD)'),
+		startTime: z.string().optional(),
+		endTime: z.string().optional(),
+		hardwarePickupLocation: z
+			.string()
+			.max(200, 'Pickup location must be at most 200 characters')
+			.optional(),
 
-	location: z.object({
-		venue: z.string().min(1),
-		city: z.string().min(1),
-		province: z.string().min(1),
-	}),
+		location: z.object({
+			venue: z
+				.string()
+				.min(1, 'Venue is required')
+				.max(100, 'Venue must be at most 100 characters'),
+			city: z
+				.string()
+				.min(1, 'City is required')
+				.max(100, 'City must be at most 100 characters'),
+			province: z
+				.string()
+				.min(1, 'Province is required')
+				.max(100, 'Province must be at most 100 characters'),
+		}),
 
-	registration: z.object({
-		opensAt: z.string(),
-		closesAt: z.string(),
-	}),
+		registration: z.object({
+			opensAt: z
+				.string()
+				.min(1, 'Registration open date is required')
+				.refine(isValidDateStr, 'Please provide a valid registration open date (YYYY-MM-DD)'),
+			closesAt: z
+				.string()
+				.min(1, 'Registration close date is required')
+				.refine(isValidDateStr, 'Please provide a valid registration close date (YYYY-MM-DD)'),
+		}),
 
-	raceCategories: z
-		.array(raceCategorySchema)
-		.min(1, 'At least one category required'),
-});
+		raceCategories: z
+			.array(raceCategorySchema)
+			.min(1, 'At least one category required'),
+	})
+	.superRefine((data, ctx) => {
+		const { opensAt, closesAt } = data.registration;
+		const eventDate = data.date;
+
+		// closesAt must be after opensAt
+		if (
+			isValidDateStr(opensAt) &&
+			isValidDateStr(closesAt) &&
+			!dateGt(closesAt, opensAt)
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Registration close date must be after the open date',
+				path: ['registration', 'closesAt'],
+			});
+		}
+
+		// closesAt must be on or before event date
+		if (
+			isValidDateStr(closesAt) &&
+			isValidDateStr(eventDate) &&
+			dateGt(closesAt, eventDate)
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Registration must close on or before the event date',
+				path: ['registration', 'closesAt'],
+			});
+		}
+
+		// opensAt must be before event date
+		if (
+			isValidDateStr(opensAt) &&
+			isValidDateStr(eventDate) &&
+			!dateGt(eventDate, opensAt)
+		) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Registration open date must be before the event date',
+				path: ['registration', 'opensAt'],
+			});
+		}
+	});
 
 export const updateEventStatusSchema = z.object({
 	status: z.enum(['upcoming', 'active', 'finished', 'archived', 'stopped']),

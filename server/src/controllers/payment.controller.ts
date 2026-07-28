@@ -1,19 +1,19 @@
-import mongoose from "mongoose";
-import { FRONTEND_URL } from "../constant/env";
-import { BAD_REQUEST, NOT_FOUND } from "../constant/http";
-import appAssert from "../errors/app-assert";
-import DeviceModel from "../models/device.model";
-import EventModel from "../models/event.model";
-import PaymentModel from "../models/payment.model";
+import mongoose from 'mongoose';
+import { FRONTEND_URL } from '../constant/env';
+import { BAD_REQUEST, NOT_FOUND } from '../constant/http';
+import appAssert from '../errors/app-assert';
+import DeviceModel from '../models/device.model';
+import EventModel from '../models/event.model';
+import PaymentModel from '../models/payment.model';
 import RegistrationModel, {
   PopulatedRegistration,
-} from "../models/registration.model";
+} from '../models/registration.model';
 import {
   checkIfUserAlreadyPaid,
   createPaymongoCheckout,
-} from "../services/paymongo.service";
-import CustomResponse from "../utils/response";
-import { asyncHandler, generateBibNumber } from "../utils/utils";
+} from '../services/paymongo.service';
+import CustomResponse from '../utils/response';
+import { asyncHandler, generateBibNumber } from '../utils/utils';
 
 /**
  * @route POST /api/v1/payment/create
@@ -23,21 +23,21 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
   const userId = req.user!._id;
 
   const registration = await RegistrationModel.findById(registrationId)
-    .populate("event")
+    .populate('event')
     .lean<PopulatedRegistration>();
-  appAssert(registration, NOT_FOUND, "Registration not found");
+  appAssert(registration, NOT_FOUND, 'Registration not found');
 
   const { event } = registration;
   const raceCategory = event.raceCategories.find(
     (rc) => rc._id.toString() === registration.raceCategory.toString(),
   );
-  appAssert(raceCategory, BAD_REQUEST, "Race category not found");
+  appAssert(raceCategory, BAD_REQUEST, 'Race category not found');
 
   const pendingPayment = await PaymentModel.findOne({
     registration: registration._id,
     event: event._id,
     user: userId,
-    status: "pending",
+    status: 'pending',
   });
 
   if (pendingPayment) {
@@ -48,8 +48,8 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
   const checkout = await createPaymongoCheckout({
     amount: raceCategory.price,
     successUrl: `${FRONTEND_URL}/client/payment/success/?registrationId=${registration._id}&eventId=${event._id}&userId=${userId}`,
-    description: raceCategory.distanceKm + "km race",
-    name: raceCategory.distanceKm + "km race",
+    description: raceCategory.distanceKm + 'km race',
+    name: raceCategory.distanceKm + 'km race',
     metadata: {
       registrationId: registration._id.toString(),
       eventId: event._id.toString(),
@@ -64,12 +64,12 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
     user: userId,
     event: event._id,
     registration: registration._id,
-    provider: "paymongo",
+    provider: 'paymongo',
     checkoutSessionId: checkoutID,
     checkoutUrl,
     amount: raceCategory.price,
-    currency: "PHP",
-    status: "pending",
+    currency: 'PHP',
+    status: 'pending',
   });
 
   res.json({ checkoutUrl });
@@ -81,20 +81,20 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
 export const verifyCheckoutSession = asyncHandler(async (req, res) => {
   const user = req.user;
   const { registrationId } = req.body;
-  appAssert(registrationId, BAD_REQUEST, "Registration ID is required");
+  appAssert(registrationId, BAD_REQUEST, 'Registration ID is required');
 
   const registration = await RegistrationModel.findById(registrationId);
-  appAssert(registration, NOT_FOUND, "Registration not found");
+  appAssert(registration, NOT_FOUND, 'Registration not found');
 
   // Fetch the event that contains the race category
   const event = await EventModel.findById(registration.event);
-  appAssert(event, NOT_FOUND, "Event not found");
+  appAssert(event, NOT_FOUND, 'Event not found');
 
   // Find the race category inside the event
   const raceCategory = event.raceCategories.find(
     (rc) => rc._id.toString() === registration.raceCategory.toString(),
   );
-  appAssert(raceCategory, NOT_FOUND, "Race category not found");
+  appAssert(raceCategory, NOT_FOUND, 'Race category not found');
 
   const payment = await PaymentModel.findOne(
     {
@@ -104,11 +104,11 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
     null,
   );
 
-  appAssert(payment, NOT_FOUND, "Payment record not found");
+  appAssert(payment, NOT_FOUND, 'Payment record not found');
 
   // If already paid → exit safely
-  if (payment.status === "paid") {
-    res.json(new CustomResponse(true, true, "Payment already confirmed"));
+  if (payment.status === 'paid') {
+    res.json(new CustomResponse(true, true, 'Payment already confirmed'));
     return;
   }
 
@@ -118,7 +118,7 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
   ]);
 
   if (!hasPaid) {
-    res.json(new CustomResponse(true, activeCheckoutUrl, "Payment pending"));
+    res.json(new CustomResponse(true, activeCheckoutUrl, 'Payment pending'));
     return;
   }
 
@@ -129,11 +129,11 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
   const updatedPayment = await PaymentModel.findOneAndUpdate(
     {
       _id: payment._id,
-      status: { $ne: "paid" },
+      status: { $ne: 'paid' },
     },
     {
       $set: {
-        status: "paid",
+        status: 'paid',
         paidAt: new Date(),
       },
     },
@@ -142,7 +142,7 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
 
   // If null → another request already updated it
   if (!updatedPayment) {
-    res.json(new CustomResponse(true, true, "Payment already processed"));
+    res.json(new CustomResponse(true, true, 'Payment already processed'));
     return;
   }
 
@@ -157,10 +157,10 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
   }
 
   await RegistrationModel.updateOne(
-    { _id: registration._id, status: { $ne: "confirmed" } },
+    { _id: registration._id, status: { $ne: 'confirmed' } },
     {
       $set: {
-        status: "confirmed",
+        status: 'confirmed',
         bibNumber,
       },
     },
@@ -172,11 +172,11 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
   await EventModel.updateOne(
     {
       _id: registration.event as string,
-      "raceCategories._id": registration.raceCategory,
-    },
+      'raceCategories._id': registration.raceCategory,
+    } as any,
     {
       $inc: {
-        "raceCategories.$.registeredCount": 1,
+        'raceCategories.$.registeredCount': 1,
       },
     },
   );
@@ -204,7 +204,7 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
     );
   }
 
-  res.json(new CustomResponse(true, true, "Payment successful"));
+  res.json(new CustomResponse(true, true, 'Payment successful'));
 });
 
 /**
@@ -213,16 +213,16 @@ export const verifyCheckoutSession = asyncHandler(async (req, res) => {
  */
 export const markPaymentAsPaid = asyncHandler(async (req, res) => {
   const { registrationId } = req.body;
-  appAssert(registrationId, BAD_REQUEST, "Registration ID is required");
+  appAssert(registrationId, BAD_REQUEST, 'Registration ID is required');
 
   const registration = await RegistrationModel.findById(registrationId)
-    .populate("event")
+    .populate('event')
     .lean<PopulatedRegistration>();
-  appAssert(registration, NOT_FOUND, "Registration not found");
+  appAssert(registration, NOT_FOUND, 'Registration not found');
 
   // Already confirmed
-  if (registration.status === "confirmed") {
-    res.json(new CustomResponse(true, true, "Registration already confirmed"));
+  if (registration.status === 'confirmed') {
+    res.json(new CustomResponse(true, true, 'Registration already confirmed'));
     return;
   }
 
@@ -230,7 +230,7 @@ export const markPaymentAsPaid = asyncHandler(async (req, res) => {
   const raceCategory = event.raceCategories.find(
     (rc) => rc._id.toString() === registration.raceCategory.toString(),
   );
-  appAssert(raceCategory, BAD_REQUEST, "Race category not found");
+  appAssert(raceCategory, BAD_REQUEST, 'Race category not found');
 
   // Check for existing payment record
   let payment = await PaymentModel.findOne({
@@ -239,15 +239,15 @@ export const markPaymentAsPaid = asyncHandler(async (req, res) => {
 
   if (payment) {
     // If already paid, exit safely
-    if (payment.status === "paid") {
-      res.json(new CustomResponse(true, true, "Payment already confirmed"));
+    if (payment.status === 'paid') {
+      res.json(new CustomResponse(true, true, 'Payment already confirmed'));
       return;
     }
 
     // Mark existing pending payment as paid
     await PaymentModel.findOneAndUpdate(
-      { _id: payment._id, status: { $ne: "paid" } },
-      { $set: { status: "paid", paidAt: new Date() } },
+      { _id: payment._id, status: { $ne: 'paid' } },
+      { $set: { status: 'paid', paidAt: new Date() } },
       { new: true },
     );
   } else {
@@ -256,10 +256,10 @@ export const markPaymentAsPaid = asyncHandler(async (req, res) => {
       user: registration.user,
       event: event._id,
       registration: registration._id,
-      provider: "cash",
+      provider: 'cash',
       amount: raceCategory.price,
-      currency: "PHP",
-      status: "paid",
+      currency: 'PHP',
+      status: 'paid',
       paidAt: new Date(),
     });
   }
@@ -272,10 +272,10 @@ export const markPaymentAsPaid = asyncHandler(async (req, res) => {
 
   // Confirm registration
   await RegistrationModel.updateOne(
-    { _id: registration._id, status: { $ne: "confirmed" } },
+    { _id: registration._id, status: { $ne: 'confirmed' } },
     {
       $set: {
-        status: "confirmed",
+        status: 'confirmed',
         bibNumber,
         payment: payment._id,
       },
@@ -286,11 +286,11 @@ export const markPaymentAsPaid = asyncHandler(async (req, res) => {
   await EventModel.updateOne(
     {
       _id: registration.event as unknown as string,
-      "raceCategories._id": registration.raceCategory,
-    },
+      'raceCategories._id': registration.raceCategory,
+    } as any,
     {
       $inc: {
-        "raceCategories.$.registeredCount": 1,
+        'raceCategories.$.registeredCount': 1,
       },
     },
   );
@@ -317,6 +317,6 @@ export const markPaymentAsPaid = asyncHandler(async (req, res) => {
   }
 
   res.json(
-    new CustomResponse(true, true, "Payment marked as paid successfully"),
+    new CustomResponse(true, true, 'Payment marked as paid successfully'),
   );
 });

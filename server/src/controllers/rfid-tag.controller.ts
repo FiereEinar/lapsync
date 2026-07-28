@@ -77,7 +77,7 @@ export const unassignRfidTag = asyncHandler(async (req, res) => {
   // Clear rfidTag from the registration if it was assigned
   if (tag.registration) {
     await RegistrationModel.updateOne(
-      { _id: tag.registration },
+      { _id: tag.registration } as any,
       { $unset: { rfidTag: 1 } },
     );
   }

@@ -18,7 +18,21 @@ import { formatDatesForInput } from "@/lib/utils";
 import { MapPin, Calendar, Clock, Users, Plus, Trash2, Loader2, CheckCircle2, Map } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+
+/** Returns today's date as a YYYY-MM-DD string (local timezone) */
+const todayStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+/** Returns a YYYY-MM-DD string for the day after the given YYYY-MM-DD string */
+const nextDayStr = (dateStr: string) => {
+  if (!dateStr) return todayStr();
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -80,6 +94,12 @@ export function EventForm({
     control: form.control,
     name: "raceCategories",
   });
+
+  // Watch date fields to drive dynamic min constraints
+  const watchedOpensAt = useWatch({ control: form.control, name: 'registration.opensAt' });
+  const watchedEventDate = useWatch({ control: form.control, name: 'date' });
+
+  const today = useMemo(() => todayStr(), []);
 
   const [showMap, setShowMap] = useState(false);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(() => {
@@ -148,7 +168,7 @@ export function EventForm({
                 <FormItem>
                   <FormLabel>Date</FormLabel>
                   <FormControl>
-                    <Input type='date' className='rounded-xl' {...field} />
+                    <Input type='date' className='rounded-xl' min={today} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -186,6 +206,7 @@ export function EventForm({
                   <FormControl>
                     <Input placeholder='e.g. Downtown' className='rounded-xl' {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -198,6 +219,7 @@ export function EventForm({
                   <FormControl>
                     <Input placeholder='e.g. Davao' className='rounded-xl' {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -210,6 +232,7 @@ export function EventForm({
                   <FormControl>
                     <Input placeholder='e.g. Davao del Sur' className='rounded-xl' {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -306,8 +329,15 @@ export function EventForm({
                 <FormItem>
                   <FormLabel>Opens At</FormLabel>
                   <FormControl>
-                    <Input type='date' className='rounded-xl' {...field} />
+                    <Input
+                      type='date'
+                      className='rounded-xl'
+                      min={today}
+                      max={watchedEventDate || undefined}
+                      {...field}
+                    />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -318,8 +348,15 @@ export function EventForm({
                 <FormItem>
                   <FormLabel>Closes At</FormLabel>
                   <FormControl>
-                    <Input type='date' className='rounded-xl' {...field} />
+                    <Input
+                      type='date'
+                      className='rounded-xl'
+                      min={watchedOpensAt ? nextDayStr(watchedOpensAt) : today}
+                      max={watchedEventDate || undefined}
+                      {...field}
+                    />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -386,6 +423,7 @@ export function EventForm({
                         <FormControl>
                           <Input placeholder='5K Run' className='rounded-lg h-9 text-sm' {...field} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
