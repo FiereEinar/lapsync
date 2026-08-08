@@ -1,13 +1,18 @@
-import { BAD_REQUEST, OK, UNAUTHORIZED } from "../constant/http";
-import appAssert from "../errors/app-assert";
-import DeviceModel, { PopulatedDevice } from "../models/device.model";
-import TelemetryModel from "../models/telemetry.model";
-import AlertModel from "../models/alert.model";
-import SettingsModel from "../models/settings.model";
-import { io } from "../server";
-import { GPSPoint, haversineDistance, isValidGPS, parseStrictGPSString } from "../utils/gps";
-import CustomResponse from "../utils/response";
-import { asyncHandler, generateCypto } from "../utils/utils";
+import { BAD_REQUEST, OK, UNAUTHORIZED } from '../constant/http';
+import appAssert from '../errors/app-assert';
+import DeviceModel, { PopulatedDevice } from '../models/device.model';
+import TelemetryModel from '../models/telemetry.model';
+import AlertModel from '../models/alert.model';
+import SettingsModel from '../models/settings.model';
+import { io } from '../server';
+import {
+  GPSPoint,
+  haversineDistance,
+  isValidGPS,
+  parseStrictGPSString,
+} from '../utils/gps';
+import CustomResponse from '../utils/response';
+import { asyncHandler, generateCypto } from '../utils/utils';
 
 const lastKnownGPS = new Map<string, GPSPoint>();
 
@@ -20,10 +25,7 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
   // Validate the device ID
   const device = await DeviceModel.findOne({ deviceToken: deviceId }).populate({
     path: 'registration',
-    populate: [
-      { path: 'user' },
-      { path: 'event' }
-    ]
+    populate: [{ path: 'user' }, { path: 'event' }],
   });
 
   if (!device || !device.isActive || !device.registration) {
@@ -41,13 +43,13 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
     const parsed = parseStrictGPSString(`${gps.lat},${gps.lon}`);
 
     if (!parsed) {
-      console.log("🚫 Corrupted GPS packet rejected:", gps);
+      console.log('🚫 Corrupted GPS packet rejected:', gps);
       res.status(OK).json({ success: true });
       return;
     }
 
     if (!isValidGPS(parsed)) {
-      console.log("🚫 Out-of-range GPS rejected:", parsed);
+      console.log('🚫 Out-of-range GPS rejected:', parsed);
       res.status(OK).json({ success: true });
       return;
     }
@@ -80,30 +82,33 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
 
   // Targeted Emit to runner's specific room
   if (gps) {
-    io.of("/race").to(registrationId).emit("gpsUpdate", gps);
+    io.of('/race').to(registrationId).emit('gpsUpdate', gps);
   }
 
   if (heartRate) {
-    io.of("/race").to(registrationId).emit("heartRateUpdate", { heartRate });
+    io.of('/race').to(registrationId).emit('heartRateUpdate', { heartRate });
   }
 
   if (emg) {
-    io.of("/race").to(registrationId).emit("emgUpdate", { emg });
+    io.of('/race').to(registrationId).emit('emgUpdate', { emg });
   }
 
   // Automated Alert Engine (Physiological Status)
-  if (heartRate && (heartRate > settings.heartRateMax || heartRate < settings.heartRateMin)) {
-    const alertMessage = "Critical Heart Rate Reading: " + heartRate + " bpm";
+  if (
+    heartRate &&
+    (heartRate > settings.heartRateMax || heartRate < settings.heartRateMin)
+  ) {
+    const alertMessage = 'Critical Heart Rate Reading: ' + heartRate + ' bpm';
     const alertDoc = await AlertModel.create({
       event: registration.event,
       registration: registration._id,
-      type: "HEART_RATE_CRITICAL",
+      type: 'HEART_RATE_CRITICAL',
       value: heartRate,
       message: alertMessage,
       location: gps || lastKnownGPS.get(deviceId) || {},
     });
 
-    io.of("/race").emit("emergencyAlert", {
+    io.of('/race').emit('emergencyAlert', {
       ...alertDoc.toJSON(),
       alertId: alertDoc._id,
       user: registration.user,
@@ -117,13 +122,13 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
     const alertDoc = await AlertModel.create({
       event: registration.event,
       registration: registration._id,
-      type: "EMG_CRAMP_CRITICAL",
+      type: 'EMG_CRAMP_CRITICAL',
       value: emg,
       message: alertMessage,
       location: gps || lastKnownGPS.get(deviceId) || {},
     });
 
-    io.of("/race").emit("emergencyAlert", {
+    io.of('/race').emit('emergencyAlert', {
       ...alertDoc.toJSON(),
       alertId: alertDoc._id,
       user: registration.user,
@@ -132,13 +137,13 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
   }
 
   // Admin global broadcast
-  io.of("/race").emit("adminLiveUpdate", {
+  io.of('/race').emit('adminLiveUpdate', {
     registrationId,
     user: registration.user,
     emergencyContact: registration.emergencyContact,
     gps: gps || null,
     heartRate: heartRate || null,
-    emg: emg || null
+    emg: emg || null,
   });
 
   // Record telemetry to the database for replay if the event is currently active
@@ -159,18 +164,18 @@ export const deviceTelemetryController = asyncHandler(async (req, res) => {
  */
 export const getDevices = asyncHandler(async (req, res) => {
   const devices = await DeviceModel.find().populate({
-    path: "registration",
+    path: 'registration',
     populate: [
       {
-        path: "user",
+        path: 'user',
       },
       {
-        path: "event",
+        path: 'event',
       },
     ],
   });
 
-  res.json(new CustomResponse(true, devices, "Devices fetched successfully"));
+  res.json(new CustomResponse(true, devices, 'Devices fetched successfully'));
 });
 
 export const createDevice = asyncHandler(async (req, res) => {
@@ -190,7 +195,9 @@ export const createDevice = asyncHandler(async (req, res) => {
   if (existing) {
     res
       .status(BAD_REQUEST)
-      .json(new CustomResponse(false, null, "Device token generation collision"));
+      .json(
+        new CustomResponse(false, null, 'Device token generation collision'),
+      );
     return;
   }
 
@@ -213,24 +220,24 @@ export const removeDevice = asyncHandler(async (req, res) => {
   const { deviceID } = req.params;
 
   const device = await DeviceModel.findByIdAndDelete(deviceID);
-  appAssert(device, BAD_REQUEST, "Device not found");
+  appAssert(device, BAD_REQUEST, 'Device not found');
 
-  res.json(new CustomResponse(true, null, "Device deleted successfully"));
+  res.json(new CustomResponse(true, null, 'Device deleted successfully'));
 });
 
 export const assignDevice = asyncHandler(async (req, res) => {
   const { deviceID } = req.params;
   const { registrationId } = req.body;
 
-  appAssert(registrationId, BAD_REQUEST, "Registration ID is required");
+  appAssert(registrationId, BAD_REQUEST, 'Registration ID is required');
 
   // Verify the device exists and is available
   const device = await DeviceModel.findById(deviceID);
-  appAssert(device, BAD_REQUEST, "Device not found");
+  appAssert(device, BAD_REQUEST, 'Device not found');
   appAssert(
     device.registration === null,
     BAD_REQUEST,
-    "Device is already assigned",
+    'Device is already assigned',
   );
 
   // Update device and assign registration
@@ -241,7 +248,7 @@ export const assignDevice = asyncHandler(async (req, res) => {
   );
 
   res.json(
-    new CustomResponse(true, updatedDevice, "Device assigned successfully"),
+    new CustomResponse(true, updatedDevice, 'Device assigned successfully'),
   );
 });
 
@@ -253,9 +260,9 @@ export const unassignDevice = asyncHandler(async (req, res) => {
     { registration: null },
     { new: true },
   );
-  appAssert(device, BAD_REQUEST, "Device not found");
+  appAssert(device, BAD_REQUEST, 'Device not found');
 
-  res.json(new CustomResponse(true, null, "Device unassigned successfully"));
+  res.json(new CustomResponse(true, null, 'Device unassigned successfully'));
 });
 
 export const updateDevice = asyncHandler(async (req, res) => {
@@ -263,23 +270,29 @@ export const updateDevice = asyncHandler(async (req, res) => {
   const { name, deviceToken, isActive, registration } = req.body;
 
   const existing = await DeviceModel.findById(deviceID);
-  appAssert(existing, BAD_REQUEST, "Device not found");
+  appAssert(existing, BAD_REQUEST, 'Device not found');
 
   if (deviceToken && deviceToken !== existing.deviceToken) {
     const tokenExists = await DeviceModel.findOne({ deviceToken });
-    appAssert(!tokenExists, BAD_REQUEST, "Device token already in use");
+    appAssert(!tokenExists, BAD_REQUEST, 'Device token already in use');
   }
 
   const updatedDevice = await DeviceModel.findByIdAndUpdate(
     deviceID,
     {
       name: name !== undefined ? name : existing.name,
-      deviceToken: deviceToken !== undefined ? deviceToken : existing.deviceToken,
+      deviceToken:
+        deviceToken !== undefined ? deviceToken : existing.deviceToken,
       isActive: isActive !== undefined ? isActive : existing.isActive,
-      registration: registration !== undefined ? (registration || null) : existing.registration,
+      registration:
+        registration !== undefined
+          ? registration || null
+          : existing.registration,
     },
     { new: true },
   );
 
-  res.json(new CustomResponse(true, updatedDevice, "Device updated successfully"));
+  res.json(
+    new CustomResponse(true, updatedDevice, 'Device updated successfully'),
+  );
 });

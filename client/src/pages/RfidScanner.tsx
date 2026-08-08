@@ -268,17 +268,14 @@ export default function RfidScanner() {
 
   const addFeedEntry = useCallback((entry: ScanFeedEntry) => {
     setScanFeed((prev) => {
-      const updated = [...prev, entry];
+      const updated = [entry, ...prev];
       // Keep last 200 entries
-      if (updated.length > 200) return updated.slice(-200);
+      if (updated.length > 200) return updated.slice(0, 200);
       return updated;
     });
   }, []);
 
-  // Auto-scroll feed
-  useEffect(() => {
-    feedEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [scanFeed]);
+
 
   // ── Socket.IO Connection ──
 

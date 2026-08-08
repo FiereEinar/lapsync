@@ -221,7 +221,7 @@ export default function ClientEventDetail() {
                   </Marker>
                 </MapContainer>
               </div>
-              <div className="px-5 py-3 border-t border-border flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="py-3 flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
                 <span className="font-medium text-foreground">
                   {event.location.venue}
