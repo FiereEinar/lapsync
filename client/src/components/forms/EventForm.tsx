@@ -16,9 +16,9 @@ import {
 import { createEventSchema } from "@/schemas/event.schema";
 import { formatDatesForInput } from "@/lib/utils";
 import { MapPin, Calendar, Clock, Users, Plus, Trash2, Loader2, CheckCircle2, Map } from "lucide-react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
 /** Returns today's date as a YYYY-MM-DD string (local timezone) */
 const todayStr = () => {
@@ -72,6 +72,32 @@ function MapClickHandler({
   return null;
 }
 
+interface NominatimResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  address: {
+    road?: string;
+    suburb?: string;
+    neighbourhood?: string;
+    city?: string;
+    town?: string;
+    municipality?: string;
+    village?: string;
+    state?: string;
+    province?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+/** Captures the Leaflet map instance into a ref so we can call flyTo from outside MapContainer */
+function MapRefCapture({ mapRef }: { mapRef: { current: import('leaflet').Map | null } }) {
+  const map = useMap();
+  useEffect(() => { mapRef.current = map; }, [map, mapRef]);
+  return null;
+}
+
 export type EventFormValues = z.infer<typeof createEventSchema>;
 
 type EventFormProps = {
@@ -107,6 +133,12 @@ export function EventForm({
     if (coords?.lat && coords?.lng) return { lat: coords.lat, lng: coords.lng };
     return null;
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const mapRef = useRef<import('leaflet').Map | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   // Sync pin into form coordinates whenever pin changes
   useEffect(() => {
@@ -116,9 +148,78 @@ export function EventForm({
     }
   }, [pin, form]);
 
-  const handlePinPick = (lat: number, lng: number) => {
+  // Close suggestions dropdown when clicking outside the search container
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Debounced Nominatim forward geocode (type → suggestions)
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.length < 3) {
+      setSearchResults([]);
+      setShowSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&addressdetails=1`,
+          { headers: { 'User-Agent': 'lapsync-app' } }
+        );
+        const data: NominatimResult[] = await res.json();
+        setSearchResults(data);
+        setShowSuggestions(data.length > 0);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  /** Called when the user picks a suggestion from the dropdown */
+  const handleSuggestionSelect = useCallback((result: NominatimResult) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
     setPin({ lat, lng });
-  };
+    setSearchQuery(result.display_name);
+    setShowSuggestions(false);
+    setSearchResults([]);
+    const addr = result.address || {};
+    form.setValue('location.venue', addr.road || addr.suburb || addr.neighbourhood || '');
+    form.setValue('location.city', addr.city || addr.town || addr.municipality || addr.village || '');
+    form.setValue('location.province', addr.state || addr.province || '');
+    mapRef.current?.flyTo([lat, lng], 15);
+  }, [form]);
+
+  /** Called on map click — drops pin and reverse-geocodes to auto-fill fields */
+  const handlePinPick = useCallback(async (lat: number, lng: number) => {
+    setPin({ lat, lng });
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+        { headers: { 'User-Agent': 'lapsync-app' } }
+      );
+      const data = await res.json();
+      if (data.display_name) {
+        setSearchQuery(data.display_name);
+        const addr = data.address || {};
+        form.setValue('location.venue', addr.road || addr.suburb || addr.neighbourhood || '');
+        form.setValue('location.city', addr.city || addr.town || addr.municipality || addr.village || '');
+        form.setValue('location.province', addr.state || addr.province || '');
+      }
+    } catch {
+      // Silently fail — pin is already set, user can fill fields manually
+    }
+  }, [form]);
 
   const mapCenter: [number, number] = pin
     ? [pin.lat, pin.lng]
@@ -196,6 +297,63 @@ export function EventForm({
             <MapPin className='w-4 h-4' />
             Location
           </div>
+
+          {/* Smart Location Search */}
+          <div className='space-y-2'>
+            <p className='text-sm font-medium text-foreground'>Search Location</p>
+            <div className='relative' ref={searchContainerRef}>
+              <div className='relative'>
+                <MapPin className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none' />
+                <input
+                  type='text'
+                  className='w-full pl-9 pr-9 py-2 rounded-xl border border-input bg-background text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground'
+                  placeholder='Search for a venue, city, or address...'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchResults.length > 0 && setShowSuggestions(true)}
+                  autoComplete='off'
+                />
+                {searchLoading && (
+                  <Loader2 className='absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground' />
+                )}
+                {!searchLoading && searchQuery && (
+                  <button
+                    type='button'
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors text-sm leading-none'
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {showSuggestions && searchResults.length > 0 && (
+                <div className='absolute z-50 w-full mt-1 bg-popover border border-border rounded-xl shadow-lg overflow-hidden'>
+                  {searchResults.map((result) => (
+                    <button
+                      key={result.place_id}
+                      type='button'
+                      className='w-full text-left px-4 py-3 text-sm hover:bg-muted/60 transition-colors flex items-start gap-2.5 border-b border-border/50 last:border-0'
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // prevent input blur before click registers
+                        handleSuggestionSelect(result);
+                      }}
+                    >
+                      <MapPin className='w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0' />
+                      <span className='line-clamp-2 leading-snug'>{result.display_name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className='text-xs text-muted-foreground'>
+              Type to search, or click a spot on the map — fields below auto-fill from the result.
+            </p>
+          </div>
+
           <div className='grid grid-cols-3 gap-4'>
             <FormField
               control={form.control}
@@ -267,10 +425,12 @@ export function EventForm({
                     className='text-xs h-8 text-muted-foreground hover:text-destructive rounded-xl'
                     onClick={() => {
                       setPin(null);
+                      setSearchQuery('');
+                      setSearchResults([]);
                       form.setValue("location.coordinates" as any, undefined);
                     }}
                   >
-                    Remove
+                    Clear
                   </Button>
                 )}
               </div>
@@ -279,7 +439,6 @@ export function EventForm({
             {showMap && (
               <div className='rounded-xl overflow-hidden border border-border shadow-sm' style={{ height: 280 }}>
                 <MapContainer
-                  key={`${mapCenter[0]},${mapCenter[1]}`}
                   center={mapCenter}
                   zoom={pin ? 15 : 6}
                   style={{ height: "100%", width: "100%" }}
@@ -287,6 +446,7 @@ export function EventForm({
                 >
                   <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
                   <MapClickHandler onPick={handlePinPick} />
+                  <MapRefCapture mapRef={mapRef} />
                   {pin && (
                     <Marker position={[pin.lat, pin.lng]} icon={venueIcon} />
                   )}
