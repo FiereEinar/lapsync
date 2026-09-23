@@ -4,15 +4,15 @@ import {
   Marker,
   Polyline,
   Popup,
-} from "react-leaflet";
-import { useEffect, useState } from "react";
-import L from "leaflet";
-import { getSocket } from "@/services/socket";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from 'react-leaflet';
+import { useEffect, useState } from 'react';
+import L from 'leaflet';
+import { getSocket } from '@/services/socket';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -20,11 +20,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EventAlerts from "../EventAlerts";
-import _ from "lodash";
-import { createCustomMarker } from "@/lib/map-utils";
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import EventAlerts from '../EventAlerts';
+import _ from 'lodash';
+import { createCustomMarker } from '@/lib/map-utils';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -33,8 +33,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
-
-
 
 interface RunnerData {
   registrationId: string;
@@ -59,9 +57,9 @@ export default function MapLive() {
   }, []);
 
   useEffect(() => {
-    const socket = getSocket("race");
+    const socket = getSocket('race');
 
-    socket.on("adminLiveUpdate", (update) => {
+    socket.on('adminLiveUpdate', (update) => {
       const { registrationId, user, emergencyContact, gps, heartRate, emg } =
         update;
 
@@ -100,7 +98,7 @@ export default function MapLive() {
     });
 
     return () => {
-      socket.off("adminLiveUpdate");
+      socket.off('adminLiveUpdate');
     };
   }, []);
 
@@ -123,15 +121,15 @@ export default function MapLive() {
   const center = getMapCenter();
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle>Live Race View</CardTitle>
         </CardHeader>
         <CardContent>
           {center[0] === 0 && center[1] === 0 ? (
-            <div className='w-full h-[500px] bg-muted flex items-center justify-center rounded-lg'>
-              <p className='text-muted-foreground animate-pulse'>
+            <div className="w-full h-[500px] bg-muted flex items-center justify-center rounded-lg">
+              <p className="text-muted-foreground animate-pulse">
                 Waiting for runners live signal...
               </p>
             </div>
@@ -139,9 +137,9 @@ export default function MapLive() {
             <MapContainer
               center={center}
               zoom={15}
-              className='w-full h-[500px] rounded-lg z-0 border'
+              className="w-full h-[500px] rounded-lg z-0 border"
             >
-              <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
               {activeRunners
                 .filter((r) => r.position)
@@ -152,10 +150,10 @@ export default function MapLive() {
                   if (focusedRunnerId !== null && !isFocused) return null;
 
                   const pinColor = isOffline
-                    ? "#9ca3af"
+                    ? '#9ca3af'
                     : isFocused
-                      ? "#e11d48"
-                      : "#3b82f6";
+                      ? '#e11d48'
+                      : '#3b82f6';
 
                   return (
                     <div key={r.registrationId}>
@@ -163,36 +161,36 @@ export default function MapLive() {
                         position={r.position!}
                         icon={createCustomMarker(
                           pinColor,
-                          r.user?.name || "Unknown",
-                          r.heartRate
+                          r.user?.name || 'Unknown',
+                          r.heartRate,
                         )}
                       >
                         <Popup>
-                          <div className='flex flex-col gap-2 min-w-[120px] p-1'>
-                            <div className='font-semibold text-base flex justify-between items-center'>
-                              {_.startCase(r.user?.name || "Unknown")}
+                          <div className="flex flex-col gap-2 min-w-[120px] p-1">
+                            <div className="font-semibold text-base flex justify-between items-center">
+                              {_.startCase(r.user?.name || 'Unknown')}
                               {isOffline && (
                                 <span
-                                  className='w-2 h-2 rounded-full bg-yellow-500 animate-pulse ml-2'
-                                  title='Lost Signal'
+                                  className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse ml-2"
+                                  title="Lost Signal"
                                 ></span>
                               )}
                             </div>
-                            <div className='text-sm text-muted-foreground flex justify-between'>
-                              <span>HR: {r.heartRate || "--"}</span>
-                              <span>EMG: {r.emg || "--"}</span>
+                            <div className="text-sm text-muted-foreground flex justify-between">
+                              <span>HR: {r.heartRate || '--'}</span>
+                              <span>EMG: {r.emg || '--'}</span>
                             </div>
                             <Button
-                              size='sm'
-                              variant={isFocused ? "outline" : "default"}
+                              size="sm"
+                              variant={isFocused ? 'outline' : 'default'}
                               onClick={() =>
                                 setFocusedRunnerId(
                                   isFocused ? null : r.registrationId,
                                 )
                               }
-                              className='w-full h-8 text-xs mt-1'
+                              className="w-full h-8 text-xs mt-1"
                             >
-                              {isFocused ? "Unfocus" : "View"}
+                              {isFocused ? 'Unfocus' : 'View'}
                             </Button>
                           </div>
                         </Popup>
@@ -210,32 +208,32 @@ export default function MapLive() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue='runners' className='w-full'>
-        <TabsList className='grid w-full max-w-md grid-cols-2'>
-          <TabsTrigger value='runners'>Active Runners</TabsTrigger>
-          <TabsTrigger value='alerts'>Warnings</TabsTrigger>
+      <Tabs defaultValue="runners" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="runners">Active Runners</TabsTrigger>
+          <TabsTrigger value="alerts">Warnings</TabsTrigger>
         </TabsList>
 
-        <TabsContent value='runners' className='mt-4'>
+        <TabsContent value="runners" className="mt-4">
           <Card>
             <CardHeader>
               <CardTitle>Active Runners</CardTitle>
             </CardHeader>
             <CardContent>
               {activeRunners.length === 0 ? (
-                <p className='text-muted-foreground text-center py-4'>
+                <p className="text-muted-foreground text-center py-4">
                   No active runners detected yet.
                 </p>
               ) : (
-                <div className='rounded-lg border overflow-hidden'>
+                <div className="rounded-lg border overflow-hidden">
                   <Table>
-                    <TableHeader className='bg-muted/50'>
+                    <TableHeader className="bg-muted/50">
                       <TableRow>
                         <TableHead>Runner</TableHead>
                         <TableHead>Heart Rate</TableHead>
                         <TableHead>EMG</TableHead>
                         <TableHead>Emergency Contact</TableHead>
-                        <TableHead className='text-right'>Action</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -248,48 +246,48 @@ export default function MapLive() {
                             key={runner.registrationId}
                             className={
                               focusedRunnerId === runner.registrationId
-                                ? "bg-primary/5"
-                                : ""
+                                ? 'bg-primary/5'
+                                : ''
                             }
                           >
-                            <TableCell className='font-medium'>
-                              {_.startCase(runner.user?.name || "Unknown")}
+                            <TableCell className="font-medium">
+                              {_.startCase(runner.user?.name || 'Unknown')}
                               {isOffline && (
-                                <span className='ml-2 text-[10px] bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded-full font-bold'>
+                                <span className="ml-2 text-[10px] bg-yellow-500/20 text-yellow-600 px-2 py-0.5 rounded-full font-bold">
                                   Offline
                                 </span>
                               )}
                             </TableCell>
                             <TableCell>
-                              <div className='flex items-center gap-2'>
+                              <div className="flex items-center gap-2">
                                 <span
-                                  className={`font-mono ${runner.heartRate && runner.heartRate > 170 ? "text-destructive font-bold" : ""}`}
+                                  className={`font-mono ${runner.heartRate && runner.heartRate > 170 ? 'text-destructive font-bold' : ''}`}
                                 >
-                                  {runner.heartRate || "--"}
+                                  {runner.heartRate || '--'}
                                 </span>
-                                <span className='text-xs text-muted-foreground'>
+                                <span className="text-xs text-muted-foreground">
                                   bpm
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell>{runner.emg || "--"}</TableCell>
+                            <TableCell>{runner.emg || '--'}</TableCell>
                             <TableCell>
                               {runner.emergencyContact ? (
-                                <div className='flex flex-col'>
-                                  <span className='text-sm font-medium'>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">
                                     {runner.emergencyContact.name}
                                   </span>
-                                  <span className='text-xs text-muted-foreground'>
+                                  <span className="text-xs text-muted-foreground">
                                     {runner.emergencyContact.phone}
                                   </span>
                                 </div>
                               ) : (
-                                "--"
+                                '--'
                               )}
                             </TableCell>
-                            <TableCell className='text-right'>
+                            <TableCell className="text-right">
                               <button
-                                className='text-primary hover:underline text-sm font-medium'
+                                className="text-primary hover:underline text-sm font-medium"
                                 onClick={() =>
                                   setFocusedRunnerId(
                                     focusedRunnerId === runner.registrationId
@@ -299,8 +297,8 @@ export default function MapLive() {
                                 }
                               >
                                 {focusedRunnerId === runner.registrationId
-                                  ? "Unfocus"
-                                  : "View"}
+                                  ? 'Unfocus'
+                                  : 'View'}
                               </button>
                             </TableCell>
                           </TableRow>
@@ -314,7 +312,7 @@ export default function MapLive() {
           </Card>
         </TabsContent>
 
-        <TabsContent value='alerts' className='mt-4'>
+        <TabsContent value="alerts" className="mt-4">
           <EventAlerts />
         </TabsContent>
       </Tabs>

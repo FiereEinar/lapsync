@@ -1,25 +1,25 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Play, Pause } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Play, Pause } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
-import L from "leaflet";
-import { useEffect, useState, useMemo, useRef } from "react";
-import { useParams } from "react-router-dom";
-import axiosInstance from "@/api/axios";
-import { useQuery } from "@tanstack/react-query";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import _ from "lodash";
-import { createCustomMarker } from "@/lib/map-utils";
+} from '@/components/ui/select';
+import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
+import L from 'leaflet';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import axiosInstance from '@/api/axios';
+import { useQuery } from '@tanstack/react-query';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import _ from 'lodash';
+import { createCustomMarker } from '@/lib/map-utils';
 
 // Fix leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -54,15 +54,13 @@ type GroupedTelemetry = {
 };
 
 const COLORS = [
-  "#ef4444", // red
-  "#3b82f6", // blue
-  "#10b981", // emerald
-  "#f59e0b", // amber
-  "#8b5cf6", // violet
-  "#ec4899", // pink
+  '#ef4444', // red
+  '#3b82f6', // blue
+  '#10b981', // emerald
+  '#f59e0b', // amber
+  '#8b5cf6', // violet
+  '#ec4899', // pink
 ];
-
-
 
 export default function MapReplay({ eventId }: { eventId?: string } = {}) {
   const { eventID: urlEventId } = useParams();
@@ -73,7 +71,7 @@ export default function MapReplay({ eventId }: { eventId?: string } = {}) {
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: telemetryPoints = [], isLoading } = useQuery({
-    queryKey: ["telemetry", eventIDToUse],
+    queryKey: ['telemetry', eventIDToUse],
     queryFn: async (): Promise<TelemetryData[]> => {
       const { data } = await axiosInstance.get(
         `/telemetry/event/${eventIDToUse}`,
@@ -197,26 +195,26 @@ export default function MapReplay({ eventId }: { eventId?: string } = {}) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className='w-full h-[500px] bg-muted flex items-center justify-center rounded-lg'>
-            <p className='text-muted-foreground animate-pulse'>
+          <div className="w-full h-[500px] bg-muted flex items-center justify-center rounded-lg">
+            <p className="text-muted-foreground animate-pulse">
               Loading Telemetry Map...
             </p>
           </div>
         ) : telemetryPoints.length === 0 ? (
-          <div className='w-full h-[500px] bg-muted flex items-center justify-center rounded-lg'>
-            <p className='text-muted-foreground'>
+          <div className="w-full h-[500px] bg-muted flex items-center justify-center rounded-lg">
+            <p className="text-muted-foreground">
               No GPS data available for this event yet.
             </p>
           </div>
         ) : (
-          <div className='flex flex-col gap-4'>
+          <div className="flex flex-col gap-4">
             {defaultCenter && (
               <MapContainer
                 center={defaultCenter}
                 zoom={14}
-                className='w-full h-[500px] rounded-lg z-0 border'
+                className="w-full h-[500px] rounded-lg z-0 border"
               >
-                <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
                 {positions.map(({ track, currentPoint }, index) => {
                   const latLngs = track.map(
@@ -241,7 +239,7 @@ export default function MapReplay({ eventId }: { eventId?: string } = {}) {
                         icon={createCustomMarker(
                           color,
                           currentPoint.registration.user.name,
-                          currentPoint.heartRate
+                          currentPoint.heartRate,
                         )}
                       />
                     </div>
@@ -250,39 +248,39 @@ export default function MapReplay({ eventId }: { eventId?: string } = {}) {
               </MapContainer>
             )}
 
-            <div className='flex items-center gap-4 p-4 border rounded-lg bg-card mt-2'>
+            <div className="flex items-center gap-4 p-4 border rounded-lg bg-card mt-2">
               <Button
-                variant='outline'
-                size='icon'
+                variant="outline"
+                size="icon"
                 onClick={togglePlay}
                 disabled={currentTime >= maxTime}
               >
                 {isPlaying ? (
-                  <Pause className='w-4 h-4' />
+                  <Pause className="w-4 h-4" />
                 ) : (
-                  <Play className='w-4 h-4' />
+                  <Play className="w-4 h-4" />
                 )}
               </Button>
 
-              <div className='flex items-center'>
+              <div className="flex items-center">
                 <Select
                   value={playbackSpeed.toString()}
                   onValueChange={(val) => setPlaybackSpeed(Number(val))}
                 >
-                  <SelectTrigger className='w-[110px]'>
-                    <SelectValue placeholder='Speed' />
+                  <SelectTrigger className="w-[110px]">
+                    <SelectValue placeholder="Speed" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value='1'>1x Speed</SelectItem>
-                    <SelectItem value='5'>5x Speed</SelectItem>
-                    <SelectItem value='10'>10x Speed</SelectItem>
-                    <SelectItem value='30'>30x Speed</SelectItem>
-                    <SelectItem value='60'>60x Speed</SelectItem>
+                    <SelectItem value="1">1x Speed</SelectItem>
+                    <SelectItem value="5">5x Speed</SelectItem>
+                    <SelectItem value="10">10x Speed</SelectItem>
+                    <SelectItem value="30">30x Speed</SelectItem>
+                    <SelectItem value="60">60x Speed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className='flex-1 flex flex-col gap-2'>
+              <div className="flex-1 flex flex-col gap-2">
                 <Slider
                   min={minTime}
                   max={maxTime}
@@ -290,9 +288,9 @@ export default function MapReplay({ eventId }: { eventId?: string } = {}) {
                   value={[currentTime]}
                   onValueChange={handleSliderChange}
                 />
-                <div className='flex justify-between text-xs text-muted-foreground'>
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>{new Date(minTime).toLocaleTimeString()}</span>
-                  <span className='font-bold text-foreground text-sm'>
+                  <span className="font-bold text-foreground text-sm">
                     {new Date(currentTime).toLocaleTimeString()}
                   </span>
                   <span>{new Date(maxTime).toLocaleTimeString()}</span>
